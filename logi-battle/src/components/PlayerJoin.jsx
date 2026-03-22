@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import PlayerGame from './PlayerGame'
 
+import { gamesService } from '../services/database'
+
 export const PlayerJoin = () => {
   // Parser les paramètres URL manuellement
   const getGameIdFromUrl = () => {
@@ -15,12 +17,25 @@ export const PlayerJoin = () => {
   const [playerName, setPlayerName] = useState('')
   const [team, setTeam] = useState(null)
   const [joined, setJoined] = useState(false)
+  const [isJoining, setIsJoining] = useState(false)
 
-  const handleJoinGame = (e) => {
+  const handleJoinGame = async (e) => {
     e.preventDefault()
     if (gameId && playerName && team) {
-      // Ici, on enverrait les données à Firebase
-      setJoined(true)
+      setIsJoining(true)
+      try {
+        const game = await gamesService.getGame(gameId)
+        if (game) {
+          setJoined(true)
+        } else {
+          alert("Partie introuvable ! Vérifiez le code.")
+        }
+      } catch (err) {
+        console.error("Erreur de connexion", err)
+        alert("Erreur de connexion à la base de données")
+      } finally {
+        setIsJoining(false)
+      }
     }
   }
 
@@ -142,10 +157,10 @@ export const PlayerJoin = () => {
 
               <button
                 type="submit"
-                disabled={!playerName || !team}
+                disabled={!playerName || !team || isJoining}
                 className="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all mt-6"
               >
-                Rejoindre la partie
+                {isJoining ? 'Connexion en cours...' : 'Rejoindre la partie'}
               </button>
             </form>
           </motion.div>

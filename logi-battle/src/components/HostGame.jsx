@@ -3,18 +3,34 @@ import { motion } from 'framer-motion'
 import { useGameStore } from '../hooks/useGameStore'
 import GameBoard from './GameBoard'
 
+import { gamesService } from '../services/database'
+
 export const HostGame = ({ onBack, gameMode }) => {
   const gameStore = useGameStore()
   const [gameId, setGameId] = useState(null)
   const [players, setPlayers] = useState({ teamA: [], teamB: [] })
   const [gameStarted, setGameStarted] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [isInitializing, setIsInitializing] = useState(true)
 
-  // Générer un ID de jeu unique
+  // Générer un ID de jeu unique et l'enregistrer dans Supabase
   useEffect(() => {
-    const id = `GAME-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-    setGameId(id)
-    gameStore.setGameId(id)
+    const initGame = async () => {
+      try {
+        const id = `GAME-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+        setGameId(id)
+        gameStore.setGameId(id)
+        
+        // Créer la partie dans Supabase
+        await gamesService.createGame('ÉQUIPE ALPHA', 'ÉQUIPE OMEGA', id)
+      } catch (err) {
+        console.error('Erreur lors de la création de la partie sur Supabase:', err)
+      } finally {
+        setIsInitializing(false)
+      }
+    }
+    
+    initGame()
   }, [])
 
   // URL pour les joueurs (à adapter selon votre déploiement)

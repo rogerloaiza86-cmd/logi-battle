@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { gamesService } from '../services/database'
 
 export const PlayerGame = ({ gameId, playerName, team }) => {
+  const channelRef = useRef(null)
   const [gameStatus, setGameStatus] = useState('waiting') // waiting, playing, answered, finished
   const [currentQuestion, setCurrentQuestion] = useState(null)
   const [userAnswer, setUserAnswer] = useState('')
@@ -11,20 +13,31 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
 
   const isTeamA = team === 'A'
 
-  // Simulation - En vrai, ça viendrait de Firebase
+  // Écoute en temps réel Supabase
   useEffect(() => {
-    // Simuler le début de partie après 2 secondes
-    const timer = setTimeout(() => {
-      setGameStatus('playing')
-      setCurrentQuestion({
-        question: "En quelle année a eu lieu le Brexit ?",
-        answer: 2016,
-        hint: "Référendum du 23 juin"
+    const channel = gamesService.getGameChannel(gameId)
+    if (channel) {
+      channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
+        setCurrentQuestion({
+          question: payload.questionData.description,
+          answer: payload.questionData.correctAnswer || payload.questionData.answer,
+          hint: payload.questionData.hints?.[0] || '',
+          type: payload.questionData.type,
+          category: payload.questionData.category || ''
+        })
+        setTimeLeft(payload.time || 30)
+        setGameStatus('playing')
+        setUserAnswer('')
+        setResult(null)
       })
-    }, 2000)
 
-    return () => clearTimeout(timer)
-  }, [])
+      channel.on('broadcast', { event: 'round_end' }, ({ payload }) => {
+        setGameStatus('waiting')
+      })
+
+      channelRef.current = channel
+    }
+  }, [gameId])
 
   // Timer
   useEffect(() => {
@@ -56,7 +69,12 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
   const handleSubmit = () => {
     if (!userAnswer || gameStatus !== 'playing') return
     
-    const isCorrect = parseInt(userAnswer) === currentQuestion?.answer
+    // Pour vocabulaire ou culture (lettres A,B,C,D transformées potentiellement) ou chiffres
+    // La logique existante comparait parseInt avec number. Ajustons si qcm.
+    const isCorrect = 
+      String(userAnswer).trim().toLowerCase() === String(currentQuestion?.answer).trim().toLowerCase() ||
+      parseInt(userAnswer) === currentQuestion?.answer
+      
     setResult(isCorrect ? 'correct' : 'wrong')
     setGameStatus('answered')
     
@@ -64,14 +82,14 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
       setScore((prev) => prev + 1)
     }
 
-    // Simuler la prochaine question après 3 secondes
-    setTimeout(() => {
-      setUserAnswer('')
-      setResult(null)
-      setTimeLeft(30)
-      setGameStatus('playing')
-      // Ici on chargerait la vraie prochaine question
-    }, 3000)
+    // Envoyer la réponse à l'hôte
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'player_answer',
+        payload: { team, isCorrect, playerName }
+      })
+    }
   }
 
   const getTimerColor = () => {

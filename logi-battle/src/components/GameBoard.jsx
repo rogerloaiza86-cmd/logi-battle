@@ -5,12 +5,15 @@ import QuestionCard from './QuestionCard'
 import VocabularyCard from './VocabularyCard'
 import { generateNextQuestion } from '../utils/questionGenerator'
 import { useGameStore } from '../hooks/useGameStore'
+import { gamesService } from '../services/database'
 
 const ROUND_TIME = 30
 const VOCABULARY_TIME = 20
 
-export const GameBoard = ({ onBack, gameMode }) => {
+export const GameBoard = ({ onBack, gameMode, isHost }) => {
   const gameStore = useGameStore()
+  const channelRef = useRef(null)
+  
   const [question, setQuestion] = useState(null)
   const [showIncorrect, setShowIncorrect] = useState(false)
   const [particles, setParticles] = useState([])
@@ -31,8 +34,35 @@ export const GameBoard = ({ onBack, gameMode }) => {
   ])
   const roundStartTime = useRef(null)
 
+  // Enregistrement des scores dans la BD en temps réel
   useEffect(() => {
+    if (isHost && gameStore.gameId) {
+      gamesService.updateGameScore(
+        gameStore.gameId,
+        gameStore.teamA.score,
+        gameStore.teamB.score,
+        gameStore.ropePosition
+      ).catch(console.error)
+    }
+  }, [gameStore.teamA.score, gameStore.teamB.score, gameStore.ropePosition, isHost, gameStore.gameId])
+
+  useEffect(() => {
+    // Configuration du Broadcast
+    if (isHost && gameStore.gameId) {
+      const channel = gamesService.getGameChannel(gameStore.gameId)
+      if (channel) {
+        channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
+          handleAnswer(payload.team, payload.isCorrect)
+        }).subscribe()
+        channelRef.current = channel
+      }
+    }
+
     startNewRound()
+    
+    return () => {
+      // Nettoyage au démontage
+    }
   }, [])
 
   useEffect(() => {
@@ -64,6 +94,17 @@ export const GameBoard = ({ onBack, gameMode }) => {
     setRoundWinner(null)
     setBothTeamsAnswered(false)
     roundStartTime.current = Date.now()
+
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'new_question',
+        payload: {
+          questionData: newQuestion,
+          time: time
+        }
+      })
+    }
   }
 
   const endRound = () => {
@@ -82,6 +123,17 @@ export const GameBoard = ({ onBack, gameMode }) => {
     
     setRoundWinner(winner)
     
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'round_end',
+        payload: {
+          winner: winner,
+          correctAnswer: question?.answer
+        }
+      })
+    }
+
     if (winner === 'A') {
       gameStore.incrementTeamAScore(1)
       createParticles('A')
