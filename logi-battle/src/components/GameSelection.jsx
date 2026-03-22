@@ -274,20 +274,47 @@ export const GameSelection = ({ onGameSelect, onHostMode, onChampionshipMode, on
               <span className="text-2xl font-black text-[#fea52e]">LOGI-BATTLE</span>
             </div>
             <nav className="flex items-center gap-8">
-              <button className="text-[#fea52e] text-sm font-bold tracking-wider">ARÈNE</button>
-              <button className="text-gray-500 text-sm font-bold tracking-wider hover:text-gray-300 transition-colors">ENTRAÎNEMENT</button>
-              <button className="text-gray-500 text-sm font-bold tracking-wider hover:text-gray-300 transition-colors">BATAILLON</button>
+              <button 
+                onClick={() => handleNavClick('arena')}
+                className={`text-sm font-bold tracking-wider transition-colors ${activeNav === 'arena' ? 'text-[#fea52e]' : 'text-gray-500 hover:text-gray-300'}`}
+              >
+                ARÈNE
+              </button>
+              <button 
+                onClick={() => handleNavClick('training')}
+                className={`text-sm font-bold tracking-wider transition-colors ${activeNav === 'training' ? 'text-[#fea52e]' : 'text-gray-500 hover:text-gray-300'}`}
+              >
+                ENTRAÎNEMENT
+              </button>
+              <button 
+                onClick={() => handleNavClick('battalion')}
+                className={`text-sm font-bold tracking-wider transition-colors ${activeNav === 'battalion' ? 'text-[#fea52e]' : 'text-gray-500 hover:text-gray-300'}`}
+              >
+                BATAILLON
+              </button>
             </nav>
             <div className="flex items-center gap-4">
-              <button className="w-10 h-10 rounded-xl bg-[#1a1a2e] flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+              <button 
+                onClick={() => handleNavClick('hq')}
+                title="Tableau de bord (QG)"
+                className="w-10 h-10 rounded-xl bg-[#1a1a2e] flex items-center justify-center text-gray-400 hover:text-[#fea52e] hover:bg-[#fea52e]/10 transition-colors"
+              >
                 <span className="material-icons">bar_chart</span>
               </button>
-              <button className="w-10 h-10 rounded-xl bg-[#1a1a2e] flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+              <button 
+                onClick={() => alert("⚙️ Modale de Paramètres (En construction)")}
+                title="Paramètres"
+                className="w-10 h-10 rounded-xl bg-[#1a1a2e] flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+              >
                 <span className="material-icons">settings</span>
               </button>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+              <button 
+                onClick={() => alert("👤 Profil Élève : DIAMOND BOLT")}
+                title="Profil Opérateur"
+                className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 flex items-center justify-center transition-colors shadow-lg shadow-green-500/20"
+              >
                 <span className="material-icons text-white">person</span>
-              </div>
+              </button>
             </div>
           </div>
         </header>
