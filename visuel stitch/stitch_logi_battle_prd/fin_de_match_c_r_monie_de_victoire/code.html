@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LOGI-BATTLE | Championship Result</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary-fixed": "#bfd1ff",
+              "surface-container-highest": "#23233f",
+              "tertiary-dim": "#e21e49",
+              "on-secondary-fixed-variant": "#004da8",
+              "inverse-on-surface": "#53536a",
+              "secondary-fixed-dim": "#a9c4ff",
+              "on-primary-container": "#351d00",
+              "on-background": "#e5e3ff",
+              "on-error": "#450900",
+              "outline": "#74738b",
+              "inverse-primary": "#885300",
+              "background": "#0c0c1f",
+              "primary-fixed-dim": "#ee981f",
+              "tertiary-fixed-dim": "#ff7984",
+              "surface-dim": "#0c0c1f",
+              "on-secondary-fixed": "#003271",
+              "on-tertiary-container": "#000000",
+              "error-container": "#b92902",
+              "on-secondary": "#001e4a",
+              "on-tertiary-fixed": "#39000a",
+              "secondary-container": "#005ac2",
+              "outline-variant": "#46465c",
+              "secondary": "#699cff",
+              "on-tertiary": "#49000f",
+              "surface-bright": "#292948",
+              "on-primary-fixed": "#321b00",
+              "tertiary-fixed": "#ff9198",
+              "surface-variant": "#23233f",
+              "tertiary": "#ff6f7d",
+              "primary-fixed": "#fea52e",
+              "primary": "#fea52e",
+              "on-primary": "#512f00",
+              "on-tertiary-fixed-variant": "#78001f",
+              "primary-dim": "#ee981f",
+              "error": "#ff7351",
+              "primary-container": "#e18e10",
+              "surface-tint": "#fea52e",
+              "surface": "#0c0c1f",
+              "inverse-surface": "#fcf8ff",
+              "on-surface-variant": "#aaa8c3",
+              "error-dim": "#d53d18",
+              "surface-container-lowest": "#000000",
+              "on-surface": "#e5e3ff",
+              "on-error-container": "#ffd2c8",
+              "secondary-dim": "#699cff",
+              "tertiary-container": "#fc3559",
+              "surface-container-high": "#1d1d37",
+              "surface-container-low": "#111127",
+              "surface-container": "#17172f",
+              "on-secondary-container": "#f7f7ff",
+              "on-primary-fixed-variant": "#5d3700"
+            },
+            fontFamily: {
+              "headline": ["Lexend"],
+              "body": ["Lexend"],
+              "label": ["Lexend"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        background: rgba(35, 35, 63, 0.6);
+        backdrop-filter: blur(16px);
+      }
+      .industrial-glow {
+        box-shadow: 0 0 40px rgba(254, 165, 46, 0.2);
+      }
+      .skew-container {
+        transform: skew(-8deg);
+      }
+      .skew-content {
+        transform: skew(8deg);
+      }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary selection:text-on-primary overflow-x-hidden">
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 left-0 w-full flex justify-between items-center px-6 py-4 bg-[#0c0c1f]/80 backdrop-blur-xl z-50 shadow-[0_4px_20px_rgba(254,165,46,0.15)]">
+<div class="flex items-center gap-4">
+<span class="text-2xl font-black text-[#fea52e] tracking-tighter italic">LOGI-BATTLE</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<span class="font-headline uppercase tracking-[0.05em] font-bold text-[#e5e3ff]/60 hover:scale-110 hover:text-[#fea52e] transition-transform cursor-pointer">Arena</span>
+<span class="font-headline uppercase tracking-[0.05em] font-bold text-[#e5e3ff]/60 hover:scale-110 hover:text-[#fea52e] transition-transform cursor-pointer">Battalion</span>
+<span class="font-headline uppercase tracking-[0.05em] font-bold text-[#e5e3ff]/60 hover:scale-110 hover:text-[#fea52e] transition-transform cursor-pointer">HQ</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#e5e3ff]/60 cursor-pointer">leaderboard</span>
+<span class="material-symbols-outlined text-[#e5e3ff]/60 cursor-pointer">settings</span>
+<div class="w-10 h-10 rounded-full border-2 border-primary overflow-hidden">
+<img alt="Champion Pilot Avatar" class="w-full h-full object-cover" data-alt="Cybernetic pilot avatar icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTnp3ZsgDoh0TmKCkzj-kN6iuewS4VTuQNdAr67gkX_N5mB2V7kh6YfvpD3DIv7Kgl0VE1maOAKIzPal9EkFqdmE-YuZgWb1sRne421q3aG0c4jlRD0qpz3ZxEIqf5Pn0Iv8cSK3ZA0RrVE_fyibO2kjQGE7RDPooHBtBM_YELfiPSELyG9p_f2r5hd2gpcRhr6n-LyZEmPeW1Cvqc_8nsrTReLD2DTAgKkGpPqiBrTKGn7mVbfhGW9gVBlR0gWSOeZZTw4lC-B-L_"/>
+</div>
+</div>
+</header>
+<!-- Main Content: Championship Ceremony -->
+<main class="min-h-screen pt-24 pb-32 px-4 md:px-8 flex flex-col items-center relative overflow-hidden">
+<!-- Environmental Effects -->
+<div class="absolute inset-0 pointer-events-none">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px]"></div>
+<div class="absolute top-0 left-1/4 w-[2px] h-full bg-gradient-to-b from-transparent via-primary/30 to-transparent rotate-12"></div>
+<div class="absolute top-0 right-1/4 w-[2px] h-full bg-gradient-to-b from-transparent via-secondary/30 to-transparent -rotate-12"></div>
+<!-- Confetti Elements (Abstract) -->
+<div class="absolute top-10 left-[10%] w-4 h-4 bg-primary rotate-45 opacity-60"></div>
+<div class="absolute top-40 right-[15%] w-3 h-3 bg-secondary rounded-full opacity-60"></div>
+<div class="absolute bottom-20 left-[20%] w-6 h-2 bg-tertiary -rotate-12 opacity-60"></div>
+</div>
+<!-- Victory Banner -->
+<div class="relative z-10 flex flex-col items-center text-center mb-12">
+<div class="skew-container bg-primary p-1 px-8 mb-4 industrial-glow">
+<span class="skew-content block font-headline text-on-primary font-black text-xl tracking-[0.2em] uppercase">Championship Result</span>
+</div>
+<h1 class="font-headline text-6xl md:text-8xl font-black italic tracking-tighter text-on-background drop-shadow-[0_0_30px_rgba(254,165,46,0.5)] uppercase">
+                New Champion
+            </h1>
+<p class="font-headline text-secondary tracking-[0.3em] font-bold mt-2 uppercase">OPERATOR_01 Ascended</p>
+</div>
+<!-- Final Score Board (Asymmetric Layout) -->
+<div class="relative z-10 w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+<!-- Winner Side -->
+<div class="lg:col-span-5 order-2 lg:order-1">
+<div class="glass-card p-8 rounded-lg border-l-8 border-primary industrial-glow relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-8xl" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+</div>
+<span class="font-label text-primary font-bold tracking-widest text-sm mb-2 block uppercase">Winner / Team Alpha</span>
+<h2 class="font-headline text-4xl font-extrabold text-on-surface mb-6 uppercase">OPERATOR_01</h2>
+<div class="flex items-end gap-2">
+<span class="font-headline text-8xl font-black text-on-background leading-none">2,840</span>
+<span class="font-label text-primary font-bold mb-2">PTS</span>
+</div>
+<div class="mt-8 space-y-3">
+<div class="flex justify-between items-center text-sm font-label tracking-wider">
+<span class="text-on-surface-variant uppercase">Accuracy</span>
+<span class="text-primary">98.4%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full">
+<div class="bg-primary h-full rounded-full" style="width: 98%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Central Trophy Display -->
+<div class="lg:col-span-2 flex justify-center order-1 lg:order-2">
+<div class="relative group">
+<div class="absolute inset-0 bg-primary blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+<div class="relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center bg-surface-container-high rounded-full border-4 border-primary industrial-glow">
+<span class="material-symbols-outlined text-primary text-8xl md:text-9xl" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+</div>
+<!-- Ambient Glow Dots -->
+<div class="absolute -top-4 -right-4 w-4 h-4 bg-primary rounded-full shadow-[0_0_15px_#fea52e]"></div>
+<div class="absolute -bottom-4 -left-4 w-4 h-4 bg-secondary rounded-full shadow-[0_0_15px_#699cff]"></div>
+</div>
+</div>
+<!-- Opponent Side -->
+<div class="lg:col-span-5 order-3">
+<div class="glass-card p-8 rounded-lg border-r-8 border-tertiary relative overflow-hidden opacity-80">
+<span class="font-label text-tertiary font-bold tracking-widest text-sm mb-2 block uppercase text-right">Runner Up / Team Beta</span>
+<h2 class="font-headline text-4xl font-extrabold text-on-surface mb-6 uppercase text-right">RIVAL_CORP_X</h2>
+<div class="flex items-end justify-end gap-2">
+<span class="font-headline text-8xl font-black text-on-surface-variant/40 leading-none">2,150</span>
+<span class="font-label text-tertiary font-bold mb-2">PTS</span>
+</div>
+<div class="mt-8 space-y-3">
+<div class="flex justify-between items-center text-sm font-label tracking-wider">
+<span class="text-on-surface-variant uppercase">Accuracy</span>
+<span class="text-tertiary">82.1%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full">
+<div class="bg-tertiary h-full rounded-full" style="width: 82%;"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Rewards Bento Grid -->
+<div class="mt-16 w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+<div class="glass-card p-6 rounded-lg flex flex-col items-center text-center">
+<div class="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary">military_tech</span>
+</div>
+<h3 class="font-label font-bold text-on-surface uppercase mb-1">Rank Up</h3>
+<p class="font-headline text-2xl font-black text-primary">DIAMOND II</p>
+</div>
+<div class="glass-card p-6 rounded-lg flex flex-col items-center text-center border-t-4 border-secondary">
+<div class="w-12 h-12 bg-secondary/20 rounded-lg flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-secondary">payments</span>
+</div>
+<h3 class="font-label font-bold text-on-surface uppercase mb-1">Credits Earned</h3>
+<p class="font-headline text-2xl font-black text-secondary">+15,000 CR</p>
+</div>
+<div class="glass-card p-6 rounded-lg flex flex-col items-center text-center">
+<div class="w-12 h-12 bg-on-surface-variant/20 rounded-lg flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-on-surface-variant">model_training</span>
+</div>
+<h3 class="font-label font-bold text-on-surface uppercase mb-1">XP Bonus</h3>
+<p class="font-headline text-2xl font-black text-on-surface">+450 XP</p>
+</div>
+</div>
+<!-- Action Area -->
+<div class="mt-16 flex flex-col md:flex-row gap-6 relative z-10">
+<button class="px-12 py-5 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-full font-headline font-black text-xl tracking-tighter uppercase shadow-[0_8px_20px_rgba(254,165,46,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-3">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+                Return to HQ
+            </button>
+<button class="px-12 py-5 bg-surface-container-highest text-on-surface rounded-full font-headline font-bold text-xl tracking-tighter uppercase border border-outline-variant/30 hover:bg-surface-bright transition-all flex items-center gap-3">
+<span class="material-symbols-outlined">share</span>
+                Share Result
+            </button>
+</div>
+</main>
+<!-- Side Navigation (Web Shell) -->
+<nav class="hidden lg:flex flex-col fixed left-0 top-0 h-full z-40 bg-[#0c0c1f] w-64 shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
+<div class="p-6 pt-24">
+<div class="flex items-center gap-4 mb-10">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center border border-primary/20">
+<span class="material-symbols-outlined text-primary">verified_user</span>
+</div>
+<div>
+<h4 class="font-headline font-black text-primary text-sm uppercase">OPERATOR_01</h4>
+<p class="font-label text-[10px] text-on-surface-variant tracking-widest uppercase">Diamond Bolt League</p>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="text-[#e5e3ff]/40 py-4 px-6 flex items-center gap-4 font-label uppercase tracking-widest text-sm hover:bg-[#699cff]/10 hover:text-[#699cff] transition-colors cursor-pointer group">
+<span class="material-symbols-outlined">sports_esports</span>
+<span>Arena</span>
+</div>
+<div class="text-[#e5e3ff]/40 py-4 px-6 flex items-center gap-4 font-label uppercase tracking-widest text-sm hover:bg-[#699cff]/10 hover:text-[#699cff] transition-colors cursor-pointer group">
+<span class="material-symbols-outlined">model_training</span>
+<span>Training</span>
+</div>
+<div class="text-[#e5e3ff]/40 py-4 px-6 flex items-center gap-4 font-label uppercase tracking-widest text-sm hover:bg-[#699cff]/10 hover:text-[#699cff] transition-colors cursor-pointer group">
+<span class="material-symbols-outlined">groups</span>
+<span>Battalion</span>
+</div>
+<div class="bg-[#fea52e]/10 text-[#fea52e] border-r-4 border-[#fea52e] py-4 px-6 flex items-center gap-4 font-label uppercase tracking-widest text-sm">
+<span class="material-symbols-outlined">dashboard</span>
+<span>HQ</span>
+</div>
+<div class="text-[#e5e3ff]/40 py-4 px-6 flex items-center gap-4 font-label uppercase tracking-widest text-sm hover:bg-[#699cff]/10 hover:text-[#699cff] transition-colors cursor-pointer group">
+<span class="material-symbols-outlined">history</span>
+<span>Archives</span>
+</div>
+</div>
+</div>
+<div class="mt-auto p-6 border-t border-outline-variant/10">
+<button class="w-full py-4 bg-primary text-on-primary font-headline font-black uppercase tracking-widest text-sm rounded-lg shadow-[0_0_15px_rgba(254,165,46,0.3)]">
+                Start Battle
+            </button>
+</div>
+</nav>
+<!-- Bottom Navigation (Mobile Shell) -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#0c0c1f]/90 backdrop-blur-2xl rounded-t-[2rem] shadow-[0_-8px_24px_rgba(0,0,0,0.6)]">
+<div class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2 font-label text-[10px] font-bold uppercase tracking-tighter">
+<span class="material-symbols-outlined mb-1">grid_view</span>
+<span>Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2 font-label text-[10px] font-bold uppercase tracking-tighter">
+<span class="material-symbols-outlined mb-1">swords</span>
+<span>Game</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2 font-label text-[10px] font-bold uppercase tracking-tighter">
+<span class="material-symbols-outlined mb-1">military_tech</span>
+<span>Classes</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#fea52e] bg-[#fea52e]/10 rounded-2xl p-2 shadow-[0_0_15px_rgba(254,165,46,0.3)] font-label text-[10px] font-bold uppercase tracking-tighter">
+<span class="material-symbols-outlined mb-1">hub</span>
+<span>Groups</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2 font-label text-[10px] font-bold uppercase tracking-tighter">
+<span class="material-symbols-outlined mb-1">query_stats</span>
+<span>Stats</span>
+</div>
+</nav>
+</body></html>

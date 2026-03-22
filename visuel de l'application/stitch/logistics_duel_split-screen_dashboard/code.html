@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Logistics Duel Split-Screen Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#f49d25",
+                "background-light": "#f8f7f5",
+                "background-dark": "#221a10",
+                "midnight": "#1e293b",
+                "industrial": "#f49d25",
+              },
+              fontFamily: {
+                "display": ["Lexend"]
+              },
+              borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        .split-divider {
+            background-image: radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px);
+            background-size: 1px 12px;
+        }
+        .tug-rope-gradient {
+            background: linear-gradient(90deg, #3b82f6 0%, #f49d25 100%);
+        }
+        .keypad-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .keypad-btn:active {
+            transform: scale(0.92);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 overflow-hidden h-screen flex flex-col">
+<!-- Global Progress Bar (The Rope) -->
+<div class="relative w-full h-16 bg-slate-900 dark:bg-black/40 flex items-center px-8 z-50">
+<div class="flex justify-between w-full absolute left-0 px-8 items-center">
+<span class="text-blue-400 font-bold text-xl">TEAM A</span>
+<span class="text-primary font-bold text-xl">TEAM B</span>
+</div>
+<div class="w-full h-3 bg-slate-800 rounded-full relative overflow-visible mx-24">
+<!-- Progress Fill -->
+<div class="absolute left-0 top-0 h-full bg-blue-500 rounded-l-full" style="width: 58%"></div>
+<div class="absolute right-0 top-0 h-full bg-primary rounded-r-full" style="width: 42%"></div>
+<!-- The Knot/Flag Indicator -->
+<div class="absolute top-1/2 left-[58%] -translate-y-1/2 -translate-x-1/2 w-10 h-10 bg-white dark:bg-slate-100 rounded-full shadow-xl flex items-center justify-center border-4 border-slate-900 ring-4 ring-blue-500/20">
+<span class="material-icons text-slate-900 text-xl">flag</span>
+</div>
+</div>
+</div>
+<!-- Main Duel Arena -->
+<main class="flex-grow flex relative">
+<!-- Vertical Dotted Divider -->
+<div class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[2px] split-divider z-40 opacity-30"></div>
+<!-- Left Side: Team A (Midnight Blue) -->
+<section class="w-1/2 h-full bg-slate-900 flex flex-col p-8 relative">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-4">
+<div class="w-20 h-20 rounded-2xl bg-blue-600/20 border-2 border-blue-500 p-1">
+<img class="w-full h-full object-cover rounded-xl" data-alt="Male forklift operator avatar wearing safety gear" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvPDcm9tdj_cJNrB6oEz0TRfdNqd_C2sbz_aAkgl6kfRjbpMAPXobluonduTU9lBv4WQjT1KYCvq2qVDvXKUhFY2JEc9J8auhuvEKA_2WEx2_PizB1JsBncE6JA2RkitWzs_dkQsQRN1qv0ZtQTRuntGun7Nnt2v-oCjQdOGOKT2EhpbKc_DvgEP9rop_D72xDAqeZwVsdFCMqelkwxrNdf2yFS5n8qA7FBakZuO-NueVRaGIGZCPhiiRlUOe7pUfU5YCZWjtxoIg"/>
+</div>
+<div>
+<h2 class="text-blue-400 font-bold text-lg tracking-wider">TEAM ALPHA</h2>
+<p class="text-white text-3xl font-extrabold">1,240 <span class="text-xs text-blue-300 font-normal uppercase ml-1">pts</span></p>
+</div>
+</div>
+<div class="bg-blue-500/10 px-4 py-2 rounded-full border border-blue-500/20">
+<span class="text-blue-400 font-medium">RANK: 01</span>
+</div>
+</div>
+<!-- Team A Question Card -->
+<div class="flex-grow flex flex-col items-center justify-center gap-8">
+<div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8 text-center transform transition-all">
+<span class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4 block">Logistics Challenge #42</span>
+<h3 class="text-slate-800 text-2xl font-semibold mb-2">Inventory Calculation</h3>
+<p class="text-slate-600 mb-8">If a truck carries 12 pallets and each pallet has 8 layers, what is the total number of layers?</p>
+<div class="bg-slate-100 rounded-lg p-6 mb-2">
+<span class="text-slate-900 text-5xl font-black tracking-tighter">96</span>
+<div class="h-1 w-12 bg-blue-500 mx-auto mt-2 rounded-full"></div>
+</div>
+</div>
+<!-- Team A Keypad -->
+<div class="w-full max-w-md grid grid-cols-3 gap-3">
+<button class="keypad-btn bg-slate-800 hover:bg-slate-700 text-white font-bold py-6 rounded-xl text-2xl border border-white/5">1</button>
+<button class="keypad-btn bg-slate-800 hover:bg-slate-700 text-white font-bold py-6 rounded-xl text-2xl border border-white/5">2</button>
+<button class="keypad-btn bg-slate-800 hover:bg-slate-700 text-white font-bold py-6 rounded-xl text-2xl border border-white/5">3</button>
+<button class="keypad-btn bg-slate-800 hover:bg-slate-700 text-white font-bold py-6 rounded-xl text-2xl border border-white/5">4</button>
+<button class="keypad-btn bg-slate-800 hover:bg-slate-700 text-white font-bold py-6 rounded-xl text-2xl border border-white/5">5</button>
+<button class="keypad-btn bg-slate-800 hover:bg-slate-700 text-white font-bold py-6 rounded-xl text-2xl border border-white/5">6</button>
+<button class="keypad-btn bg-slate-800 hover:bg-slate-700 text-white font-bold py-6 rounded-xl text-2xl border border-white/5">7</button>
+<button class="keypad-btn bg-slate-800 hover:bg-slate-700 text-white font-bold py-6 rounded-xl text-2xl border border-white/5">8</button>
+<button class="keypad-btn bg-slate-800 hover:bg-slate-700 text-white font-bold py-6 rounded-xl text-2xl border border-white/5">9</button>
+<button class="keypad-btn bg-slate-800 hover:bg-slate-700 text-white font-bold py-6 rounded-xl text-2xl border border-white/5">C</button>
+<button class="keypad-btn bg-slate-800 hover:bg-slate-700 text-white font-bold py-6 rounded-xl text-2xl border border-white/5">0</button>
+<button class="keypad-btn bg-slate-800 hover:bg-slate-700 text-white font-bold py-6 rounded-xl text-2xl border border-white/5">
+<span class="material-icons">backspace</span>
+</button>
+<button class="col-span-3 bg-blue-500 hover:bg-blue-400 text-white font-extrabold py-5 rounded-xl text-xl shadow-lg shadow-blue-500/20 uppercase tracking-widest mt-2">
+                        Validate Answer
+                    </button>
+</div>
+</div>
+</section>
+<!-- Right Side: Team B (Industrial Orange) -->
+<section class="w-1/2 h-full bg-background-dark flex flex-col p-8 relative border-l border-white/5">
+<!-- Background Decorative Overlay -->
+<div class="absolute inset-0 bg-primary/10 pointer-events-none"></div>
+<div class="flex items-center justify-between mb-8 relative z-10">
+<div class="bg-primary/20 px-4 py-2 rounded-full border border-primary/30 order-2">
+<span class="text-primary font-medium uppercase">Rank: 02</span>
+</div>
+<div class="flex items-center gap-4 flex-row-reverse order-1">
+<div class="w-20 h-20 rounded-2xl bg-primary/20 border-2 border-primary p-1">
+<img class="w-full h-full object-cover rounded-xl" data-alt="Female order picker avatar in high visibility vest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZq5li5UflcludU03mtlM4IQuNt6m2dPF3pqkd2RsaPdQAagV8VnjgvY3jrxsu965r-y81lDcsYXVddi6uFXPEwqoId6P1JMoF9he5jSH570y8LA76FG52WuzBzIjfQHrPZ3tSznFrTkuW3CjBWdcp4czu25RuLrfqx6sY5zbqHs5VPXmNQz9aCSoX-hafvSeWN5h57mtWm1vxzTclyLTFAUFcpvH7ZX8nPpwatMgT4vWA8b_RPDrViiD0EWdN2ZtaPWfa42DXy10"/>
+</div>
+<div class="text-right">
+<h2 class="text-primary font-bold text-lg tracking-wider">TEAM BRAVO</h2>
+<p class="text-white text-3xl font-extrabold">985 <span class="text-xs text-primary/70 font-normal uppercase ml-1">pts</span></p>
+</div>
+</div>
+</div>
+<!-- Team B Question Card -->
+<div class="flex-grow flex flex-col items-center justify-center gap-8 relative z-10">
+<div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8 text-center ring-4 ring-primary/20">
+<span class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4 block">Logistics Challenge #42</span>
+<h3 class="text-slate-800 text-2xl font-semibold mb-2">Inventory Calculation</h3>
+<p class="text-slate-600 mb-8">If a truck carries 12 pallets and each pallet has 8 layers, what is the total number of layers?</p>
+<div class="bg-slate-100 rounded-lg p-6 mb-2 border-2 border-primary/30">
+<span class="text-slate-900 text-5xl font-black tracking-tighter opacity-20">---</span>
+<div class="h-1 w-12 bg-primary mx-auto mt-2 rounded-full"></div>
+</div>
+</div>
+<!-- Team B Keypad -->
+<div class="w-full max-w-md grid grid-cols-3 gap-3">
+<button class="keypad-btn bg-background-dark hover:bg-slate-800 text-white font-bold py-6 rounded-xl text-2xl border border-primary/20">1</button>
+<button class="keypad-btn bg-background-dark hover:bg-slate-800 text-white font-bold py-6 rounded-xl text-2xl border border-primary/20">2</button>
+<button class="keypad-btn bg-background-dark hover:bg-slate-800 text-white font-bold py-6 rounded-xl text-2xl border border-primary/20">3</button>
+<button class="keypad-btn bg-background-dark hover:bg-slate-800 text-white font-bold py-6 rounded-xl text-2xl border border-primary/20">4</button>
+<button class="keypad-btn bg-background-dark hover:bg-slate-800 text-white font-bold py-6 rounded-xl text-2xl border border-primary/20">5</button>
+<button class="keypad-btn bg-background-dark hover:bg-slate-800 text-white font-bold py-6 rounded-xl text-2xl border border-primary/20">6</button>
+<button class="keypad-btn bg-background-dark hover:bg-slate-800 text-white font-bold py-6 rounded-xl text-2xl border border-primary/20">7</button>
+<button class="keypad-btn bg-background-dark hover:bg-slate-800 text-white font-bold py-6 rounded-xl text-2xl border border-primary/20">8</button>
+<button class="keypad-btn bg-background-dark hover:bg-slate-800 text-white font-bold py-6 rounded-xl text-2xl border border-primary/20">9</button>
+<button class="keypad-btn bg-background-dark hover:bg-slate-800 text-white font-bold py-6 rounded-xl text-2xl border border-primary/20">C</button>
+<button class="keypad-btn bg-background-dark hover:bg-slate-800 text-white font-bold py-6 rounded-xl text-2xl border border-primary/20">0</button>
+<button class="keypad-btn bg-background-dark hover:bg-slate-800 text-white font-bold py-6 rounded-xl text-2xl border border-primary/20">
+<span class="material-icons">backspace</span>
+</button>
+<button class="col-span-3 bg-primary hover:bg-amber-500 text-white font-extrabold py-5 rounded-xl text-xl shadow-lg shadow-primary/20 uppercase tracking-widest mt-2">
+                        Validate Answer
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Action Bar / Status -->
+<footer class="h-12 bg-slate-900 border-t border-white/5 flex items-center justify-between px-8 text-[10px] uppercase tracking-widest font-bold text-slate-500">
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span> SYSTEM READY</span>
+<span>|</span>
+<span>ROUND 4 OF 10</span>
+</div>
+<div class="flex items-center gap-4">
+<span>TIME REMAINING: 14:02</span>
+<span>|</span>
+<span class="text-primary">DUEL MODE ACTIVE</span>
+</div>
+</footer>
+</body></html>

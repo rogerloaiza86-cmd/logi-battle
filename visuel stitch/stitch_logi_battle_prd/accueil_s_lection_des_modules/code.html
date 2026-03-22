@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Logi-Battle | Module Selection</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary-fixed": "#bfd1ff",
+              "surface-container-highest": "#23233f",
+              "tertiary-dim": "#e21e49",
+              "on-secondary-fixed-variant": "#004da8",
+              "inverse-on-surface": "#53536a",
+              "secondary-fixed-dim": "#a9c4ff",
+              "on-primary-container": "#351d00",
+              "on-background": "#e5e3ff",
+              "on-error": "#450900",
+              "outline": "#74738b",
+              "inverse-primary": "#885300",
+              "background": "#0c0c1f",
+              "primary-fixed-dim": "#ee981f",
+              "tertiary-fixed-dim": "#ff7984",
+              "surface-dim": "#0c0c1f",
+              "on-secondary-fixed": "#003271",
+              "on-tertiary-container": "#000000",
+              "error-container": "#b92902",
+              "on-secondary": "#001e4a",
+              "on-tertiary-fixed": "#39000a",
+              "secondary-container": "#005ac2",
+              "outline-variant": "#46465c",
+              "secondary": "#699cff",
+              "on-tertiary": "#49000f",
+              "surface-bright": "#292948",
+              "on-primary-fixed": "#321b00",
+              "tertiary-fixed": "#ff9198",
+              "surface-variant": "#23233f",
+              "tertiary": "#ff6f7d",
+              "primary-fixed": "#fea52e",
+              "primary": "#fea52e",
+              "on-primary": "#512f00",
+              "on-tertiary-fixed-variant": "#78001f",
+              "primary-dim": "#ee981f",
+              "error": "#ff7351",
+              "primary-container": "#e18e10",
+              "surface-tint": "#fea52e",
+              "surface": "#0c0c1f",
+              "inverse-surface": "#fcf8ff",
+              "on-surface-variant": "#aaa8c3",
+              "error-dim": "#d53d18",
+              "surface-container-lowest": "#000000",
+              "on-surface": "#e5e3ff",
+              "on-error-container": "#ffd2c8",
+              "secondary-dim": "#699cff",
+              "tertiary-container": "#fc3559",
+              "surface-container-high": "#1d1d37",
+              "surface-container-low": "#111127",
+              "surface-container": "#17172f",
+              "on-secondary-container": "#f7f7ff",
+              "on-primary-fixed-variant": "#5d3700"
+            },
+            fontFamily: {
+              "headline": ["Lexend"],
+              "body": ["Lexend"],
+              "label": ["Lexend"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Lexend', sans-serif;
+        background-color: #0c0c1f;
+      }
+      .glass-card {
+        background: rgba(35, 35, 63, 0.6);
+        backdrop-filter: blur(16px);
+      }
+      .skew-container {
+        transform: skew(-4deg);
+      }
+      .skew-content {
+        transform: skew(4deg);
+      }
+    </style>
+</head>
+<body class="text-on-surface overflow-x-hidden">
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 left-0 w-full flex justify-between items-center px-6 py-4 bg-[#0c0c1f]/80 backdrop-blur-xl z-50 shadow-[0_4px_20px_rgba(254,165,46,0.15)]">
+<div class="flex items-center gap-3">
+<span class="text-2xl font-black text-[#fea52e] tracking-tighter italic">LOGI-BATTLE</span>
+</div>
+<div class="hidden md:flex gap-8 items-center font-['Lexend'] uppercase tracking-[0.05em] font-bold">
+<a class="text-[#fea52e] drop-shadow-[0_0_8px_rgba(254,165,46,0.8)] hover:scale-110 transition-transform" href="#">Arena</a>
+<a class="text-[#e5e3ff]/60 hover:text-[#fea52e] hover:scale-110 transition-transform" href="#">Training</a>
+<a class="text-[#e5e3ff]/60 hover:text-[#fea52e] hover:scale-110 transition-transform" href="#">Battalion</a>
+</div>
+<div class="flex items-center gap-4 text-[#fea52e]">
+<button class="hover:scale-110 transition-transform active:scale-95">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+</button>
+<button class="hover:scale-110 transition-transform active:scale-95">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full border-2 border-primary overflow-hidden shadow-[0_0_10px_rgba(254,165,46,0.4)]">
+<img alt="Champion Pilot Avatar" class="w-full h-full object-cover" data-alt="Cybernetic pilot avatar portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRVOO6HBWSoMrnUQbVVzSe4DZMUiOa5KLB3b2Y4A7aWeDWs_YonXaxWRptb9ZQazBsj_n-UXooIMJNYo-Yqjr0uaz4vB-3JoV9ssR32ys4gy6VGXsW-Tm3RbUSIxx_RhA3RFGDzZEvstuC4d8i3Ue0GWY2vi_sPfvksTse5oGDZspsN6L6HR8ofQXb4_SQ91YY15TNpgb8AtIqAz-AEuoXyyXhwEpk35wPXW6DK2OObWLMfJnFhft1VTwihkDmMEdyc823lBLp8-zd"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar Shell -->
+<aside class="hidden lg:flex flex-col fixed left-0 top-0 h-full w-64 z-40 bg-[#0c0c1f] pt-24 shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
+<div class="px-6 mb-10">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+</div>
+<div>
+<h3 class="text-xs font-black tracking-widest uppercase text-on-surface">OPERATOR_01</h3>
+<p class="text-[10px] text-primary/70 font-bold uppercase">DIAMOND BOLT</p>
+</div>
+</div>
+<div class="h-[2px] w-full bg-gradient-to-r from-primary/40 to-transparent"></div>
+</div>
+<nav class="flex-1 flex flex-col gap-1 font-['Lexend'] font-medium text-sm tracking-widest uppercase">
+<a class="bg-[#fea52e]/10 text-[#fea52e] border-r-4 border-[#fea52e] py-4 px-6 flex items-center gap-4 transition-all translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="sports_esports">sports_esports</span> Arena
+            </a>
+<a class="text-[#e5e3ff]/40 py-4 px-6 flex items-center gap-4 hover:bg-[#699cff]/10 hover:text-[#699cff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="model_training">model_training</span> Training
+            </a>
+<a class="text-[#e5e3ff]/40 py-4 px-6 flex items-center gap-4 hover:bg-[#699cff]/10 hover:text-[#699cff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span> Battalion
+            </a>
+<a class="text-[#e5e3ff]/40 py-4 px-6 flex items-center gap-4 hover:bg-[#699cff]/10 hover:text-[#699cff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span> HQ
+            </a>
+<a class="text-[#e5e3ff]/40 py-4 px-6 flex items-center gap-4 hover:bg-[#699cff]/10 hover:text-[#699cff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span> Archives
+            </a>
+</nav>
+<div class="p-6 flex flex-col gap-4 border-t border-surface-container-highest">
+<button class="w-full py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary font-black rounded-lg shadow-[0_8px_20px_rgba(254,165,46,0.3)] hover:scale-105 active:scale-95 transition-all uppercase tracking-tighter">
+                START BATTLE
+            </button>
+<div class="flex flex-col gap-2">
+<a class="text-[#e5e3ff]/40 text-[10px] flex items-center gap-2 hover:text-on-surface" href="#">
+<span class="material-symbols-outlined text-xs" data-icon="support_agent">support_agent</span> SUPPORT
+                </a>
+<a class="text-[#e5e3ff]/40 text-[10px] flex items-center gap-2 hover:text-error" href="#">
+<span class="material-symbols-outlined text-xs" data-icon="logout">logout</span> LOGOUT
+                </a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 pt-24 pb-32 px-6 min-h-screen">
+<!-- Hero Action Area -->
+<section class="mb-12 flex flex-col md:flex-row gap-6">
+<div class="flex-1 glass-card p-8 rounded-lg relative overflow-hidden group border-l-4 border-primary">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-9xl" data-icon="rocket_launch">rocket_launch</span>
+</div>
+<h2 class="text-3xl font-black mb-2 tracking-tighter italic">CHAMPION MODE</h2>
+<p class="text-on-surface-variant max-w-md mb-6 font-body">Enter the global rankings and face off against lead logistics operators for prestige and rewards.</p>
+<button class="px-8 py-3 bg-primary text-on-primary font-bold rounded-full shadow-[0_0_20px_rgba(254,165,46,0.4)] hover:scale-105 transition-transform">
+                    ENTER ARENA
+                </button>
+</div>
+<div class="flex-1 glass-card p-8 rounded-lg relative overflow-hidden group border-l-4 border-secondary">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-9xl" data-icon="qr_code_scanner">qr_code_scanner</span>
+</div>
+<h2 class="text-3xl font-black mb-2 tracking-tighter italic">QR SCANNER</h2>
+<p class="text-on-surface-variant max-w-md mb-6 font-body">Quick-join localized terminal battles or scan pallet IDs to unlock specific challenge modules.</p>
+<button class="px-8 py-3 bg-secondary text-on-secondary font-bold rounded-full shadow-[0_0_20px_rgba(105,156,255,0.4)] hover:scale-105 transition-transform">
+                    INITIALIZE SCAN
+                </button>
+</div>
+</section>
+<!-- Module Selection Grid -->
+<section class="mb-12">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="text-label-lg font-black uppercase tracking-[0.2em] text-primary mb-1">Select Operations</h2>
+<p class="text-2xl font-bold">LOGI-CORE MODULES</p>
+</div>
+<div class="flex gap-2">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<div class="w-3 h-3 rounded-full bg-surface-container-highest"></div>
+<div class="w-3 h-3 rounded-full bg-surface-container-highest"></div>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Module Card 1 -->
+<div class="glass-card p-6 rounded-lg hover:shadow-[0_0_25px_rgba(254,165,46,0.2)] transition-all cursor-pointer group relative">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="inventory_2">inventory_2</span>
+</div>
+<span class="text-[10px] font-bold text-secondary-fixed opacity-60">LVL 01</span>
+</div>
+<h3 class="text-lg font-bold mb-1 group-hover:text-primary transition-colors">Storage Strategy</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed">Optimize rack positioning for high-frequency inventory throughput.</p>
+<div class="mt-4 flex items-center gap-2">
+<div class="h-1 flex-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-3/4"></div>
+</div>
+<span class="text-[10px] font-bold">75%</span>
+</div>
+</div>
+<!-- Module Card 2 -->
+<div class="glass-card p-6 rounded-lg hover:shadow-[0_0_25px_rgba(105,156,255,0.2)] transition-all cursor-pointer group relative">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="local_shipping">local_shipping</span>
+</div>
+<span class="text-[10px] font-bold text-secondary-fixed opacity-60">LVL 04</span>
+</div>
+<h3 class="text-lg font-bold mb-1 group-hover:text-secondary transition-colors">Fleet Dynamics</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed">Route optimization under volatile traffic and weather constraints.</p>
+<div class="mt-4 flex items-center gap-2">
+<div class="h-1 flex-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-1/4"></div>
+</div>
+<span class="text-[10px] font-bold">25%</span>
+</div>
+</div>
+<!-- Module Card 3 -->
+<div class="glass-card p-6 rounded-lg hover:shadow-[0_0_25px_rgba(254,165,46,0.2)] transition-all cursor-pointer group relative">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="barcode_scanner">barcode_scanner</span>
+</div>
+<span class="text-[10px] font-bold text-secondary-fixed opacity-60">LVL 02</span>
+</div>
+<h3 class="text-lg font-bold mb-1 group-hover:text-primary transition-colors">Rapid Sorting</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed">High-speed barcode recognition and conveyor belt management.</p>
+<div class="mt-4 flex items-center gap-2">
+<div class="h-1 flex-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-full shadow-[0_0_8px_rgba(254,165,46,0.6)]"></div>
+</div>
+<span class="text-[10px] font-bold">MAX</span>
+</div>
+</div>
+<!-- Module Card 4 -->
+<div class="glass-card p-6 rounded-lg hover:shadow-[0_0_25px_rgba(226,30,73,0.2)] transition-all cursor-pointer group relative">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-tertiary-dim group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="report_problem">report_problem</span>
+</div>
+<span class="text-[10px] font-bold text-tertiary-fixed-dim opacity-60">NEW</span>
+</div>
+<h3 class="text-lg font-bold mb-1 group-hover:text-tertiary-dim transition-colors">Crisis Response</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed">Manage system-wide failures and emergency rerouting protocols.</p>
+<div class="mt-4 flex items-center gap-2">
+<div class="h-1 flex-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-dim w-0"></div>
+</div>
+<span class="text-[10px] font-bold">0%</span>
+</div>
+</div>
+<!-- Module Cards 5-16 Placeholder Grids -->
+<div class="glass-card p-6 rounded-lg border border-white/5 hover:bg-surface-container-highest transition-colors cursor-pointer flex flex-col justify-center items-center gap-2 min-h-[160px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="precision_manufacturing">precision_manufacturing</span>
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">Robo-Docking</span>
+</div>
+<div class="glass-card p-6 rounded-lg border border-white/5 hover:bg-surface-container-highest transition-colors cursor-pointer flex flex-col justify-center items-center gap-2 min-h-[160px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="pallet">pallet</span>
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">Stack Master</span>
+</div>
+<div class="glass-card p-6 rounded-lg border border-white/5 hover:bg-surface-container-highest transition-colors cursor-pointer flex flex-col justify-center items-center gap-2 min-h-[160px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="forklift">forklift</span>
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">Precision Lift</span>
+</div>
+<div class="glass-card p-6 rounded-lg border border-white/5 hover:bg-surface-container-highest transition-colors cursor-pointer flex flex-col justify-center items-center gap-2 min-h-[160px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="hub">hub</span>
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">Node Linker</span>
+</div>
+<div class="glass-card p-6 rounded-lg border border-white/5 hover:bg-surface-container-highest transition-colors cursor-pointer flex flex-col justify-center items-center gap-2 min-h-[160px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="package_2">package_2</span>
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">Eco-Packing</span>
+</div>
+<div class="glass-card p-6 rounded-lg border border-white/5 hover:bg-surface-container-highest transition-colors cursor-pointer flex flex-col justify-center items-center gap-2 min-h-[160px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="terminal">terminal</span>
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">Code Cargo</span>
+</div>
+<div class="glass-card p-6 rounded-lg border border-white/5 hover:bg-surface-container-highest transition-colors cursor-pointer flex flex-col justify-center items-center gap-2 min-h-[160px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="query_stats">query_stats</span>
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">Yield Predict</span>
+</div>
+<div class="glass-card p-6 rounded-lg border border-white/5 hover:bg-surface-container-highest transition-colors cursor-pointer flex flex-col justify-center items-center gap-2 min-h-[160px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="electric_truck">electric_car</span>
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">EV Dispatch</span>
+</div>
+<div class="glass-card p-6 rounded-lg border border-white/5 hover:bg-surface-container-highest transition-colors cursor-pointer flex flex-col justify-center items-center gap-2 min-h-[160px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="conveyor_belt">conveyor_belt</span>
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">Flow State</span>
+</div>
+<div class="glass-card p-6 rounded-lg border border-white/5 hover:bg-surface-container-highest transition-colors cursor-pointer flex flex-col justify-center items-center gap-2 min-h-[160px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="factory">factory</span>
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">Line Lead</span>
+</div>
+<div class="glass-card p-6 rounded-lg border border-white/5 hover:bg-surface-container-highest transition-colors cursor-pointer flex flex-col justify-center items-center gap-2 min-h-[160px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="monitoring">monitoring</span>
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">Real-Time Sync</span>
+</div>
+<div class="glass-card p-6 rounded-lg border border-white/5 hover:bg-surface-container-highest transition-colors cursor-pointer flex flex-col justify-center items-center gap-2 min-h-[160px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="security">security</span>
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">Vault Guard</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar Shell -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#0c0c1f]/90 backdrop-blur-2xl shadow-[0_-8px_24px_rgba(0,0,0,0.6)] rounded-t-[2rem]">
+<a class="flex flex-col items-center justify-center text-[#fea52e] bg-[#fea52e]/10 rounded-2xl p-2 shadow-[0_0_15px_rgba(254,165,46,0.3)] font-['Lexend'] text-[10px] font-bold uppercase tracking-tighter active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span>Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2 font-['Lexend'] text-[10px] font-bold uppercase tracking-tighter hover:text-[#699cff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="swords">swords</span>
+<span>Game</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2 font-['Lexend'] text-[10px] font-bold uppercase tracking-tighter hover:text-[#699cff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="military_tech">military_tech</span>
+<span>Classes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2 font-['Lexend'] text-[10px] font-bold uppercase tracking-tighter hover:text-[#699cff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+<span>Groups</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2 font-['Lexend'] text-[10px] font-bold uppercase tracking-tighter hover:text-[#699cff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span>Stats</span>
+</a>
+</nav>
+<!-- Background Industrial Pattern Decor -->
+<div class="fixed inset-0 pointer-events-none -z-10 opacity-10">
+<div class="absolute top-1/4 -right-20 w-96 h-96 bg-primary rounded-full blur-[120px]"></div>
+<div class="absolute bottom-1/4 -left-20 w-80 h-80 bg-secondary rounded-full blur-[100px]"></div>
+<div class="w-full h-full opacity-5" data-alt="Faint orange grid pattern background" style="background-image: radial-gradient(circle at 2px 2px, #fea52e 1px, transparent 0); background-size: 40px 40px;"></div>
+</div>
+</body></html>

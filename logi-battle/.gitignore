@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.DS_Store
+*.local
+.env.local
+.env.*.local
+*.log
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.turbo/
+.vercel/
+.netlify/
+coverage/

@@ -1,0 +1,428 @@
+/**
+ * Design System: The Industrial Arena
+ * Basé sur les designs Stitch
+ */
+
+/* ========== VARIABLES ========== */
+:root {
+  /* Primary Colors */
+  --industrial-orange: #fea52e;
+  --industrial-orange-dark: #e89420;
+  --industrial-orange-glow: rgba(254, 165, 46, 0.4);
+  
+  /* Secondary Colors */
+  --team-alpha-blue: #699cff;
+  --team-alpha-blue-glow: rgba(105, 156, 255, 0.3);
+  --team-omega-red: #ff6b6b;
+  --team-omega-red-glow: rgba(255, 107, 107, 0.3);
+  
+  /* Background Scale */
+  --deep-navy: #0c0c1f;
+  --surface: #121225;
+  --surface-low: #16162a;
+  --surface-mid: #1a1a2e;
+  --surface-high: #252538;
+  --surface-highest: #2d2d42;
+  
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0b8;
+  --text-muted: #6b6b7b;
+  --text-disabled: #4a4a5c;
+  
+  /* Status Colors */
+  --success: #22c55e;
+  --warning: #eab308;
+  --danger: #ef4444;
+  --info: #3b82f6;
+  
+  /* Glassmorphism */
+  --glass-bg: rgba(26, 26, 46, 0.7);
+  --glass-bg-light: rgba(26, 26, 46, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-strong: rgba(255, 255, 255, 0.15);
+  --glass-blur: 16px;
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+  
+  /* Border Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  
+  /* Shadows */
+  --shadow-glow-orange: 0 8px 32px rgba(254, 165, 46, 0.25);
+  --shadow-glow-blue: 0 8px 32px rgba(105, 156, 255, 0.25);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-ambient: 0 0 40px rgba(254, 165, 46, 0.1);
+  
+  /* Typography Scale */
+  --font-display-lg: 3.5rem;
+  --font-display-md: 2.5rem;
+  --font-headline-lg: 2rem;
+  --font-headline-md: 1.5rem;
+  --font-title-lg: 1.25rem;
+  --font-title-md: 1rem;
+  --font-body-lg: 1rem;
+  --font-body-md: 0.875rem;
+  --font-label: 0.75rem;
+}
+
+/* ========== BASE ========== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Lexend', sans-serif;
+  background-color: var(--deep-navy);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========== GLASSMORPHISM ========== */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+.glass-light {
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+/* ========== SURFACE LAYERS ========== */
+.surface { background-color: var(--surface); }
+.surface-low { background-color: var(--surface-low); }
+.surface-mid { background-color: var(--surface-mid); }
+.surface-high { background-color: var(--surface-high); }
+.surface-highest { background-color: var(--surface-highest); }
+
+/* ========== TYPOGRAPHY ========== */
+.text-display-lg {
+  font-size: var(--font-display-lg);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.text-display-md {
+  font-size: var(--font-display-md);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.text-headline-lg {
+  font-size: var(--font-headline-lg);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.text-headline-md {
+  font-size: var(--font-headline-md);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.text-title-lg {
+  font-size: var(--font-title-lg);
+  font-weight: 600;
+}
+
+.text-title-md {
+  font-size: var(--font-title-md);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.text-label {
+  font-size: var(--font-label);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Text Colors */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.text-orange { color: var(--industrial-orange); }
+.text-blue { color: var(--team-alpha-blue); }
+.text-red { color: var(--team-omega-red); }
+
+/* ========== BUTTONS ========== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: var(--font-label);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--industrial-orange) 0%, var(--industrial-orange-dark) 100%);
+  color: var(--deep-navy);
+  box-shadow: var(--shadow-glow-orange);
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 40px rgba(254, 165, 46, 0.4);
+}
+
+.btn-secondary {
+  background: var(--surface-high);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border-strong);
+}
+
+.btn-secondary:hover {
+  background: var(--surface-highest);
+  border-color: var(--glass-border);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--glass-border);
+}
+
+.btn-ghost:hover {
+  background: var(--glass-bg-light);
+  color: var(--text-primary);
+}
+
+/* ========== CARDS ========== */
+.card {
+  background: var(--surface-mid);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: var(--glass-border-strong);
+  box-shadow: var(--shadow-ambient);
+}
+
+.card-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+}
+
+/* ========== NAVIGATION ========== */
+.nav-sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--glass-border);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  background: var(--surface-mid);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: var(--surface-high);
+  color: var(--industrial-orange);
+  border-left: 3px solid var(--industrial-orange);
+}
+
+/* ========== BADGES & TAGS ========== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  font-size: var(--font-label);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+}
+
+.badge-orange {
+  background: rgba(254, 165, 46, 0.2);
+  color: var(--industrial-orange);
+  border: 1px solid rgba(254, 165, 46, 0.3);
+}
+
+.badge-blue {
+  background: rgba(105, 156, 255, 0.2);
+  color: var(--team-alpha-blue);
+  border: 1px solid rgba(105, 156, 255, 0.3);
+}
+
+.badge-red {
+  background: rgba(255, 107, 107, 0.2);
+  color: var(--team-omega-red);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+/* ========== PROGRESS BARS ========== */
+.progress-bar {
+  height: 0.5rem;
+  background: var(--surface-high);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width 0.5s ease;
+}
+
+.progress-bar-fill.orange {
+  background: linear-gradient(90deg, var(--industrial-orange), var(--industrial-orange-dark));
+}
+
+.progress-bar-fill.blue {
+  background: linear-gradient(90deg, var(--team-alpha-blue), #4a7fd4);
+}
+
+/* ========== TIMER CIRCULAR ========== */
+.timer-circular {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.timer-circular svg {
+  transform: rotate(-90deg);
+}
+
+.timer-circular-bg {
+  fill: none;
+  stroke: var(--surface-high);
+  stroke-width: 8;
+}
+
+.timer-circular-progress {
+  fill: none;
+  stroke: var(--industrial-orange);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 283;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear;
+  filter: drop-shadow(0 0 6px var(--industrial-orange-glow));
+}
+
+.timer-circular-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--industrial-orange);
+}
+
+/* ========== DIVIDERS ========== */
+/* NO 1PX BORDERS - Use background color shifts instead */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-border-strong), transparent);
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px var(--industrial-orange-glow); }
+  50% { box-shadow: 0 0 40px var(--industrial-orange-glow); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ========== SCROLLBAR ========== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-high);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--surface-highest);
+}
+
+/* ========== UTILITIES ========== */
+.glow-orange { box-shadow: var(--shadow-glow-orange); }
+.glow-blue { box-shadow: var(--shadow-glow-blue); }
+.glow-ambient { box-shadow: var(--shadow-ambient); }
+
+.border-glass { border: 1px solid var(--glass-border); }
+.border-glass-strong { border: 1px solid var(--glass-border-strong); }
+
+/* Skewed container for VS labels */
+.skew-container {
+  transform: skewX(-8deg);
+}
+
+.skew-content {
+  transform: skewX(8deg);
+}

@@ -1,0 +1,265 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+/* Design System */
+@import './design-system.css';
+
+/* Base Styles */
+body {
+  font-family: 'Lexend', sans-serif;
+  background-color: var(--deep-navy);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========== ANIMATIONS ========== */
+
+/* Screen Vibration Effect */
+@keyframes screen-vibrate {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  10% { transform: translateX(-2px) translateY(-2px); }
+  20% { transform: translateX(2px) translateY(2px); }
+  30% { transform: translateX(-2px) translateY(2px); }
+  40% { transform: translateX(2px) translateY(-2px); }
+  50% { transform: translateX(-2px) translateY(-2px); }
+  60% { transform: translateX(2px) translateY(2px); }
+  70% { transform: translateX(-2px) translateY(2px); }
+  80% { transform: translateX(2px) translateY(-2px); }
+  90% { transform: translateX(-2px) translateY(-2px); }
+}
+
+.vibrate-screen {
+  animation: screen-vibrate 0.4s cubic-bezier(0.36, 0, 0.66, 1);
+}
+
+/* Particle Effect */
+.particle {
+  pointer-events: none;
+}
+
+@keyframes particle-burst {
+  0% {
+    opacity: 1;
+    transform: translate(var(--tx), var(--ty)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--tx) * 2), calc(var(--ty) * 2)) scale(0);
+  }
+}
+
+.particle-burst {
+  animation: particle-burst 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Glow Pulse Animation */
+@keyframes glow-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(254, 165, 46, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(254, 165, 46, 0.5);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Slide Up Animation */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out;
+}
+
+/* Scale In Animation */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
+/* Shimmer Effect for Loading */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--surface-mid) 25%,
+    var(--surface-high) 50%,
+    var(--surface-mid) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ========== ROPE ANIMATION ========== */
+.rope-container {
+  position: relative;
+  height: 8px;
+  background: var(--surface-high);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rope-fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rope-fill.team-a {
+  left: 50%;
+  background: linear-gradient(90deg, transparent, var(--team-alpha-blue));
+  transform-origin: left;
+}
+
+.rope-fill.team-b {
+  right: 50%;
+  background: linear-gradient(90deg, var(--industrial-orange), transparent);
+  transform-origin: right;
+}
+
+.rope-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 16px;
+  background: white;
+  border-radius: 2px;
+  z-index: 10;
+}
+
+/* ========== CARD HOVER EFFECTS ========== */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* ========== BUTTON PRESS EFFECT ========== */
+.btn-press:active {
+  transform: scale(0.95);
+}
+
+/* ========== GRADIENT TEXT ========== */
+.gradient-text {
+  background: linear-gradient(135deg, var(--industrial-orange) 0%, #ffb347 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-blue {
+  background: linear-gradient(135deg, var(--team-alpha-blue) 0%, #8fb3ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ========== NOISE TEXTURE ========== */
+.noise-bg {
+  position: relative;
+}
+
+.noise-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ========== SCROLLBAR STYLING ========== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-high);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--surface-highest);
+}
+
+/* ========== FOCUS STATES ========== */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(254, 165, 46, 0.3);
+}
+
+/* ========== DISABLED STATES ========== */
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ========== TAILWIND CUSTOM UTILITIES ========== */
+@layer utilities {
+  .text-shadow-glow {
+    text-shadow: 0 0 20px rgba(254, 165, 46, 0.5);
+  }
+  
+  .bg-gradient-radial {
+    background: radial-gradient(circle at center, var(--surface-mid) 0%, var(--deep-navy) 100%);
+  }
+  
+  .border-gradient {
+    border: double 1px transparent;
+    background-image: linear-gradient(var(--surface-mid), var(--surface-mid)), 
+                      linear-gradient(135deg, var(--industrial-orange), var(--team-alpha-blue));
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+}

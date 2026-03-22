@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html class="dark"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary-fixed": "#bfd1ff",
+              "surface-container-highest": "#23233f",
+              "tertiary-dim": "#e21e49",
+              "on-secondary-fixed-variant": "#004da8",
+              "inverse-on-surface": "#53536a",
+              "secondary-fixed-dim": "#a9c4ff",
+              "on-primary-container": "#351d00",
+              "on-background": "#e5e3ff",
+              "on-error": "#450900",
+              "outline": "#74738b",
+              "inverse-primary": "#885300",
+              "background": "#0c0c1f",
+              "primary-fixed-dim": "#ee981f",
+              "tertiary-fixed-dim": "#ff7984",
+              "surface-dim": "#0c0c1f",
+              "on-secondary-fixed": "#003271",
+              "on-tertiary-container": "#000000",
+              "error-container": "#b92902",
+              "on-secondary": "#001e4a",
+              "on-tertiary-fixed": "#39000a",
+              "secondary-container": "#005ac2",
+              "outline-variant": "#46465c",
+              "secondary": "#699cff",
+              "on-tertiary": "#49000f",
+              "surface-bright": "#292948",
+              "on-primary-fixed": "#321b00",
+              "tertiary-fixed": "#ff9198",
+              "surface-variant": "#23233f",
+              "tertiary": "#ff6f7d",
+              "primary-fixed": "#fea52e",
+              "primary": "#fea52e",
+              "on-primary": "#512f00",
+              "on-tertiary-fixed-variant": "#78001f",
+              "primary-dim": "#ee981f",
+              "error": "#ff7351",
+              "primary-container": "#e18e10",
+              "surface-tint": "#fea52e",
+              "surface": "#0c0c1f",
+              "inverse-surface": "#fcf8ff",
+              "on-surface-variant": "#aaa8c3",
+              "error-dim": "#d53d18",
+              "surface-container-lowest": "#000000",
+              "on-surface": "#e5e3ff",
+              "on-error-container": "#ffd2c8",
+              "secondary-dim": "#699cff",
+              "tertiary-container": "#fc3559",
+              "surface-container-high": "#1d1d37",
+              "surface-container-low": "#111127",
+              "surface-container": "#17172f",
+              "on-secondary-container": "#f7f7ff",
+              "on-primary-fixed-variant": "#5d3700"
+            },
+            fontFamily: {
+              "headline": ["Lexend"],
+              "body": ["Lexend"],
+              "label": ["Lexend"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tug-rope-texture {
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body min-h-screen overflow-x-hidden selection:bg-primary selection:text-on-primary">
+<!-- Top Navigation (Shell Implementation) -->
+<header class="fixed top-0 left-0 w-full flex justify-between items-center px-6 py-4 bg-[#0c0c1f]/80 backdrop-blur-xl z-50 shadow-[0_4px_20px_rgba(254,165,46,0.15)]">
+<div class="flex items-center gap-4">
+<span class="text-2xl font-black text-[#fea52e] tracking-tighter italic">LOGI-BATTLE</span>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-[#e5e3ff]/60 hover:scale-110 hover:text-[#fea52e] transition-transform">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+</button>
+<button class="text-[#e5e3ff]/60 hover:scale-110 hover:text-[#fea52e] transition-transform">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border-2 border-primary overflow-hidden">
+<img alt="Champion Pilot Avatar" class="w-full h-full object-cover" data-alt="Cyberpunk style pilot avatar portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvPcGhr0pMkDh6nvv3KP-GTkcA01ew3RQhsdZ_pusUa7EPn85y5NDSYfXmvvi0Qeh4a76wxsvc5jzjGGtwvcnMcmlPm2E5afVXotsAksVTSuDpJVuFIII5m7YtVRwF7wp_XNRefn0xO6r7WQUe_4_3a9fNKBXuyikgTWyypq2KmL6kuAQocPil01NbDU41Fzgsz-yWBUnEs_yoHfSW_NSDmEXLhMHijTGotlSsSF7CSYos3sD2QqtVyVIcgkUu9p2uF-KsdL-ZbBv_"/>
+</div>
+</div>
+</header>
+<!-- Main Battlefield Canvas -->
+<main class="pt-24 pb-32 lg:pb-12 px-4 md:px-8 max-w-[1600px] mx-auto min-h-screen flex flex-col gap-8">
+<!-- Team Header & Score Split -->
+<div class="grid grid-cols-2 gap-4 lg:gap-12 relative">
+<!-- Team Alpha (Blue) -->
+<div class="flex items-center gap-4 bg-surface-container-low p-4 rounded-lg -skew-x-6 border-l-4 border-secondary shadow-[0_0_20px_rgba(105,156,255,0.1)]">
+<div class="w-12 h-12 lg:w-16 lg:h-16 rounded-lg bg-secondary/20 flex items-center justify-center border border-secondary/30 skew-x-6">
+<span class="material-symbols-outlined text-secondary text-3xl" data-icon="rocket_launch">rocket_launch</span>
+</div>
+<div class="skew-x-6">
+<p class="text-[10px] font-bold uppercase tracking-widest text-secondary-fixed">Team Alpha</p>
+<h2 class="text-xl lg:text-3xl font-black text-secondary">14,250</h2>
+</div>
+</div>
+<!-- VS Badge -->
+<div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+<div class="bg-background border-2 border-outline-variant w-12 h-12 rounded-full flex items-center justify-center font-black italic text-on-surface-variant shadow-xl">
+                    VS
+                </div>
+</div>
+<!-- Team Beta (Orange) -->
+<div class="flex items-center justify-end gap-4 bg-surface-container-low p-4 rounded-lg skew-x-6 border-r-4 border-primary shadow-[0_0_20px_rgba(254,165,46,0.1)]">
+<div class="text-right -skew-x-6">
+<p class="text-[10px] font-bold uppercase tracking-widest text-primary-fixed">Team Omega</p>
+<h2 class="text-xl lg:text-3xl font-black text-primary">12,800</h2>
+</div>
+<div class="w-12 h-12 lg:w-16 lg:h-16 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 -skew-x-6">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="bolt">bolt</span>
+</div>
+</div>
+</div>
+<!-- Tug-of-War Progress Bar -->
+<div class="relative w-full h-12 lg:h-16 bg-surface-container-lowest rounded-full overflow-hidden shadow-inner border border-outline-variant/10">
+<!-- Dynamic Tension Line -->
+<div class="absolute inset-0 flex">
+<div class="h-full bg-secondary shadow-[inset_-10px_0_20px_rgba(0,0,0,0.3),0_0_30px_rgba(105,156,255,0.4)] tug-rope-texture" style="width: 58%"></div>
+<div class="h-full bg-primary shadow-[inset_10px_0_20px_rgba(0,0,0,0.3),0_0_30px_rgba(254,165,46,0.4)] tug-rope-texture" style="width: 42%"></div>
+</div>
+<!-- Central Tug Indicator -->
+<div class="absolute top-1/2 -translate-y-1/2 bg-white w-2 h-full shadow-[0_0_15px_#fff]" style="left: 58%"></div>
+<!-- Labels -->
+<div class="absolute inset-0 flex justify-between items-center px-8 pointer-events-none">
+<span class="font-black italic text-on-secondary/80 text-sm lg:text-base">DOMINATING</span>
+<span class="font-black italic text-on-primary/80 text-sm lg:text-base">RECOVERING</span>
+</div>
+</div>
+<!-- Gameplay HUD (Bento Style) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
+<!-- Timer & Meta (Left Column) -->
+<div class="lg:col-span-3 flex flex-col gap-8 order-2 lg:order-1">
+<div class="bg-surface-container-high rounded-lg p-8 flex flex-col items-center justify-center relative overflow-hidden group">
+<!-- Background Glow -->
+<div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="relative w-32 h-32 lg:w-40 lg:h-40">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-variant" cx="50%" cy="50%" fill="transparent" r="45%" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary drop-shadow-[0_0_8px_rgba(254,165,46,0.8)]" cx="50%" cy="50%" fill="transparent" r="45%" stroke="currentColor" stroke-dasharray="283" stroke-dashoffset="70" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-4xl lg:text-5xl font-black text-primary">24</span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Seconds</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-high rounded-lg p-6 border-l-4 border-tertiary">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-tertiary" data-icon="warning">warning</span>
+<h3 class="font-bold text-sm tracking-widest uppercase">Critical Event</h3>
+</div>
+<p class="text-sm text-on-surface-variant leading-relaxed">Incoming pallet overflow in Sector 7. Double points for next 3 questions!</p>
+</div>
+</div>
+<!-- Question Card (Center Column) -->
+<div class="lg:col-span-6 order-1 lg:order-2">
+<div class="h-full bg-surface-container-high/60 backdrop-blur-xl rounded-lg p-8 lg:p-12 border border-outline-variant/20 flex flex-col shadow-2xl relative">
+<div class="absolute top-0 right-12 bg-primary px-4 py-1 rounded-b-xl text-on-primary font-bold text-xs tracking-tighter uppercase">
+                        Question 12/20
+                    </div>
+<div class="mb-12">
+<label class="text-secondary font-bold text-xs uppercase tracking-[0.2em] mb-4 block">Cargo Management</label>
+<h1 class="text-2xl lg:text-4xl font-headline font-bold leading-tight">If a 40ft container holds 25 standard pallets, what is the maximum stack height allowed for Grade-A electronics?</h1>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-auto">
+<button class="group relative bg-surface-container-highest p-6 rounded-lg text-left border border-transparent hover:border-primary/50 transition-all hover:translate-y-[-4px] shadow-lg">
+<div class="flex items-center justify-between mb-2">
+<span class="w-8 h-8 rounded-md bg-surface-variant flex items-center justify-center font-bold text-on-surface-variant group-hover:bg-primary group-hover:text-on-primary transition-colors">A</span>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 text-primary" data-icon="check_circle">check_circle</span>
+</div>
+<span class="font-medium text-lg">1.2 Meters</span>
+</button>
+<button class="group relative bg-surface-container-highest p-6 rounded-lg text-left border border-transparent hover:border-primary/50 transition-all hover:translate-y-[-4px] shadow-lg">
+<div class="flex items-center justify-between mb-2">
+<span class="w-8 h-8 rounded-md bg-surface-variant flex items-center justify-center font-bold text-on-surface-variant group-hover:bg-primary group-hover:text-on-primary transition-colors">B</span>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 text-primary" data-icon="check_circle">check_circle</span>
+</div>
+<span class="font-medium text-lg">2.4 Meters</span>
+</button>
+<button class="group relative bg-surface-container-highest p-6 rounded-lg text-left border border-transparent hover:border-primary/50 transition-all hover:translate-y-[-4px] shadow-lg">
+<div class="flex items-center justify-between mb-2">
+<span class="w-8 h-8 rounded-md bg-surface-variant flex items-center justify-center font-bold text-on-surface-variant group-hover:bg-primary group-hover:text-on-primary transition-colors">C</span>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 text-primary" data-icon="check_circle">check_circle</span>
+</div>
+<span class="font-medium text-lg">No Limit</span>
+</button>
+<button class="group relative bg-surface-container-highest p-6 rounded-lg text-left border border-transparent hover:border-primary/50 transition-all hover:translate-y-[-4px] shadow-lg">
+<div class="flex items-center justify-between mb-2">
+<span class="w-8 h-8 rounded-md bg-surface-variant flex items-center justify-center font-bold text-on-surface-variant group-hover:bg-primary group-hover:text-on-primary transition-colors">D</span>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 text-primary" data-icon="check_circle">check_circle</span>
+</div>
+<span class="font-medium text-lg">Weight Limited Only</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Activity Feed (Right Column) -->
+<div class="lg:col-span-3 flex flex-col gap-6 order-3">
+<div class="bg-surface-container-low rounded-lg p-6 h-full flex flex-col">
+<h3 class="font-black text-xs uppercase tracking-widest text-on-surface-variant mb-6 flex items-center gap-2">
+<span class="w-2 h-2 bg-secondary rounded-full animate-pulse"></span>
+                        Live Battlefield Logs
+                    </h3>
+<div class="flex flex-col gap-4 overflow-y-auto max-h-[400px] lg:max-h-none">
+<div class="flex gap-3 items-start animate-fade-in">
+<div class="w-8 h-8 rounded bg-secondary/20 flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="person">person</span>
+</div>
+<div>
+<p class="text-xs"><span class="font-bold text-secondary">User_42</span> answered correctly!</p>
+<p class="text-[10px] text-on-surface-variant">Team Alpha +250</p>
+</div>
+</div>
+<div class="flex gap-3 items-start opacity-70">
+<div class="w-8 h-8 rounded bg-primary/20 flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="person">person</span>
+</div>
+<div>
+<p class="text-xs"><span class="font-bold text-primary">CargoKing</span> missed the timing.</p>
+<p class="text-[10px] text-on-surface-variant">Team Omega -50</p>
+</div>
+</div>
+<div class="flex gap-3 items-start">
+<div class="w-8 h-8 rounded bg-secondary/20 flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="person">person</span>
+</div>
+<div>
+<p class="text-xs"><span class="font-bold text-secondary">LogiMaster</span> is on a 5-streak!</p>
+<p class="text-[10px] text-on-surface-variant">Combo Bonus Active</p>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant/10">
+<div class="flex justify-between text-[10px] font-bold uppercase text-on-surface-variant mb-2">
+<span>Global Morale</span>
+<span>88%</span>
+</div>
+<div class="h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[88%] shadow-[0_0_10px_rgba(105,156,255,0.5)]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Shell (Mobile Optimized) -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#0c0c1f]/90 backdrop-blur-2xl rounded-t-[2rem] shadow-[0_-8px_24px_rgba(0,0,0,0.6)]">
+<div class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-tighter mt-1">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#fea52e] bg-[#fea52e]/10 rounded-2xl p-3 shadow-[0_0_15px_rgba(254,165,46,0.3)]">
+<span class="material-symbols-outlined" data-icon="swords" data-weight="fill" style="font-variation-settings: 'FILL' 1;">swords</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-tighter mt-1">Game</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2">
+<span class="material-symbols-outlined" data-icon="military_tech">military_tech</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-tighter mt-1">Classes</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-tighter mt-1">Groups</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-tighter mt-1">Stats</span>
+</div>
+</nav>
+<!-- Asymmetric Decorative Elements -->
+<div class="fixed top-1/3 -left-20 w-40 h-80 bg-secondary/5 blur-[100px] pointer-events-none -rotate-12"></div>
+<div class="fixed bottom-1/4 -right-20 w-60 h-60 bg-primary/5 blur-[100px] pointer-events-none rotate-45"></div>
+</body></html>

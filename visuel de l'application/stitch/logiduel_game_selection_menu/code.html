@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LogiDuel - Sélection de Jeu</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#f49d25",
+                "background-light": "#f8f7f5",
+                "background-dark": "#221a10",
+              },
+              fontFamily: {
+                "display": ["Lexend"]
+              },
+              borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+            },
+          },
+        }
+      </script>
+<style>
+        .industrial-pattern {
+            background-color: #f8f7f5;
+            background-image: radial-gradient(#f49d25 0.5px, transparent 0.5px), radial-gradient(#f49d25 0.5px, #f8f7f5 0.5px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            opacity: 0.05;
+        }
+        .dark .industrial-pattern {
+            background-color: #221a10;
+            background-image: radial-gradient(#f49d25 0.5px, transparent 0.5px), radial-gradient(#f49d25 0.5px, #221a10 0.5px);
+            opacity: 0.03;
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark min-h-screen relative overflow-x-hidden">
+<!-- Subtle Pattern Layer -->
+<div class="fixed inset-0 industrial-pattern pointer-events-none"></div>
+<!-- Navigation Bar -->
+<nav class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10 px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 bg-primary rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary/20">
+<span class="material-icons text-3xl">local_shipping</span>
+</div>
+<h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Logi<span class="text-primary">Duel</span></h1>
+</div>
+<button class="flex items-center gap-2 bg-white dark:bg-gray-800 border-2 border-primary/20 hover:border-primary px-5 py-2.5 rounded-full transition-all duration-300 shadow-sm hover:shadow-primary/10 group">
+<span class="material-icons text-primary group-hover:rotate-90 transition-transform duration-500">settings</span>
+<span class="font-medium text-gray-700 dark:text-gray-200 uppercase text-sm tracking-wider">Réglages</span>
+</button>
+</nav>
+<!-- Main Content -->
+<main class="relative z-10 container mx-auto px-6 py-12 flex flex-col items-center">
+<!-- Hero Section -->
+<header class="text-center mb-16 max-w-2xl">
+<h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Prêt pour le Duel ?</h2>
+<p class="text-lg text-gray-600 dark:text-gray-400">Choisissez votre module d'entraînement et optimisez vos compétences logistiques en temps réel.</p>
+</header>
+<!-- Game Selection Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full max-w-7xl">
+<!-- Card 1: Trouver un emplacement -->
+<button class="group relative flex flex-col items-center text-center bg-white dark:bg-gray-800 p-8 rounded-xl border-b-4 border-transparent hover:border-primary shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+<div class="mb-6 w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-colors duration-300">
+<span class="material-icons text-5xl text-primary group-hover:text-white transition-colors duration-300">warehouse</span>
+</div>
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Trouver un emplacement</h3>
+<p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6">Optimisez le rangement de vos produits selon les zones de stockage.</p>
+<div class="mt-auto flex items-center gap-2 text-primary font-bold uppercase text-xs tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<span>Jouer</span>
+<span class="material-icons text-sm">arrow_forward</span>
+</div>
+</button>
+<!-- Card 2: Palettisation -->
+<button class="group relative flex flex-col items-center text-center bg-white dark:bg-gray-800 p-8 rounded-xl border-b-4 border-transparent hover:border-primary shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+<div class="mb-6 w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-colors duration-300">
+<span class="material-icons text-5xl text-primary group-hover:text-white transition-colors duration-300">inventory_2</span>
+</div>
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Palettisation</h3>
+<p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6">Assemblez vos palettes efficacement pour garantir la stabilité du fret.</p>
+<div class="mt-auto flex items-center gap-2 text-primary font-bold uppercase text-xs tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<span>Jouer</span>
+<span class="material-icons text-sm">arrow_forward</span>
+</div>
+</button>
+<!-- Card 3: Plan de chargement -->
+<button class="group relative flex flex-col items-center text-center bg-white dark:bg-gray-800 p-8 rounded-xl border-b-4 border-transparent hover:border-primary shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+<div class="mb-6 w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-colors duration-300">
+<span class="material-icons text-5xl text-primary group-hover:text-white transition-colors duration-300">conveyor_belt</span>
+</div>
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Plan de chargement</h3>
+<p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6">Maximisez l'espace de vos véhicules de transport en quelques clics.</p>
+<div class="mt-auto flex items-center gap-2 text-primary font-bold uppercase text-xs tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<span>Jouer</span>
+<span class="material-icons text-sm">arrow_forward</span>
+</div>
+</button>
+<!-- Card 4: Gestion de stock -->
+<button class="group relative flex flex-col items-center text-center bg-white dark:bg-gray-800 p-8 rounded-xl border-b-4 border-transparent hover:border-primary shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+<div class="mb-6 w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-colors duration-300">
+<span class="material-icons text-5xl text-primary group-hover:text-white transition-colors duration-300">fact_check</span>
+</div>
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Gestion de stock</h3>
+<p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6">Maîtrisez vos flux et vos inventaires pour éviter les ruptures.</p>
+<div class="mt-auto flex items-center gap-2 text-primary font-bold uppercase text-xs tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<span>Jouer</span>
+<span class="material-icons text-sm">arrow_forward</span>
+</div>
+</button>
+</div>
+<!-- Visual Decoration / Footer Info -->
+<div class="mt-20 flex flex-wrap justify-center gap-12 grayscale opacity-40">
+<div class="flex items-center gap-2">
+<span class="material-icons">qr_code_2</span>
+<span class="font-medium">Scan &amp; Play</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-icons">groups</span>
+<span class="font-medium">Multi-joueurs</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-icons">analytics</span>
+<span class="font-medium">Suivi de score</span>
+</div>
+</div>
+</main>
+<!-- Background Industrial Graphic -->
+<div class="fixed bottom-0 right-0 p-12 pointer-events-none opacity-10">
+<span class="material-icons text-[200px] text-primary rotate-12">precision_manufacturing</span>
+</div>
+<!-- Stats Bar (Optional Touch UI Element) -->
+<footer class="fixed bottom-0 left-0 right-0 bg-white/50 dark:bg-black/20 backdrop-blur-sm border-t border-primary/10 px-8 py-3 flex items-center justify-between text-xs font-medium text-gray-500 uppercase tracking-widest">
+<div class="flex gap-6">
+<span>Session: LogiExpert-04</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span> Serveur En Ligne</span>
+</div>
+<div class="flex gap-4">
+<span class="material-icons text-sm">help_outline</span>
+<span>Support</span>
+</div>
+</footer>
+</body></html>

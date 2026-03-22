@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LOGI-BATTLE | Arena Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed": "#bfd1ff",
+                        "surface-container-highest": "#23233f",
+                        "tertiary-dim": "#e21e49",
+                        "on-secondary-fixed-variant": "#004da8",
+                        "inverse-on-surface": "#53536a",
+                        "secondary-fixed-dim": "#a9c4ff",
+                        "on-primary-container": "#351d00",
+                        "on-background": "#e5e3ff",
+                        "on-error": "#450900",
+                        "outline": "#74738b",
+                        "inverse-primary": "#885300",
+                        "background": "#0c0c1f",
+                        "primary-fixed-dim": "#ee981f",
+                        "tertiary-fixed-dim": "#ff7984",
+                        "surface-dim": "#0c0c1f",
+                        "on-secondary-fixed": "#003271",
+                        "on-tertiary-container": "#000000",
+                        "error-container": "#b92902",
+                        "on-secondary": "#001e4a",
+                        "on-tertiary-fixed": "#39000a",
+                        "secondary-container": "#005ac2",
+                        "outline-variant": "#46465c",
+                        "secondary": "#699cff",
+                        "on-tertiary": "#49000f",
+                        "surface-bright": "#292948",
+                        "on-primary-fixed": "#321b00",
+                        "tertiary-fixed": "#ff9198",
+                        "surface-variant": "#23233f",
+                        "tertiary": "#ff6f7d",
+                        "primary-fixed": "#fea52e",
+                        "primary": "#fea52e",
+                        "on-primary": "#512f00",
+                        "on-tertiary-fixed-variant": "#78001f",
+                        "primary-dim": "#ee981f",
+                        "error": "#ff7351",
+                        "primary-container": "#e18e10",
+                        "surface-tint": "#fea52e",
+                        "surface": "#0c0c1f",
+                        "inverse-surface": "#fcf8ff",
+                        "on-surface-variant": "#aaa8c3",
+                        "error-dim": "#d53d18",
+                        "surface-container-lowest": "#000000",
+                        "on-surface": "#e5e3ff",
+                        "on-error-container": "#ffd2c8",
+                        "secondary-dim": "#699cff",
+                        "tertiary-container": "#fc3559",
+                        "surface-container-high": "#1d1d37",
+                        "surface-container-low": "#111127",
+                        "surface-container": "#17172f",
+                        "on-secondary-container": "#f7f7ff",
+                        "on-primary-fixed-variant": "#5d3700"
+                    },
+                    fontFamily: {
+                        "headline": ["Lexend"],
+                        "body": ["Lexend"],
+                        "label": ["Lexend"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(35, 35, 63, 0.6);
+            backdrop-filter: blur(16px);
+        }
+        .skew-container {
+            transform: skewX(-8deg);
+        }
+        .skew-content {
+            transform: skewX(8deg);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full flex justify-between items-center px-6 py-4 bg-[#0c0c1f]/80 backdrop-blur-xl z-50 shadow-[0_4px_20px_rgba(254,165,46,0.15)]">
+<div class="text-2xl font-black text-[#fea52e] tracking-tighter italic">LOGI-BATTLE</div>
+<div class="hidden md:flex gap-8 items-center">
+<nav class="flex gap-6 font-['Lexend'] uppercase tracking-[0.05em] font-bold">
+<a class="text-[#fea52e] drop-shadow-[0_0_8px_rgba(254,165,46,0.8)] hover:scale-110 transition-transform" href="#">Arena</a>
+<a class="text-[#e5e3ff]/60 hover:text-[#fea52e] hover:scale-110 transition-transform" href="#">Battalion</a>
+<a class="text-[#e5e3ff]/60 hover:text-[#fea52e] hover:scale-110 transition-transform" href="#">HQ</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#fea52e] cursor-pointer hover:scale-110 transition-transform">leaderboard</span>
+<span class="material-symbols-outlined text-[#e5e3ff]/60 cursor-pointer hover:scale-110 transition-transform">settings</span>
+<div class="w-10 h-10 rounded-full border-2 border-primary overflow-hidden">
+<img alt="Champion Pilot Avatar" class="w-full h-full object-cover" data-alt="Cyberpunk style pilot avatar icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBR3hoyLiOkv0NM328GfzP8cq_D3dDcdIhSsp88DRe4q7n7RnGHtcVroZiB1_s03C6I3Upxrex1Gn3newymkDFfI1iFaD-h9rALegQUS3wtNKrmfujeRLGEogUgyrR6SHAuHuq93XfkV_osV1uto4M8l9SnO-BvqwKfxgX_fbQz9yTV9OODXg7uPvPKRzHGTT5G4L5IPCseOQgSCA8U3cH9Ovr349gnSyDZbdLlbRRA9sqyUcQwx2Q4WfzbhYACbtC_8d3eFIkWHgWI"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar (Desktop Only) -->
+<aside class="hidden lg:flex flex-col fixed left-0 top-0 h-full w-64 z-40 bg-[#0c0c1f] shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
+<div class="pt-24 px-6 mb-12">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-12 h-12 bg-surface-container-highest rounded-lg flex items-center justify-center border border-outline-variant/20">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+</div>
+<div>
+<div class="font-['Lexend'] font-black text-primary text-sm tracking-widest">OPERATOR_01</div>
+<div class="text-[10px] text-secondary font-bold tracking-widest">DIAMOND BOLT</div>
+</div>
+</div>
+</div>
+<nav class="flex-1">
+<a class="bg-[#fea52e]/10 text-[#fea52e] border-r-4 border-[#fea52e] py-4 px-6 flex items-center gap-4 font-['Lexend'] font-medium text-sm tracking-widest uppercase transition-all translate-x-1" href="#">
+<span class="material-symbols-outlined">sports_esports</span>
+<span>Arena</span>
+</a>
+<a class="text-[#e5e3ff]/40 py-4 px-6 flex items-center gap-4 font-['Lexend'] font-medium text-sm tracking-widest uppercase hover:bg-[#699cff]/10 hover:text-[#699cff] transition-colors" href="#">
+<span class="material-symbols-outlined">model_training</span>
+<span>Training</span>
+</a>
+<a class="text-[#e5e3ff]/40 py-4 px-6 flex items-center gap-4 font-['Lexend'] font-medium text-sm tracking-widest uppercase hover:bg-[#699cff]/10 hover:text-[#699cff] transition-colors" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span>Battalion</span>
+</a>
+<a class="text-[#e5e3ff]/40 py-4 px-6 flex items-center gap-4 font-['Lexend'] font-medium text-sm tracking-widest uppercase hover:bg-[#699cff]/10 hover:text-[#699cff] transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>HQ</span>
+</a>
+<a class="text-[#e5e3ff]/40 py-4 px-6 flex items-center gap-4 font-['Lexend'] font-medium text-sm tracking-widest uppercase hover:bg-[#699cff]/10 hover:text-[#699cff] transition-colors" href="#">
+<span class="material-symbols-outlined">history</span>
+<span>Archives</span>
+</a>
+</nav>
+<div class="p-6">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary font-black py-4 rounded-lg shadow-[0_8px_20px_rgba(254,165,46,0.3)] hover:scale-105 active:scale-95 transition-all uppercase tracking-widest italic">
+                START BATTLE
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 pt-24 pb-32 px-4 md:px-8">
+<!-- Large Champion Banner -->
+<section class="relative w-full h-80 rounded-lg overflow-hidden mb-12 shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-outline-variant/10">
+<div class="absolute inset-0 bg-gradient-to-r from-background via-transparent to-transparent z-10"></div>
+<img alt="Championship Arena Background" class="absolute inset-0 w-full h-full object-cover opacity-40" data-alt="High tech industrial cargo port at night with blue neon lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDExttgJIiwfIo1GuKySQgln0OG3ei5OdJ00IkjNW0Aw8PQTU2jp1qP3qF_lHZzOnf0Jcx97GlCl95RtT6Tj5p3sqLqNftXoEM8jkX-TKcML5WAFGcicVJX8ydck2f32BwwsS_M2l80IY1zQofib6ZK-fNPQOUiQmEhZ9SCoR5AhYvf8wRcmcn7fDoKY1ojGU9u4SK3Sq7ydv6pQerMgqbmVhbBGAbb6ORcs1ME5ldJQikRFXHf9bnBFMh1tzkPp_lF1INdGasR7JAC"/>
+<div class="relative z-20 h-full flex flex-col justify-center px-12">
+<div class="inline-block px-4 py-1 bg-tertiary/20 text-tertiary border border-tertiary/40 rounded-full text-xs font-black uppercase tracking-[0.2em] mb-4">Live Tournament</div>
+<h1 class="text-5xl md:text-7xl font-black text-on-surface uppercase tracking-tighter leading-none mb-4 italic">
+                    Logistics <br/><span class="text-primary drop-shadow-[0_0_15px_rgba(254,165,46,0.6)]">Championship</span>
+</h1>
+<p class="text-on-surface-variant max-w-lg font-medium">Defend your title in the Industrial Arena. Current Global Rank: #04. Next qualifying match in 04:22:10.</p>
+<div class="flex gap-6 mt-8">
+<div class="flex flex-col">
+<span class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Total Wins</span>
+<span class="text-2xl font-black text-secondary">482</span>
+</div>
+<div class="w-[2px] bg-outline-variant/30 h-10 self-center"></div>
+<div class="flex flex-col">
+<span class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Win Rate</span>
+<span class="text-2xl font-black text-primary">78.4%</span>
+</div>
+</div>
+</div>
+<!-- Kinetic Effect Elements -->
+<div class="absolute right-10 bottom-0 top-0 w-1/3 flex items-end justify-center pointer-events-none">
+<div class="w-full h-full bg-gradient-to-t from-primary/20 to-transparent blur-3xl opacity-30"></div>
+<span class="material-symbols-outlined text-[15rem] text-primary/10 absolute -bottom-10 right-0" style="font-variation-settings: 'wght' 700;">trophy</span>
+</div>
+</section>
+<!-- Tabs Navigation -->
+<nav class="flex gap-4 mb-10 border-b border-outline-variant/20 pb-4">
+<button class="px-6 py-2 rounded-full bg-surface-container-highest text-primary font-black uppercase text-sm tracking-widest border border-primary/30 shadow-[0_0_15px_rgba(254,165,46,0.2)]">Ranking</button>
+<button class="px-6 py-2 rounded-full text-on-surface-variant hover:text-on-surface font-bold uppercase text-sm tracking-widest transition-colors">Challenge</button>
+<button class="px-6 py-2 rounded-full text-on-surface-variant hover:text-on-surface font-bold uppercase text-sm tracking-widest transition-colors">History</button>
+</nav>
+<!-- Bento Grid Arena Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Challenger List (Industrial vs Fight Style) -->
+<div class="lg:col-span-2 space-y-6">
+<div class="flex items-center justify-between mb-2">
+<h2 class="text-xl font-black uppercase tracking-widest flex items-center gap-2">
+<span class="w-2 h-6 bg-primary rounded-full"></span>
+                        Active Challengers
+                    </h2>
+<span class="text-xs text-secondary font-bold uppercase tracking-widest">3 New Threats Detected</span>
+</div>
+<!-- Match Card 1 -->
+<div class="glass-panel rounded-lg p-6 flex flex-col md:flex-row items-center gap-6 border border-outline-variant/10 hover:border-primary/30 transition-all group">
+<div class="flex-shrink-0 relative">
+<div class="w-20 h-20 rounded-lg overflow-hidden border-2 border-secondary/50 p-1">
+<img alt="Rival Pilot 1" class="w-full h-full object-cover rounded-md grayscale group-hover:grayscale-0 transition-all" data-alt="Mechanical engineer avatar with goggles" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeuvs1fSpKvTzZDpYedc3bQz3icRwWCfk6jZwYgsSqMhvgqiEmfXuYhrNDgCkVLuxX0fGQIuC9h9ATl-GwPIzK8ko0UuGtY-A8tuAZH0YJ_RuUa5Yx7eL6xOSY-F4X8sXmRyDE_Woqhr_2K7NLeLVa75snOwBLIdrF8h91yD0JSrTAy1zLUn5UjNIZXpemcdAM2nSevpKrcTkmtKS39iyNcgCxwU7YaNlPTIwp00AuBBO8sbgB4bTQG6hXO_PMGeZxhf0Xth1towxf"/>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-secondary text-on-secondary px-2 py-0.5 rounded text-[10px] font-black italic">LVL 42</div>
+</div>
+<div class="flex-1 text-center md:text-left">
+<h3 class="text-lg font-black uppercase tracking-tight text-on-surface mb-1">UNIT_XERO_ALPHA</h3>
+<p class="text-xs text-on-surface-variant uppercase font-bold tracking-widest">Team Logistics Strike | European Sector</p>
+<div class="flex gap-4 mt-3 justify-center md:justify-start">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">local_shipping</span>
+<span class="text-[10px] font-bold">98% OPTIMIZATION</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-secondary">bolt</span>
+<span class="text-[10px] font-bold">22ms RESPONSE</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:block text-right">
+<div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-1">Wager</div>
+<div class="text-primary font-black">2,500 XP</div>
+</div>
+<button class="skew-container bg-primary text-on-primary px-8 py-3 rounded-md font-black italic uppercase tracking-tighter shadow-[0_4px_15px_rgba(254,165,46,0.3)] hover:scale-105 active:scale-95 transition-all">
+<span class="skew-content block">Start Match</span>
+</button>
+</div>
+</div>
+<!-- Match Card 2 -->
+<div class="glass-panel rounded-lg p-6 flex flex-col md:flex-row items-center gap-6 border border-outline-variant/10 hover:border-tertiary/30 transition-all group">
+<div class="flex-shrink-0 relative">
+<div class="w-20 h-20 rounded-lg overflow-hidden border-2 border-tertiary/50 p-1">
+<img alt="Rival Pilot 2" class="w-full h-full object-cover rounded-md grayscale group-hover:grayscale-0 transition-all" data-alt="Tech operator avatar with headset" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCe6F41fHwVP65kgBDWtsvCp9DbqD5dmLiHpMp9S9WwhkrMdYHFj53C4JHCZCo_sU022CNGUuBDEA_bX8h6nwmn9LPLww3TpxuFJdUZ5ZY4DSlxKEtUgIun72kvrgxGB2euXcesPxSK2gPECZRRNlII7OouVWdpK4Lz8rSlhCvOrTfZGJSsf86ChS6Yur89FGa42C0BWaunx75Ij3q7mPDIwZtsG27SyZlw62TIKWnqFb0FckYQA0OMXg64m-dDKiUQzKq9jOucDOIM"/>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-tertiary text-on-tertiary px-2 py-0.5 rounded text-[10px] font-black italic">LVL 38</div>
+</div>
+<div class="flex-1 text-center md:text-left">
+<h3 class="text-lg font-black uppercase tracking-tight text-on-surface mb-1">PROTOCOL_VALKYRIE</h3>
+<p class="text-xs text-on-surface-variant uppercase font-bold tracking-widest">Void Freight Systems | Asian Hub</p>
+<div class="flex gap-4 mt-3 justify-center md:justify-start">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">local_shipping</span>
+<span class="text-[10px] font-bold">94% OPTIMIZATION</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-secondary">bolt</span>
+<span class="text-[10px] font-bold">34ms RESPONSE</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:block text-right">
+<div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-1">Wager</div>
+<div class="text-primary font-black">1,800 XP</div>
+</div>
+<button class="skew-container bg-surface-container-highest text-on-surface px-8 py-3 rounded-md font-black italic uppercase tracking-tighter border border-outline-variant hover:bg-tertiary hover:text-on-tertiary hover:border-transparent active:scale-95 transition-all">
+<span class="skew-content block">Start Match</span>
+</button>
+</div>
+</div>
+</div>
+<!-- History Timeline Visualization -->
+<div class="space-y-6">
+<h2 class="text-xl font-black uppercase tracking-widest flex items-center gap-2">
+<span class="w-2 h-6 bg-secondary rounded-full"></span>
+                    Battle History
+                </h2>
+<div class="glass-panel rounded-lg p-6 border border-outline-variant/10 relative">
+<div class="absolute left-10 top-20 bottom-10 w-1 bg-gradient-to-b from-secondary via-primary to-transparent opacity-20"></div>
+<div class="space-y-10 relative">
+<!-- Timeline Item 1 -->
+<div class="flex gap-6 items-start">
+<div class="z-10 w-8 h-8 rounded-full bg-secondary flex items-center justify-center ring-4 ring-background shadow-[0_0_15px_rgba(105,156,255,0.4)]">
+<span class="material-symbols-outlined text-on-secondary text-sm" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<div>
+<div class="text-[10px] text-on-surface-variant font-black uppercase tracking-widest mb-1">Today 14:30</div>
+<div class="text-sm font-black text-on-surface uppercase mb-1">VICTORY: UNIT_BETA_9</div>
+<div class="text-xs text-secondary font-bold">+450 XP | +12 Rank Pts</div>
+</div>
+</div>
+<!-- Timeline Item 2 -->
+<div class="flex gap-6 items-start">
+<div class="z-10 w-8 h-8 rounded-full bg-tertiary flex items-center justify-center ring-4 ring-background shadow-[0_0_15px_rgba(255,111,125,0.4)]">
+<span class="material-symbols-outlined text-on-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">close</span>
+</div>
+<div>
+<div class="text-[10px] text-on-surface-variant font-black uppercase tracking-widest mb-1">Yesterday 21:15</div>
+<div class="text-sm font-black text-on-surface uppercase mb-1">DEFEAT: MASTER_LOGI</div>
+<div class="text-xs text-tertiary font-bold">-120 XP | -4 Rank Pts</div>
+</div>
+</div>
+<!-- Timeline Item 3 -->
+<div class="flex gap-6 items-start">
+<div class="z-10 w-8 h-8 rounded-full bg-primary flex items-center justify-center ring-4 ring-background shadow-[0_0_15px_rgba(254,165,46,0.4)]">
+<span class="material-symbols-outlined text-on-primary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<div>
+<div class="text-[10px] text-on-surface-variant font-black uppercase tracking-widest mb-1">02 Oct 10:45</div>
+<div class="text-sm font-black text-on-surface uppercase mb-1">NEW RANK: DIAMOND BOLT</div>
+<div class="text-xs text-primary font-bold">UNLOCKED: ARENA_PREMIUM</div>
+</div>
+</div>
+<!-- Timeline Item 4 -->
+<div class="flex gap-6 items-start opacity-50">
+<div class="z-10 w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center ring-4 ring-background border border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">history</span>
+</div>
+<div>
+<div class="text-[10px] text-on-surface-variant font-black uppercase tracking-widest mb-1">30 Sep 18:20</div>
+<div class="text-sm font-black text-on-surface uppercase mb-1">VICTORY: LOGI_BOT_77</div>
+<div class="text-xs text-on-surface-variant font-bold">+200 XP</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 py-3 text-xs font-black uppercase tracking-[0.2em] text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center gap-2">
+                        View Full Archives
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#0c0c1f]/90 backdrop-blur-2xl rounded-t-[2rem] shadow-[0_-8px_24px_rgba(0,0,0,0.6)]">
+<a class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2 hover:text-[#699cff] transition-colors active:scale-90" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-tighter">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#fea52e] bg-[#fea52e]/10 rounded-2xl p-2 shadow-[0_0_15px_rgba(254,165,46,0.3)] active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">swords</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-tighter">Game</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2 hover:text-[#699cff] transition-colors active:scale-90" href="#">
+<span class="material-symbols-outlined">military_tech</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-tighter">Classes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2 hover:text-[#699cff] transition-colors active:scale-90" href="#">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-tighter">Groups</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#e5e3ff]/30 p-2 hover:text-[#699cff] transition-colors active:scale-90" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-tighter">Stats</span>
+</a>
+</nav>
+<!-- Background Decoration -->
+<div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+<div class="absolute top-1/4 -right-20 w-96 h-96 bg-primary/5 blur-[120px] rounded-full"></div>
+<div class="absolute bottom-1/4 -left-20 w-96 h-96 bg-secondary/5 blur-[120px] rounded-full"></div>
+<div class="absolute inset-0 opacity-[0.03]" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD1iDQXp8BQod9nUri2TIeIkhHyb2w44hYtOQtXDYGawuU-h-SKtrSbB2jEfxUuld9sQ9SjzKZkqEJfRWGCr_Y-NuPEUXZNu1e59jtdkXb7XUtpSLA3d98_yjQ5fYnQM199Q1abApDua6q2aiQJyqtJ_W55NUFUX9uXBlHHcRmbhColPCMU3gdrIU8h1UfRWBTQGjD56QlXSp4zBBakwTlK6gdl3uMqFKs7LeW-KQ89gKj2ffGFSvS2nya4PQbDMFEHX0tblCS9Ee3L');"></div>
+</div>
+</body></html>
