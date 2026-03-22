@@ -177,6 +177,7 @@ const sidebarItems = [
 export const GameSelection = ({ onGameSelect, onHostMode, onChampionshipMode, onTrainingMode, onBattalionMode, onHQMode, onArchivesMode }) => {
   const [activeModule, setActiveModule] = useState(null)
   const [activeNav, setActiveNav] = useState('arena')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const gameStore = useGameStore()
 
   const handleSelectModule = (module) => {
@@ -209,8 +210,29 @@ export const GameSelection = ({ onGameSelect, onHostMode, onChampionshipMode, on
 
   return (
     <div className="min-h-screen bg-[#0c0c1f] flex">
+      {/* Mobile Sidebar Overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-[#121225] border-r border-white/5 flex flex-col">
+      <aside className={`
+        fixed inset-y-0 left-0 z-[60] w-64 bg-[#121225] border-r border-white/5 flex flex-col transform transition-transform duration-300 ease-in-out
+        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+        md:relative md:translate-x-0
+      `}>
+        {/* En-tête Sidebar Mobile (fermer) */}
+        <div className="md:hidden flex justify-end p-4 border-b border-white/5">
+          <button 
+            onClick={() => setMobileMenuOpen(false)}
+            className="text-gray-400 hover:text-white"
+          >
+            <span className="material-icons">close</span>
+          </button>
+        </div>
         {/* User Profile */}
         <div className="p-6 border-b border-white/5">
           <div className="flex items-center gap-3 mb-4">
@@ -266,14 +288,22 @@ export const GameSelection = ({ onGameSelect, onHostMode, onChampionshipMode, on
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto w-full">
         {/* Header */}
-        <header className="sticky top-0 z-50 bg-[#0c0c1f]/80 backdrop-blur-xl border-b border-white/5 px-8 py-4">
+        <header className="sticky top-0 z-40 bg-[#0c0c1f]/80 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-black text-[#fea52e]">LOGI-BATTLE</span>
+            <div className="flex items-center gap-3">
+              <button 
+                className="md:hidden text-[#fea52e] hover:text-white transition-colors"
+                onClick={() => setMobileMenuOpen(true)}
+              >
+                <span className="material-icons">menu</span>
+              </button>
+              <span className="text-xl md:text-2xl font-black text-[#fea52e]">LOGI-BATTLE</span>
             </div>
-            <nav className="flex items-center gap-8">
+            
+            {/* Navigation top (Desktop uniquement) */}
+            <nav className="hidden lg:flex items-center gap-8">
               <button 
                 onClick={() => handleNavClick('arena')}
                 className={`text-sm font-bold tracking-wider transition-colors ${activeNav === 'arena' ? 'text-[#fea52e]' : 'text-gray-500 hover:text-gray-300'}`}
@@ -293,33 +323,34 @@ export const GameSelection = ({ onGameSelect, onHostMode, onChampionshipMode, on
                 BATAILLON
               </button>
             </nav>
-            <div className="flex items-center gap-4">
+
+            <div className="flex items-center gap-2 md:gap-4">
               <button 
                 onClick={() => handleNavClick('hq')}
                 title="Tableau de bord (QG)"
-                className="w-10 h-10 rounded-xl bg-[#1a1a2e] flex items-center justify-center text-gray-400 hover:text-[#fea52e] hover:bg-[#fea52e]/10 transition-colors"
+                className="hidden sm:flex w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[#1a1a2e] items-center justify-center text-gray-400 hover:text-[#fea52e] hover:bg-[#fea52e]/10 transition-colors"
               >
-                <span className="material-icons">bar_chart</span>
+                <span className="material-icons text-sm md:text-base">bar_chart</span>
               </button>
               <button 
                 onClick={() => alert("⚙️ Modale de Paramètres (En construction)")}
                 title="Paramètres"
-                className="w-10 h-10 rounded-xl bg-[#1a1a2e] flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[#1a1a2e] flex items-center justify-center text-gray-400 hover:text-white transition-colors"
               >
-                <span className="material-icons">settings</span>
+                <span className="material-icons text-sm md:text-base">settings</span>
               </button>
               <button 
                 onClick={() => alert("👤 Profil Élève : DIAMOND BOLT")}
                 title="Profil Opérateur"
-                className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 flex items-center justify-center transition-colors shadow-lg shadow-green-500/20"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 flex items-center justify-center transition-colors shadow-lg shadow-green-500/20"
               >
-                <span className="material-icons text-white">person</span>
+                <span className="material-icons text-white text-sm md:text-base">person</span>
               </button>
             </div>
           </div>
         </header>
 
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           {/* Mode Selection Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             {/* Champion Mode */}
