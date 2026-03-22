@@ -10,10 +10,16 @@ import TrainingMode from './components/TrainingMode'
 import BattalionManager from './components/BattalionManager'
 import HQDashboard from './components/HQDashboard'
 import Archives from './components/Archives'
+import Login from './components/Login'
 import { useChampionshipStore } from './hooks/useChampionshipStore'
 import './styles/index.css'
 
 function App() {
+  const [userProfile, setUserProfile] = useState(() => {
+    const saved = localStorage.getItem('user_profile')
+    return saved ? JSON.parse(saved) : null
+  })
+  
   const [currentPath, setCurrentPath] = useState(window.location.pathname)
   const [gameMode, setGameMode] = useState(null)
   const [showTeamSetup, setShowTeamSetup] = useState(false)
@@ -41,11 +47,21 @@ function App() {
     return () => window.removeEventListener('popstate', handleLocationChange)
   }, [])
 
+  // Écran de connexion prioritaire
+  if (!userProfile) {
+    return <Login onLogin={setUserProfile} />
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('user_profile')
+    setUserProfile(null)
+  }
+
   // Route: /join - Page pour les joueurs qui scannent le QR
   if (currentPath === '/join' || window.location.search.includes('game=')) {
     return (
       <div className="dark">
-        <PlayerJoin />
+        <PlayerJoin userProfile={userProfile} />
       </div>
     )
   }
@@ -243,6 +259,7 @@ function App() {
   return (
     <div className="dark">
       <GameSelection 
+        userProfile={userProfile}
         onGameSelect={handleGameSelect}
         onHostMode={handleHostMode}
         onChampionshipMode={handleChampionshipMode}
@@ -250,6 +267,7 @@ function App() {
         onBattalionMode={handleBattalionMode}
         onHQMode={handleHQMode}
         onArchivesMode={handleArchivesMode}
+        onLogout={handleLogout}
       />
     </div>
   )

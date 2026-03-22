@@ -174,7 +174,7 @@ const sidebarItems = [
   { id: 'archives', label: 'ARCHIVES', icon: 'history' },
 ]
 
-export const GameSelection = ({ onGameSelect, onHostMode, onChampionshipMode, onTrainingMode, onBattalionMode, onHQMode, onArchivesMode }) => {
+export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampionshipMode, onTrainingMode, onBattalionMode, onHQMode, onArchivesMode, onLogout }) => {
   const [activeModule, setActiveModule] = useState(null)
   const [activeNav, setActiveNav] = useState('arena')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -240,8 +240,8 @@ export const GameSelection = ({ onGameSelect, onHostMode, onChampionshipMode, on
               <span className="material-icons text-white">person</span>
             </div>
             <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wider">OPÉRATEUR_01</p>
-              <p className="text-xs text-[#fea52e] font-bold">DIAMOND BOLT</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wider">{userProfile?.class || 'OPÉRATEUR'}</p>
+              <p className="text-xs text-[#fea52e] font-bold">{userProfile?.name?.toUpperCase() || 'DIAMOND BOLT'}</p>
             </div>
           </div>
         </div>
@@ -280,7 +280,10 @@ export const GameSelection = ({ onGameSelect, onHostMode, onChampionshipMode, on
             <span className="material-icons text-sm">help_outline</span>
             SUPPORT
           </button>
-          <button className="flex items-center gap-2 text-gray-600 text-xs hover:text-gray-400 transition-colors mt-2">
+          <button 
+            onClick={onLogout}
+            className="flex items-center gap-2 text-gray-600 text-xs hover:text-gray-400 transition-colors mt-2"
+          >
             <span className="material-icons text-sm">logout</span>
             DÉCONNEXION
           </button>
@@ -340,7 +343,7 @@ export const GameSelection = ({ onGameSelect, onHostMode, onChampionshipMode, on
                 <span className="material-icons text-sm md:text-base">settings</span>
               </button>
               <button 
-                onClick={() => alert("👤 Profil Élève : DIAMOND BOLT")}
+                onClick={() => alert(`👤 Profil Élève : ${userProfile?.name || 'Inconnu'} - Classe: ${userProfile?.class || ''}`)}
                 title="Profil Opérateur"
                 className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 flex items-center justify-center transition-colors shadow-lg shadow-green-500/20"
               >

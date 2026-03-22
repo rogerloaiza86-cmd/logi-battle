@@ -4,7 +4,7 @@ import PlayerGame from './PlayerGame'
 
 import { gamesService } from '../services/database'
 
-export const PlayerJoin = () => {
+export const PlayerJoin = ({ userProfile }) => {
   // Parser les paramètres URL manuellement
   const getGameIdFromUrl = () => {
     const params = new URLSearchParams(window.location.search)
@@ -14,7 +14,7 @@ export const PlayerJoin = () => {
   const [gameIdFromUrl, setGameIdFromUrl] = useState(getGameIdFromUrl())
   const [step, setStep] = useState(gameIdFromUrl ? 2 : 1)
   const [gameId, setGameId] = useState(gameIdFromUrl || '')
-  const [playerName, setPlayerName] = useState('')
+  const [playerName, setPlayerName] = useState(userProfile?.name || '')
   const [team, setTeam] = useState(null)
   const [joined, setJoined] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
