@@ -11,6 +11,7 @@ import BattalionManager from './components/BattalionManager'
 import HQDashboard from './components/HQDashboard'
 import Archives from './components/Archives'
 import Login from './components/Login'
+import ModuleBuilder from './components/ModuleBuilder'
 import { useChampionshipStore } from './hooks/useChampionshipStore'
 import './styles/index.css'
 
@@ -34,6 +35,8 @@ function App() {
   const [isBattalionMode, setIsBattalionMode] = useState(false)
   const [isHQMode, setIsHQMode] = useState(false)
   const [isArchivesMode, setIsArchivesMode] = useState(false)
+  const [isModuleBuilderMode, setIsModuleBuilderMode] = useState(false)
+  const [editingModule, setEditingModule] = useState(null)
   
   const { recordMatch } = useChampionshipStore()
 
@@ -189,6 +192,8 @@ function App() {
     setIsBattalionMode(false)
     setIsHQMode(false)
     setIsArchivesMode(false)
+    setIsModuleBuilderMode(false)
+    setEditingModule(null)
   }
 
   // Mode Entraînement
@@ -223,6 +228,19 @@ function App() {
     return (
       <div className="dark">
         <Archives onBack={resetAllModes} />
+      </div>
+    )
+  }
+
+  // Mode Création de Module (professeur)
+  if (isModuleBuilderMode) {
+    return (
+      <div className="dark">
+        <ModuleBuilder
+          onBack={resetAllModes}
+          userProfile={userProfile}
+          editModule={editingModule}
+        />
       </div>
     )
   }
@@ -267,6 +285,8 @@ function App() {
         onBattalionMode={handleBattalionMode}
         onHQMode={handleHQMode}
         onArchivesMode={handleArchivesMode}
+        onModuleBuilderMode={() => { resetAllModes(); setIsModuleBuilderMode(true) }}
+        onEditModule={(mod) => { resetAllModes(); setEditingModule(mod); setIsModuleBuilderMode(true) }}
         onLogout={handleLogout}
       />
     </div>

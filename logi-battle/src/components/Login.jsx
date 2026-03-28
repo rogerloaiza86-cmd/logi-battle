@@ -4,11 +4,12 @@ import { motion } from 'framer-motion'
 export const Login = ({ onLogin }) => {
   const [name, setName] = useState('')
   const [className, setClassName] = useState('')
+  const [role, setRole] = useState('student')
 
   const handleSubmit = (e) => {
     e.preventDefault()
     if (name.trim() && className.trim()) {
-      const profile = { name: name.trim(), class: className.trim().toUpperCase() }
+      const profile = { name: name.trim(), class: className.trim().toUpperCase(), role }
       localStorage.setItem('user_profile', JSON.stringify(profile))
       onLogin(profile)
     }
@@ -60,6 +61,38 @@ export const Login = ({ onLogin }) => {
                 placeholder="Ex: TLOG, BTS..."
                 required
               />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-400 tracking-widest mb-2 uppercase">
+                Rôle
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRole('student')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${
+                    role === 'student'
+                      ? 'bg-[#fea52e] text-[#0c0c1f]'
+                      : 'bg-[#1a1a2e] border border-white/10 text-gray-400 hover:text-white'
+                  }`}
+                >
+                  <span className="material-icons text-base">school</span>
+                  Élève
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole('teacher')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${
+                    role === 'teacher'
+                      ? 'bg-[#fea52e] text-[#0c0c1f]'
+                      : 'bg-[#1a1a2e] border border-white/10 text-gray-400 hover:text-white'
+                  }`}
+                >
+                  <span className="material-icons text-base">person_4</span>
+                  Professeur
+                </button>
+              </div>
             </div>
 
             <button
