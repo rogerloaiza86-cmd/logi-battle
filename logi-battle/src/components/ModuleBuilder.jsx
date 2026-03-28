@@ -488,6 +488,7 @@ export const ModuleBuilder = ({ onBack, userProfile, editModule }) => {
   const [step, setStep] = useState(1)
   const [isSaving, setIsSaving] = useState(false)
   const [savedSuccess, setSavedSuccess] = useState(false)
+  const [saveError, setSaveError] = useState(null)
 
   const [moduleInfo, setModuleInfo] = useState({
     title: editModule?.title || '',
@@ -541,6 +542,7 @@ export const ModuleBuilder = ({ onBack, userProfile, editModule }) => {
 
   const handleSave = async () => {
     setIsSaving(true)
+    setSaveError(null)
     try {
       const module = {
         id: editModule?.id,
@@ -564,8 +566,9 @@ export const ModuleBuilder = ({ onBack, userProfile, editModule }) => {
       saveModule(module)
       setSavedSuccess(true)
       setTimeout(() => onBack(), 1500)
-    } catch {
-      // handle error silently
+    } catch (err) {
+      console.error('[ModuleBuilder] Failed to save module:', err)
+      setSaveError('Erreur lors de la sauvegarde. Veuillez réessayer.')
     } finally {
       setIsSaving(false)
     }
@@ -698,6 +701,12 @@ export const ModuleBuilder = ({ onBack, userProfile, editModule }) => {
           </AnimatePresence>
 
           {/* Navigation */}
+          {saveError && (
+            <div className="mt-4 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-2">
+              <span className="material-icons text-red-400 text-sm">error</span>
+              <p className="text-red-400 text-sm">{saveError}</p>
+            </div>
+          )}
           <div className="flex justify-between mt-6">
             <button
               onClick={() => step > 1 ? setStep(step - 1) : onBack()}

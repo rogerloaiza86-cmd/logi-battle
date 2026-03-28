@@ -74,7 +74,8 @@ const parseAIResponse = (data, format) => {
       difficulty: q.difficulty || 1,
       aiGenerated: true,
     }))
-  } catch {
+  } catch (err) {
+    console.error('[aiService] Failed to parse AI response:', err)
     return []
   }
 }

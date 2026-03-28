@@ -14,8 +14,8 @@ const loadFromStorage = () => {
 const saveToStorage = (modules) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(modules))
-  } catch {
-    // ignore storage errors
+  } catch (err) {
+    console.error('[useModuleStore] Failed to persist modules to localStorage:', err)
   }
 }
 
