@@ -191,12 +191,6 @@ export const gamesService = {
       return () => {}
     }
 
-    if (!USE_FIREBASE) {
-      // Pas de vraie souscription en mode local par défaut
-      // On retourne une "dummy" unsubscribe function
-      return () => {}
-    }
-
     // TODO: Implémenter Firestore onSnapshot si on repasse à Firebase un jour
     return () => {}
   },
