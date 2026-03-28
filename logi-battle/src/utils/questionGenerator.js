@@ -19,6 +19,7 @@ import { getJitQuestion } from './jitQuestions'
 import { getRouteOptimizerQuestion } from './routeOptimizerQuestions'
 import { getLegalQuestion } from './legalQuestions'
 import { getMathQuestion } from './mathQuestions'
+import { useModuleStore } from '../hooks/useModuleStore'
 
 // ===== PALETTISATION =====
 /**
@@ -638,6 +639,11 @@ export const getRandomQuestionType = (includeCulture = true, includeVocabulary =
 }
 
 export const generateNextQuestion = (gameMode = 'all') => {
+  // Custom module question
+  if (gameMode && gameMode.startsWith('mod_')) {
+    return generateCustomModuleQuestion(gameMode)
+  }
+
   let type
   
   if (gameMode === 'culture') {
@@ -676,4 +682,25 @@ export const generateNextQuestion = (gameMode = 'all') => {
   const skipDifficultyTypes = ['vocabulaire', 'supply_chain', 'reception', 'stock', 'safety', 'traceability', 'green', 'team_leader', 'jit', 'route', 'legal', 'math']
   const difficulty = skipDifficultyTypes.includes(type) ? null : getRandomDifficulty()
   return generateRandomQuestion(type, difficulty)
+}
+
+// ===== CUSTOM MODULE QUESTION GENERATOR =====
+const generateCustomModuleQuestion = (moduleId) => {
+  const store = useModuleStore.getState()
+  const module = store.customModules.find((m) => m.id === moduleId)
+  if (!module || !module.questions || !module.questions.length) {
+    return generateRandomQuestion('culture', 1)
+  }
+
+  const q = module.questions[Math.floor(Math.random() * module.questions.length)]
+
+  return {
+    type: q.type === 'qcm' ? 'culture' : q.type,
+    title: module.title,
+    description: q.description,
+    data: q.data || {},
+    correctAnswer: q.data?.correctOption ?? q.data?.correctAnswer ?? 0,
+    difficulty: q.difficulty || 1,
+    isCustom: true,
+  }
 }

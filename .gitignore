@@ -1,0 +1,12 @@
+# Environment variables — NEVER commit real .env files
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Logs
+*.log

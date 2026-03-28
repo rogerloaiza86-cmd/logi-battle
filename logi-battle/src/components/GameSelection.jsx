@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useGameStore } from '../hooks/useGameStore'
+import { useModuleStore } from '../hooks/useModuleStore'
 
 const modules = [
   {
@@ -174,11 +175,21 @@ const sidebarItems = [
   { id: 'archives', label: 'ARCHIVES', icon: 'history' },
 ]
 
-export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampionshipMode, onTrainingMode, onBattalionMode, onHQMode, onArchivesMode, onLogout }) => {
+export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampionshipMode, onTrainingMode, onBattalionMode, onHQMode, onArchivesMode, onModuleBuilderMode, onEditModule, onLogout }) => {
   const [activeModule, setActiveModule] = useState(null)
   const [activeNav, setActiveNav] = useState('arena')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const gameStore = useGameStore()
+  const { customModules, loadModules } = useModuleStore()
+  const isTeacher = userProfile?.role === 'teacher'
+
+  useEffect(() => {
+    loadModules()
+  }, [loadModules])
+
+  const visibleCustomModules = customModules.filter(
+    (m) => m.isPublished || m.createdBy?.name === userProfile?.name
+  )
 
   const handleSelectModule = (module) => {
     setActiveModule(module.id)
@@ -272,6 +283,15 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
           >
             COMMENCER LE COMBAT
           </button>
+          {isTeacher && (
+            <button
+              onClick={onModuleBuilderMode}
+              className="w-full mt-2 py-3 bg-[#1a1a2e] border border-[#fea52e]/30 rounded-xl text-[#fea52e] font-bold text-xs tracking-wider hover:bg-[#fea52e]/10 transition-all flex items-center justify-center gap-2"
+            >
+              <span className="material-icons text-sm">add_circle</span>
+              CRÉER UN MODULE
+            </button>
+          )}
         </div>
 
         {/* Footer */}
@@ -471,7 +491,97 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
                 <div className="absolute inset-0 rounded-3xl bg-gradient-to-t from-[#fea52e]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
               </motion.button>
             ))}
+
+            {/* Create module card (teacher only) */}
+            {isTeacher && (
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: modules.length * 0.05 }}
+                onClick={onModuleBuilderMode}
+                className="relative rounded-3xl p-5 text-left border-2 border-dashed border-[#fea52e]/30 bg-[#fea52e]/5 hover:bg-[#fea52e]/10 hover:border-[#fea52e]/50 transition-all duration-300 group flex flex-col items-center justify-center min-h-[180px]"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-[#fea52e]/20 flex items-center justify-center mb-3">
+                  <span className="material-icons text-2xl text-[#fea52e]">add</span>
+                </div>
+                <p className="text-[#fea52e] font-bold text-sm tracking-wider">CRÉER UN MODULE</p>
+                <p className="text-gray-500 text-xs mt-1 text-center">Ajoutez vos propres questions et modules personnalisés</p>
+              </motion.button>
+            )}
           </div>
+
+          {/* Custom Modules Section */}
+          {visibleCustomModules.length > 0 && (
+            <div className="mt-12">
+              <div className="mb-6">
+                <p className="text-[#699cff] text-xs font-bold tracking-[0.2em] mb-1">MODULES PERSONNALISÉS</p>
+                <h2 className="text-3xl font-black text-white italic">MES MODULES</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {visibleCustomModules.map((module, index) => {
+                  const isOwner = module.createdBy?.name === userProfile?.name
+                  const colorMap = {
+                    orange: { bg: 'bg-[#fea52e]/20', text: 'text-[#fea52e]', bar: 'bg-[#fea52e]' },
+                    blue: { bg: 'bg-[#699cff]/20', text: 'text-[#699cff]', bar: 'bg-[#699cff]' },
+                    red: { bg: 'bg-red-500/20', text: 'text-red-400', bar: 'bg-red-400' },
+                    green: { bg: 'bg-green-500/20', text: 'text-green-400', bar: 'bg-green-400' },
+                  }
+                  const cs = colorMap[module.color] || colorMap.orange
+
+                  return (
+                    <motion.div
+                      key={module.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="relative rounded-3xl p-5 bg-[#1a1a2e] border border-white/5 hover:border-white/10 hover:bg-[#252538] transition-all duration-300 group"
+                    >
+                      {/* Custom badge */}
+                      <div className="absolute top-3 right-3 flex gap-1">
+                        {!module.isPublished && (
+                          <span className="px-2 py-0.5 bg-gray-500/20 text-gray-400 text-[10px] font-bold rounded">
+                            BROUILLON
+                          </span>
+                        )}
+                        <span className="px-2 py-0.5 bg-[#699cff]/20 text-[#699cff] text-[10px] font-bold rounded">
+                          CUSTOM
+                        </span>
+                        {isOwner && isTeacher && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onEditModule?.(module) }}
+                            className="w-5 h-5 flex items-center justify-center rounded bg-white/5 hover:bg-white/15 transition-colors"
+                          >
+                            <span className="material-icons text-gray-400 hover:text-white" style={{ fontSize: '12px' }}>edit</span>
+                          </button>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={() => handleSelectModule({ ...module, isCustom: true })}
+                        className="w-full text-left"
+                      >
+                        <div className="flex items-center gap-3 mb-4 pr-20">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${cs.bg}`}>
+                            <span className={`material-icons ${cs.text}`}>{module.icon || 'quiz'}</span>
+                          </div>
+                        </div>
+
+                        <h3 className="text-white font-bold text-base mb-1 line-clamp-1">{module.title}</h3>
+                        <p className="text-gray-500 text-xs mb-1">{module.subject}</p>
+                        <p className="text-gray-600 text-xs mb-3 line-clamp-2">{module.description}</p>
+
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600 text-xs">{module.questions?.length || 0} questions</span>
+                          <span className="text-gray-600 text-xs font-bold">{module.level}</span>
+                        </div>
+                      </button>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
