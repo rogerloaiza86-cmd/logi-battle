@@ -1,7 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import RopeAnimation from './RopeAnimation'
-import QuestionCard from './QuestionCard'
 import VocabularyCard from './VocabularyCard'
 import { generateNextQuestion } from '../utils/questionGenerator'
 import { useGameStore } from '../hooks/useGameStore'
@@ -9,6 +6,25 @@ import { gamesService } from '../services/database'
 
 const ROUND_TIME = 30
 const VOCABULARY_TIME = 20
+
+const CATEGORY_LABELS = {
+  palettisation: 'GESTION DU FRET',
+  cout_transport: 'DYNAMIQUE DE FLOTTE',
+  loading_plan: 'PLAN DE CHARGEMENT',
+  culture: 'CONNAISSANCES GÉNÉRALES',
+  vocabulaire: 'TERMINOLOGIE',
+  supply_chain: 'SUPPLY CHAIN',
+  reception: 'RÉCEPTION & CONTRÔLE',
+  stock: 'GESTION DES STOCKS',
+  safety: 'SÉCURITÉ',
+  traceability: 'TRAÇABILITÉ',
+  green: 'LOGISTIQUE VERTE',
+  team_leader: 'MANAGEMENT',
+  jit: 'JUSTE-À-TEMPS',
+  route: 'OPTIMISATION ROUTES',
+  legal: 'DOCUMENTATION & LÉGAL',
+  math: 'CALCULS LOGISTIQUES',
+}
 
 export const GameBoard = ({ onBack, gameMode, isHost }) => {
   const gameStore = useGameStore()
@@ -358,7 +374,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
             {/* Question Badge */}
             <div className="flex justify-center mb-6">
               <span className="px-4 py-2 bg-[#fea52e] text-[#0c0c1f] text-xs font-bold uppercase tracking-wider rounded-full">
-                QUESTION {roundNumber}/20
+                QUESTION {roundNumber}/{gameStore.totalRounds}
               </span>
             </div>
 
@@ -367,10 +383,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
               <div className="bg-[#1a1a2e] rounded-3xl p-8 border border-white/5">
                 {/* Category */}
                 <p className="text-[#699cff] text-xs font-bold uppercase tracking-[0.2em] mb-4">
-                  {question.type === 'palettisation' && 'GESTION DU FRET'}
-                  {question.type === 'cout_transport' && 'DYNAMIQUE DE FLOTTE'}
-                  {question.type === 'vocabulaire' && 'TERMINOLOGIE'}
-                  {question.type === 'culture' && 'CONNAISSANCES GÉNÉRALES'}
+                  {CATEGORY_LABELS[question.type] || question.title}
                 </p>
 
                 {/* Question Text */}
@@ -379,22 +392,36 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
                 </h2>
 
                 {/* Options */}
-                <div className="grid grid-cols-2 gap-4">
-                  {['A', 'B', 'C', 'D'].map((letter, index) => (
-                    <button
-                      key={letter}
-                      className="group relative bg-[#252538] hover:bg-[#2d2d42] rounded-2xl p-5 text-left transition-all border border-transparent hover:border-white/10"
-                    >
-                      <span className="absolute top-4 left-4 text-gray-500 text-sm font-bold">{letter}</span>
-                      <p className="text-white font-medium pl-6">
-                        {index === 0 && '1,2 Mètres'}
-                        {index === 1 && '2,4 Mètres'}
-                        {index === 2 && 'Sans Limite'}
-                        {index === 3 && 'Limité par le Poids'}
-                      </p>
-                    </button>
-                  ))}
-                </div>
+                {question.data?.options ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    {question.data.options.map((option, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleAnswer(isHost ? 'A' : 'B', index === question.data.correctOption)}
+                        className="group relative bg-[#252538] hover:bg-[#2d2d42] rounded-2xl p-5 text-left transition-all border border-transparent hover:border-white/10"
+                      >
+                        <span className="absolute top-4 left-4 text-gray-500 text-sm font-bold">
+                          {String.fromCharCode(65 + index)}
+                        </span>
+                        <p className="text-white font-medium pl-6">{option}</p>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex gap-4">
+                    <input
+                      type="number"
+                      className="flex-1 bg-[#252538] text-white rounded-2xl p-5 border border-white/10 focus:border-[#fea52e] outline-none"
+                      placeholder="Votre réponse..."
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          const userAnswer = parseInt(e.target.value)
+                          handleAnswer(isHost ? 'A' : 'B', userAnswer === question.correctAnswer)
+                        }
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -417,7 +444,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
                     <span className={`material-icons text-sm ${
                       log.team === 'A' ? 'text-[#699cff]' : 'text-[#fea52e]'
                     }`}>
-                      {log.points.startsWith('+') ? 'check' : 'close'}
+                      {String(log.points).startsWith('+') ? 'check' : 'close'}
                     </span>
                   </div>
                   <div className="flex-1">
@@ -428,7 +455,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
                       {' '}{log.action}
                     </p>
                     <p className={`text-xs ${
-                      log.points.startsWith('+') ? 'text-[#699cff]' : 'text-red-400'
+                      String(log.points).startsWith('+') ? 'text-[#699cff]' : 'text-red-400'
                     }`}>{log.points}</p>
                   </div>
                 </div>

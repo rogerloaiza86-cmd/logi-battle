@@ -51,7 +51,7 @@ export const generatePalletizationQuestion = (difficulty = 1, forceCalculation =
   }
   
   // Question de calcul originale
-  let boxLength, boxWidth, boxHeight, boxWeight, maxHeight
+  let boxLength, boxWidth, boxHeight, maxHeight
   let answer, explanation
 
   // Palette standard: 120cm x 80cm
@@ -112,14 +112,14 @@ export const generatePalletizationQuestion = (difficulty = 1, forceCalculation =
     type: 'palettisation',
     difficulty,
     title: '📦 Palettisation',
-    description: `Combien de colis de dimensions ${boxLength}×${boxWidth}×${boxHeight} cm pouvez-vous mettre sur une palette ${paletteLength}×${paletteWidth} cm (hauteur max: 150 cm)?`,
+    description: `Combien de colis de dimensions ${boxLength}×${boxWidth}×${boxHeight} cm pouvez-vous mettre sur une palette ${paletteLength}×${paletteWidth} cm (hauteur max: ${maxHeight} cm)?`,
     data: {
       boxLength,
       boxWidth,
       boxHeight,
       paletteLength,
       paletteWidth,
-      maxHeight: 150,
+      maxHeight,
     },
     correctAnswer: answer,
     explanation,
@@ -593,86 +593,22 @@ export const getRandomDifficulty = () => {
   return 3
 }
 
-export const getRandomQuestionType = (includeCulture = true, includeVocabulary = true, includeSupplyChain = true, includeReception = true, includeStock = true, includeSafety = true, includeTraceability = true, includeGreen = true, includeTeamLeader = true, includeJit = true, includeRoute = true, includeLegal = true, includeMath = true) => {
-  const types = ['palettisation', 'cout_transport', 'loading_plan']
-  if (includeSupplyChain) {
-    types.push('supply_chain')
-  }
-  if (includeReception) {
-    types.push('reception')
-  }
-  if (includeStock) {
-    types.push('stock')
-  }
-  if (includeSafety) {
-    types.push('safety')
-  }
-  if (includeTraceability) {
-    types.push('traceability')
-  }
-  if (includeGreen) {
-    types.push('green')
-  }
-  if (includeTeamLeader) {
-    types.push('team_leader')
-  }
-  if (includeJit) {
-    types.push('jit')
-  }
-  if (includeRoute) {
-    types.push('route')
-  }
-  if (includeLegal) {
-    types.push('legal')
-  }
-  if (includeMath) {
-    types.push('math')
-  }
-  if (includeCulture) {
-    types.push('culture')
-  }
-  if (includeVocabulary) {
-    types.push('vocabulaire')
-  }
+export const getRandomQuestionType = (excludeTypes = []) => {
+  const allTypes = [
+    'palettisation', 'cout_transport', 'loading_plan',
+    'supply_chain', 'reception', 'stock', 'safety',
+    'traceability', 'green', 'team_leader', 'jit',
+    'route', 'legal', 'math', 'culture', 'vocabulaire'
+  ]
+  const types = allTypes.filter(t => !excludeTypes.includes(t))
   return types[Math.floor(Math.random() * types.length)]
 }
 
 export const generateNextQuestion = (gameMode = 'all') => {
-  let type
-  
-  if (gameMode === 'culture') {
-    type = 'culture'
-  } else if (gameMode === 'vocabulaire') {
-    type = 'vocabulaire'
-  } else if (gameMode === 'supply_chain') {
-    type = 'supply_chain'
-  } else if (gameMode === 'reception') {
-    type = 'reception'
-  } else if (gameMode === 'stock') {
-    type = 'stock'
-  } else if (gameMode === 'safety') {
-    type = 'safety'
-  } else if (gameMode === 'traceability') {
-    type = 'traceability'
-  } else if (gameMode === 'green') {
-    type = 'green'
-  } else if (gameMode === 'team_leader') {
-    type = 'team_leader'
-  } else if (gameMode === 'jit') {
-    type = 'jit'
-  } else if (gameMode === 'route') {
-    type = 'route'
-  } else if (gameMode === 'legal') {
-    type = 'legal'
-  } else if (gameMode === 'math') {
-    type = 'math'
-  } else if (gameMode === 'all') {
-    type = getRandomQuestionType(true, true, true, true, true, true, true, true, true, true, true, true, true)
-  } else {
-    type = gameMode
-  }
-  
-  // Certains types gèrent leur propre difficulté
+  const type = gameMode === 'all'
+    ? getRandomQuestionType([])
+    : gameMode
+
   const skipDifficultyTypes = ['vocabulaire', 'supply_chain', 'reception', 'stock', 'safety', 'traceability', 'green', 'team_leader', 'jit', 'route', 'legal', 'math']
   const difficulty = skipDifficultyTypes.includes(type) ? null : getRandomDifficulty()
   return generateRandomQuestion(type, difficulty)
