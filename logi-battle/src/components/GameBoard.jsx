@@ -13,6 +13,7 @@ const VOCABULARY_TIME = 20
 export const GameBoard = ({ onBack, gameMode, isHost }) => {
   const gameStore = useGameStore()
   const channelRef = useRef(null)
+  const [isChannelReady, setIsChannelReady] = useState(false)
   
   const [question, setQuestion] = useState(null)
   const [showIncorrect, setShowIncorrect] = useState(false)
@@ -53,17 +54,29 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
       if (channel) {
         channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
           handleAnswer(payload.team, payload.isCorrect)
-        }).subscribe()
+        }).subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            setIsChannelReady(true)
+          }
+        })
         channelRef.current = channel
       }
+    } else {
+      startNewRound()
     }
-
-    startNewRound()
     
     return () => {
-      // Nettoyage au démontage
+      if (gameStore.gameId) {
+        gamesService.releaseGameChannel(gameStore.gameId)
+      }
     }
   }, [])
+
+  useEffect(() => {
+    if (isHost && isChannelReady) {
+      startNewRound()
+    }
+  }, [isHost, isChannelReady])
 
   useEffect(() => {
     let interval
