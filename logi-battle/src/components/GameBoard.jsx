@@ -69,6 +69,8 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
             beginFirstRound()
           }
         })
+      } else {
+        beginFirstRound()
       }
     } else {
       beginFirstRound()
