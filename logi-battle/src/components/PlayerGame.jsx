@@ -35,7 +35,13 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
         setGameStatus('waiting')
       })
 
+      channel.subscribe()
       channelRef.current = channel
+
+      return () => {
+        channelRef.current = null
+        gamesService.removeGameChannel(gameId)
+      }
     }
   }, [gameId])
 

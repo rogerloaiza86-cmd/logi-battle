@@ -17,7 +17,15 @@ import './styles/index.css'
 function App() {
   const [userProfile, setUserProfile] = useState(() => {
     const saved = localStorage.getItem('user_profile')
-    return saved ? JSON.parse(saved) : null
+    if (!saved) return null
+
+    try {
+      return JSON.parse(saved)
+    } catch (error) {
+      console.error('Profil local invalide:', error)
+      localStorage.removeItem('user_profile')
+      return null
+    }
   })
   
   const [currentPath, setCurrentPath] = useState(window.location.pathname)
