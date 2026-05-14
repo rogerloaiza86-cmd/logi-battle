@@ -211,6 +211,13 @@ export const gamesService = {
       return localDB.channels[gameId]
     }
     return null
+  },
+
+  removeGameChannel(gameId) {
+    if (USE_SUPABASE && localDB.channels?.[gameId]) {
+      supabase.removeChannel(localDB.channels[gameId])
+      delete localDB.channels[gameId]
+    }
   }
 }
 

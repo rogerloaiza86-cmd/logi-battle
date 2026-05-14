@@ -36,6 +36,16 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
       })
 
       channelRef.current = channel
+      channel.subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error(`Erreur d'abonnement temps réel (${status})`)
+        }
+      })
+    }
+
+    return () => {
+      channelRef.current = null
+      gamesService.removeGameChannel(gameId)
     }
   }, [gameId])
 
