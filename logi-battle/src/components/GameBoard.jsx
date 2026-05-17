@@ -48,17 +48,35 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
 
   useEffect(() => {
     // Configuration du Broadcast
+    let hasStartedRound = false
+    const startRoundOnce = () => {
+      if (hasStartedRound) return
+      hasStartedRound = true
+      startNewRound()
+    }
+
     if (isHost && gameStore.gameId) {
       const channel = gamesService.getGameChannel(gameStore.gameId)
       if (channel) {
-        channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
-          handleAnswer(payload.team, payload.isCorrect)
-        }).subscribe()
+        channel
+          .on('broadcast', { event: 'player_answer' }, ({ payload }) => {
+            handleAnswer(payload.team, payload.isCorrect)
+          })
+          .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              startRoundOnce()
+            }
+          })
         channelRef.current = channel
+
+        return () => {
+          channelRef.current = null
+          gamesService.removeGameChannel(gameStore.gameId)
+        }
       }
     }
 
-    startNewRound()
+    startRoundOnce()
     
     return () => {
       // Nettoyage au démontage
