@@ -13,6 +13,7 @@ const VOCABULARY_TIME = 20
 export const GameBoard = ({ onBack, gameMode, isHost }) => {
   const gameStore = useGameStore()
   const channelRef = useRef(null)
+  const handleAnswerRef = useRef(null)
   
   const [question, setQuestion] = useState(null)
   const [showIncorrect, setShowIncorrect] = useState(false)
@@ -52,7 +53,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
       const channel = gamesService.getGameChannel(gameStore.gameId)
       if (channel) {
         channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
-          handleAnswer(payload.team, payload.isCorrect)
+          handleAnswerRef.current?.(payload.team, payload.isCorrect)
         }).subscribe()
         channelRef.current = channel
       }
@@ -61,7 +62,10 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
     startNewRound()
     
     return () => {
-      // Nettoyage au démontage
+      channelRef.current = null
+      if (gameStore.gameId) {
+        gamesService.removeGameChannel(gameStore.gameId)
+      }
     }
   }, [])
 
@@ -107,17 +111,21 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
     }
   }
 
-  const endRound = () => {
+  const endRound = (roundState = {}) => {
     setIsRoundActive(false)
     setBothTeamsAnswered(true)
     
     let winner = null
+    const finalTeamAStatus = roundState.teamAStatus ?? teamAStatus
+    const finalTeamBStatus = roundState.teamBStatus ?? teamBStatus
+    const finalTeamATime = roundState.teamATime ?? teamATime
+    const finalTeamBTime = roundState.teamBTime ?? teamBTime
     
-    if (teamAStatus === 'correct' && teamBStatus === 'correct') {
-      winner = teamATime < teamBTime ? 'A' : 'B'
-    } else if (teamAStatus === 'correct') {
+    if (finalTeamAStatus === 'correct' && finalTeamBStatus === 'correct') {
+      winner = finalTeamATime < finalTeamBTime ? 'A' : 'B'
+    } else if (finalTeamAStatus === 'correct') {
       winner = 'A'
-    } else if (teamBStatus === 'correct') {
+    } else if (finalTeamBStatus === 'correct') {
       winner = 'B'
     }
     
@@ -129,7 +137,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
         event: 'round_end',
         payload: {
           winner: winner,
-          correctAnswer: question?.answer
+          correctAnswer: question?.correctAnswer ?? question?.answer
         }
       })
     }
@@ -161,7 +169,16 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   }
 
   const handleAnswer = (team, isCorrect) => {
+    if (!isRoundActive) return
+
+    const currentTeamStatus = team === 'A' ? teamAStatus : teamBStatus
+    if (currentTeamStatus !== 'playing') return
+
     const responseTime = Date.now() - roundStartTime.current
+    const nextTeamAStatus = team === 'A' ? (isCorrect ? 'correct' : 'wrong') : teamAStatus
+    const nextTeamBStatus = team === 'B' ? (isCorrect ? 'correct' : 'wrong') : teamBStatus
+    const nextTeamATime = team === 'A' && isCorrect ? responseTime : teamATime
+    const nextTeamBTime = team === 'B' && isCorrect ? responseTime : teamBTime
     
     if (team === 'A') {
       if (isCorrect) {
@@ -189,9 +206,16 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
 
     if (otherTeamStatus !== 'playing') {
       setBothTeamsAnswered(true)
-      endRound()
+      endRound({
+        teamAStatus: nextTeamAStatus,
+        teamBStatus: nextTeamBStatus,
+        teamATime: nextTeamATime,
+        teamBTime: nextTeamBTime,
+      })
     }
   }
+
+  handleAnswerRef.current = handleAnswer
 
   const createParticles = (winningTeam) => {
     // Animation effect handled by CSS

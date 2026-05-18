@@ -76,9 +76,9 @@ export const PlayerJoin = ({ userProfile }) => {
                 type="text"
                 value={gameId}
                 onChange={(e) => setGameId(e.target.value.toUpperCase())}
-                placeholder="Ex: GAME-A3B7"
+                placeholder="Ex: GAME-A3B7K9"
                 className="w-full bg-slate-900 border-2 border-white/10 focus:border-primary rounded-xl px-4 py-4 text-white text-center text-2xl font-mono tracking-widest uppercase transition-colors"
-                maxLength={10}
+                maxLength={20}
               />
               <button
                 onClick={() => gameId && setStep(2)}
