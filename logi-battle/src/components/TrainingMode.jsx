@@ -151,6 +151,12 @@ export const TrainingMode = ({ onBack }) => {
   }
 
   const accuracy = totalAnswered > 0 ? Math.round((correctAnswers / totalAnswered) * 100) : 0
+  const isChoiceQuestion = (candidate) => Boolean(
+    candidate?.isMCQ ||
+    candidate?.type === 'vocabulaire' ||
+    candidate?.data?.options ||
+    candidate?.options
+  )
 
   // Mode jeu actif
   if (isPlaying && !showResults) {
@@ -212,7 +218,7 @@ export const TrainingMode = ({ onBack }) => {
         <main className="flex-1 flex items-center justify-center p-6">
           <div className="w-full max-w-xl">
             {question && (
-              question.isMCQ || question.type === 'vocabulaire' ? (
+              isChoiceQuestion(question) ? (
                 <VocabularyCard
                   question={question}
                   team="A"

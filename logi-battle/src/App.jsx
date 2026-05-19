@@ -99,7 +99,11 @@ function App() {
           onMatchEnd={(result) => {
             // Enregistrer le résultat du match
             if (championshipMatch.type !== 'free') {
-              const winner = result.winner === 'A' ? 'challenger' : 'champion'
+              const winner = result.winner === 'A'
+                ? 'challenger'
+                : result.winner === 'B'
+                  ? 'champion'
+                  : 'draw'
               recordMatch(
                 championshipMatch.classId,
                 championshipMatch.challenger.id,
