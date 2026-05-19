@@ -25,7 +25,10 @@ const RANKS = [
 ]
 
 export const BattalionManager = ({ onBack }) => {
-  const [players, setPlayers] = useState([])
+  const [players, setPlayers] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    return saved ? JSON.parse(saved) : []
+  })
   const [selectedPlayer, setSelectedPlayer] = useState(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [view, setView] = useState('list') // 'list', 'detail'
@@ -33,14 +36,6 @@ export const BattalionManager = ({ onBack }) => {
   // Form states
   const [newPlayerName, setNewPlayerName] = useState('')
   const [selectedAvatar, setSelectedAvatar] = useState(AVATARS[0])
-
-  // Load players from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      setPlayers(JSON.parse(saved))
-    }
-  }, [])
 
   // Save players to localStorage
   useEffect(() => {

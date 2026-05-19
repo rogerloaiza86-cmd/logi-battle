@@ -13,18 +13,25 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
   const [result, setResult] = useState(null) // correct, wrong, null
 
   const isTeamA = team === 'A'
+  const hasOptions = currentQuestion?.options?.length > 0
 
   // Écoute en temps réel Supabase
   useEffect(() => {
     const channel = gamesService.getGameChannel(gameId)
+    let isMounted = true
+
     if (channel) {
       channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
+        if (!isMounted) return
+
+        const questionData = payload.questionData
         setCurrentQuestion({
-          question: payload.questionData.description,
-          answer: payload.questionData.correctAnswer || payload.questionData.answer,
-          hint: payload.questionData.hints?.[0] || '',
-          type: payload.questionData.type,
-          category: payload.questionData.category || ''
+          question: questionData.description,
+          answer: questionData.data?.correctOption ?? questionData.correctOption ?? questionData.correctAnswer ?? questionData.answer,
+          hint: questionData.hints?.[0] || '',
+          type: questionData.type,
+          category: questionData.data?.category || questionData.category || '',
+          options: questionData.data?.options || questionData.options || null,
         })
         setTimeLeft(payload.time || 30)
         setGameStatus('playing')
@@ -33,10 +40,18 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
       })
 
       channel.on('broadcast', { event: 'round_end' }, ({ payload }) => {
+        if (!isMounted) return
         setGameStatus('waiting')
       })
 
+      channel.subscribe()
       channelRef.current = channel
+    }
+
+    return () => {
+      isMounted = false
+      channelRef.current = null
+      gamesService.removeGameChannel(gameId)?.catch(console.error)
     }
   }, [gameId])
 
@@ -67,8 +82,13 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
     }
   }
 
+  const handleOptionSelect = (index) => {
+    if (gameStatus !== 'playing') return
+    setUserAnswer(String(index))
+  }
+
   const handleSubmit = () => {
-    if (!userAnswer || gameStatus !== 'playing') return
+    if (userAnswer === '' || gameStatus !== 'playing') return
     
     // Pour vocabulaire ou culture (lettres A,B,C,D transformées potentiellement) ou chiffres
     // La logique existante comparait parseInt avec number. Ajustons si qcm.
@@ -192,31 +212,58 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                 isTeamA ? 'border-blue-500/30' : 'border-primary/30'
               }`}>
                 <span className={`text-4xl font-black ${userAnswer ? 'text-white' : 'text-gray-600'}`}>
-                  {userAnswer || '---'}
+                  {hasOptions && userAnswer !== ''
+                    ? String.fromCharCode(65 + Number(userAnswer))
+                    : userAnswer || '---'}
                 </span>
               </div>
 
-              {/* Keypad */}
-              <div className="grid grid-cols-3 gap-2">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'C', 0, 'backspace'].map((num) => (
-                  <motion.button
-                    key={num}
-                    onClick={() => handleNumberClick(num)}
-                    whileTap={{ scale: 0.95 }}
-                    className={`aspect-square rounded-xl font-bold text-xl transition-colors ${
-                      isTeamA
-                        ? 'bg-slate-800 active:bg-blue-500/30 text-white'
-                        : 'bg-slate-800 active:bg-primary/30 text-white'
-                    }`}
-                  >
-                    {num === 'backspace' ? (
-                      <span className="material-icons">backspace</span>
-                    ) : (
-                      num
-                    )}
-                  </motion.button>
-                ))}
-              </div>
+              {hasOptions ? (
+                <div className="grid gap-2">
+                  {currentQuestion.options.map((option, index) => {
+                    const isSelected = userAnswer === String(index)
+
+                    return (
+                      <motion.button
+                        key={index}
+                        onClick={() => handleOptionSelect(index)}
+                        whileTap={{ scale: 0.98 }}
+                        className={`rounded-xl p-3 text-left border transition-colors ${
+                          isSelected
+                            ? isTeamA
+                              ? 'bg-blue-500/30 border-blue-500 text-blue-100'
+                              : 'bg-primary/30 border-primary text-primary'
+                            : 'bg-slate-800 border-slate-700 text-white'
+                        }`}
+                      >
+                        <span className="font-black mr-2">{String.fromCharCode(65 + index)}.</span>
+                        {option}
+                      </motion.button>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'C', 0, 'backspace'].map((num) => (
+                    <motion.button
+                      key={num}
+                      onClick={() => handleNumberClick(num)}
+                      whileTap={{ scale: 0.95 }}
+                      className={`aspect-square rounded-xl font-bold text-xl transition-colors ${
+                        isTeamA
+                          ? 'bg-slate-800 active:bg-blue-500/30 text-white'
+                          : 'bg-slate-800 active:bg-primary/30 text-white'
+                      }`}
+                    >
+                      {num === 'backspace' ? (
+                        <span className="material-icons">backspace</span>
+                      ) : (
+                        num
+                      )}
+                    </motion.button>
+                  ))}
+                </div>
+              )}
 
               {/* Submit Button */}
               <motion.button

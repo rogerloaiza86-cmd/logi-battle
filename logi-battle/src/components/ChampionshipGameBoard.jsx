@@ -97,17 +97,21 @@ export const ChampionshipGameBoard = ({
     roundStartTime.current = Date.now()
   }
 
-  const endRound = () => {
+  const endRound = (roundSnapshot = {}) => {
     setIsRoundActive(false)
     setBothTeamsAnswered(true)
     
     let winner = null
+    const finalTeamAStatus = roundSnapshot.teamAStatus ?? teamAStatus
+    const finalTeamBStatus = roundSnapshot.teamBStatus ?? teamBStatus
+    const finalTeamATime = roundSnapshot.teamATime ?? teamATime
+    const finalTeamBTime = roundSnapshot.teamBTime ?? teamBTime
     
-    if (teamAStatus === 'correct' && teamBStatus === 'correct') {
-      winner = teamATime < teamBTime ? 'A' : 'B'
-    } else if (teamAStatus === 'correct') {
+    if (finalTeamAStatus === 'correct' && finalTeamBStatus === 'correct') {
+      winner = finalTeamATime < finalTeamBTime ? 'A' : 'B'
+    } else if (finalTeamAStatus === 'correct') {
       winner = 'A'
-    } else if (teamBStatus === 'correct') {
+    } else if (finalTeamBStatus === 'correct') {
       winner = 'B'
     }
     
@@ -132,25 +136,40 @@ export const ChampionshipGameBoard = ({
   }
 
   const handleAnswer = (team, isCorrect) => {
+    const currentTeamStatus = team === 'A' ? teamAStatus : teamBStatus
+    if (!isRoundActive || currentTeamStatus !== 'playing') return
+
     const responseTime = Date.now() - roundStartTime.current
+    const nextRound = {
+      teamAStatus,
+      teamBStatus,
+      teamATime,
+      teamBTime,
+    }
     
     if (team === 'A') {
       if (isCorrect) {
         setTeamAStatus('correct')
         setTeamATime(responseTime)
+        nextRound.teamAStatus = 'correct'
+        nextRound.teamATime = responseTime
       } else {
         setTeamAStatus('wrong')
         setShowIncorrect(true)
         setTimeout(() => setShowIncorrect(false), 400)
+        nextRound.teamAStatus = 'wrong'
       }
     } else {
       if (isCorrect) {
         setTeamBStatus('correct')
         setTeamBTime(responseTime)
+        nextRound.teamBStatus = 'correct'
+        nextRound.teamBTime = responseTime
       } else {
         setTeamBStatus('wrong')
         setShowIncorrect(true)
         setTimeout(() => setShowIncorrect(false), 400)
+        nextRound.teamBStatus = 'wrong'
       }
     }
     
@@ -162,7 +181,7 @@ export const ChampionshipGameBoard = ({
     
     if (isCorrect || otherTeamStatus !== 'playing') {
       if (otherTeamStatus !== 'playing') {
-        endRound()
+        endRound(nextRound)
       }
     }
   }
@@ -189,6 +208,12 @@ export const ChampionshipGameBoard = ({
 
   const timerProgress = (timeLeft / ROUND_TIME) * 100
   const winner = getWinner()
+  const isChoiceQuestion = (candidate) => Boolean(
+    candidate?.isMCQ ||
+    candidate?.type === 'vocabulaire' ||
+    candidate?.data?.options ||
+    candidate?.options
+  )
 
   return (
     <motion.div
@@ -291,7 +316,7 @@ export const ChampionshipGameBoard = ({
           {/* Question Card */}
           <div className="flex-1 flex items-center justify-center p-4 min-h-0">
             {question && (
-              question.isMCQ || question.type === 'vocabulaire' ? (
+              isChoiceQuestion(question) ? (
                 <VocabularyCard
                   question={question}
                   team="A"
@@ -356,7 +381,7 @@ export const ChampionshipGameBoard = ({
           {/* Question Card */}
           <div className="flex-1 flex items-center justify-center p-4 min-h-0">
             {question && (
-              question.isMCQ || question.type === 'vocabulaire' ? (
+              isChoiceQuestion(question) ? (
                 <VocabularyCard
                   question={question}
                   team="B"
