@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
+import BrandMark from './BrandMark'
 
 export const Login = ({ onLogin }) => {
   const [name, setName] = useState('')
@@ -15,22 +16,18 @@ export const Login = ({ onLogin }) => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0c1f] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#fea52e]/10 blur-[100px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#699cff]/10 blur-[100px] rounded-full pointer-events-none" />
-
+    <div className="min-h-screen geronimo-screen flex flex-col items-center justify-center p-6 overflow-hidden">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-sm z-10"
       >
-        <div className="bg-[#121225]/80 backdrop-blur border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+        <div className="brand-card battle-trajectory backdrop-blur p-8 relative overflow-hidden">
           
           {/* Header */}
           <div className="text-center mb-10 mt-4">
-            <h1 className="text-4xl font-black text-[#fea52e] tracking-tight mb-2 uppercase">Logi-Battle</h1>
-            <p className="text-gray-400 text-sm">Identification de l'opérateur requise</p>
+            <BrandMark className="justify-center mb-4" />
+            <p className="text-gray-300 text-sm">Entrez dans l'arène coopérative.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -42,7 +39,7 @@ export const Login = ({ onLogin }) => {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-[#1a1a2e] border border-white/10 rounded-xl px-4 py-4 text-white font-medium focus:outline-none focus:border-[#fea52e] transition-colors"
+                className="w-full bg-[#1d3d59] border border-white/10 rounded-xl px-4 py-4 text-white font-medium focus:outline-none focus:border-[#f4b942] transition-colors"
                 placeholder="Ex: Clara"
                 required
               />
@@ -56,7 +53,7 @@ export const Login = ({ onLogin }) => {
                 type="text"
                 value={className}
                 onChange={(e) => setClassName(e.target.value)}
-                className="w-full bg-[#1a1a2e] border border-white/10 rounded-xl px-4 py-4 text-white font-medium focus:outline-none focus:border-[#fea52e] transition-colors uppercase"
+                className="w-full bg-[#1d3d59] border border-white/10 rounded-xl px-4 py-4 text-white font-medium focus:outline-none focus:border-[#f4b942] transition-colors uppercase"
                 placeholder="Ex: TLOG, BTS..."
                 required
               />
@@ -65,7 +62,7 @@ export const Login = ({ onLogin }) => {
             <button
               type="submit"
               disabled={!name.trim() || !className.trim()}
-              className="w-full mt-8 bg-gradient-to-r from-[#fea52e] to-[#e89420] hover:scale-[1.02] disabled:hover:scale-100 disabled:opacity-50 disabled:cursor-not-allowed text-[#0c0c1f] py-4 rounded-xl shadow-lg shadow-orange-500/20 transition-all font-bold tracking-widest uppercase"
+              className="w-full mt-8 bg-[#f4b942] hover:bg-[#d99926] hover:scale-[1.02] disabled:hover:scale-100 disabled:opacity-50 disabled:cursor-not-allowed text-[#17314a] py-4 rounded-full shadow-lg shadow-orange-500/20 transition-all font-bold tracking-widest uppercase"
             >
               Initialiser
             </button>
@@ -73,7 +70,7 @@ export const Login = ({ onLogin }) => {
         </div>
         
         <p className="text-center text-xs text-gray-600 mt-6 font-medium tracking-wide">
-          SYSTEM.LOGI.CORE // v1.0.0
+          GERONIMO.COOP // arène v1.0.0
         </p>
       </motion.div>
     </div>

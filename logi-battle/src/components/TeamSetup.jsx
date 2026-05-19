@@ -63,7 +63,7 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen bg-background-dark flex flex-col items-center justify-center p-6"
+      className="min-h-screen geronimo-screen flex flex-col items-center justify-center p-6"
     >
       {/* Header */}
       <motion.div
@@ -261,9 +261,6 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
         </motion.p>
       </motion.form>
 
-      {/* Decorative Elements */}
-      <div className="absolute top-20 left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 right-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
     </motion.div>
   )
 }

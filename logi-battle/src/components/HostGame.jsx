@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useGameStore } from '../hooks/useGameStore'
 import GameBoard from './GameBoard'
+import BrandMark from './BrandMark'
 
 import { gamesService } from '../services/database'
 
@@ -67,16 +68,14 @@ export const HostGame = ({ onBack, gameMode }) => {
   }
 
   return (
-    <div className="min-h-screen bg-background-dark flex flex-col">
+    <div className="min-h-screen geronimo-screen flex flex-col">
       {/* Header */}
-      <nav className="bg-slate-900/80 backdrop-blur-md border-b border-white/10 px-6 py-4">
+      <nav className="bg-[#0f2539]/86 backdrop-blur-md border-b border-white/10 px-6 py-4 relative z-10">
         <div className="flex items-center justify-between max-w-6xl mx-auto">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <span className="material-icons text-white">qr_code</span>
-            </div>
+            <BrandMark compact />
             <div>
-              <h1 className="text-xl font-bold text-white">Mode Multijoueur</h1>
+              <h1 className="text-xl font-bold text-white">Geronimo Coop Live</h1>
               <p className="text-xs text-gray-400">Scannez le QR code pour rejoindre</p>
             </div>
           </div>

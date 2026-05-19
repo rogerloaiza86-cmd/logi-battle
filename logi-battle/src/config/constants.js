@@ -33,7 +33,7 @@ export const GAME_CONFIG = {
     text: 'text-blue-400',
   },
   TEAM_B_COLOR: {
-    primary: '#f49d25',
+    primary: '#f4b942',
     gradient: 'from-primary to-amber-400',
     lightBg: 'bg-primary/10',
     border: 'border-primary',

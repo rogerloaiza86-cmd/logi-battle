@@ -1,6 +1,6 @@
-# Logi-Battle - Application de Gamification Logistique
+# Geronimo Coop - Arène logistique coopérative
 
-Bienvenue dans **Logi-Battle**, une application de quiz compétitif en temps réel basée sur des concepts logistiques réels !
+Bienvenue dans **Geronimo Coop**, une application de quiz compétitif en temps réel basée sur des concepts logistiques réels, avec une identité inspirée de la charte Geronimo.
 
 ## 🚀 Quick Start
 

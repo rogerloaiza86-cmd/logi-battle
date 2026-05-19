@@ -2,7 +2,7 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght,SOFT@9..144,300..700,70&display=swap');
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
@@ -11,7 +11,7 @@
 
 /* Base Styles */
 body {
-  font-family: 'Lexend', sans-serif;
+  font-family: 'Figtree', sans-serif;
   background-color: var(--deep-navy);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
@@ -61,10 +61,10 @@ body {
 /* Glow Pulse Animation */
 @keyframes glow-pulse {
   0%, 100% { 
-    box-shadow: 0 0 20px rgba(254, 165, 46, 0.3);
+    box-shadow: 0 0 20px rgba(244, 185, 66, 0.3);
   }
   50% { 
-    box-shadow: 0 0 40px rgba(254, 165, 46, 0.5);
+    box-shadow: 0 0 40px rgba(244, 185, 66, 0.5);
   }
 }
 
@@ -235,7 +235,7 @@ body {
 /* ========== FOCUS STATES ========== */
 .focus-ring:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(254, 165, 46, 0.3);
+  box-shadow: 0 0 0 3px rgba(244, 185, 66, 0.3);
 }
 
 /* ========== DISABLED STATES ========== */
@@ -248,7 +248,7 @@ body {
 /* ========== TAILWIND CUSTOM UTILITIES ========== */
 @layer utilities {
   .text-shadow-glow {
-    text-shadow: 0 0 20px rgba(254, 165, 46, 0.5);
+    text-shadow: 0 0 20px rgba(244, 185, 66, 0.5);
   }
   
   .bg-gradient-radial {

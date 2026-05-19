@@ -1,4 +1,4 @@
-name: Deploy Logi-Battle to GitHub Pages
+name: Deploy Geronimo Coop to GitHub Pages
 
 on:
   push:

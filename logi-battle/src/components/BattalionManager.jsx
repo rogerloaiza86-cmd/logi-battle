@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 const STORAGE_KEY = 'logi-battle-players'
 
 const AVATARS = [
-  { id: 'truck', icon: 'local_shipping', color: '#fea52e' },
-  { id: 'warehouse', icon: 'warehouse', color: '#699cff' },
+  { id: 'truck', icon: 'local_shipping', color: '#f4b942' },
+  { id: 'warehouse', icon: 'warehouse', color: '#7fa99b' },
   { id: 'box', icon: 'inventory_2', color: '#22c55e' },
   { id: 'forklift', icon: 'forklift', color: '#ef4444' },
   { id: 'robot', icon: 'smart_toy', color: '#a855f7' },
@@ -21,7 +21,7 @@ const RANKS = [
   { name: 'Manager', minScore: 3000, color: '#a855f7' },
   { name: 'Directeur', minScore: 5000, color: '#f97316' },
   { name: 'Expert', minScore: 8000, color: '#ef4444' },
-  { name: 'Maître Logisticien', minScore: 12000, color: '#fea52e' },
+  { name: 'Maître Logisticien', minScore: 12000, color: '#f4b942' },
 ]
 
 export const BattalionManager = ({ onBack }) => {
@@ -118,14 +118,14 @@ export const BattalionManager = ({ onBack }) => {
       : 100
 
     return (
-      <div className="min-h-screen bg-[#0c0c1f]">
+      <div className="min-h-screen bg-[#17314a]">
         {/* Header */}
-        <header className="bg-[#121225] border-b border-white/5 px-6 py-4">
+        <header className="bg-[#0f2539] border-b border-white/5 px-6 py-4">
           <div className="flex items-center justify-between max-w-6xl mx-auto">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setView('list')}
-                className="w-10 h-10 rounded-xl bg-[#1a1a2e] hover:bg-[#252538] flex items-center justify-center transition-colors"
+                className="w-10 h-10 rounded-xl bg-[#1d3d59] hover:bg-[#234a68] flex items-center justify-center transition-colors"
               >
                 <span className="material-icons text-gray-400">arrow_back</span>
               </button>
@@ -145,7 +145,7 @@ export const BattalionManager = ({ onBack }) => {
 
         <main className="max-w-6xl mx-auto px-6 py-8">
           {/* Profile Header */}
-          <div className="bg-[#1a1a2e] rounded-3xl p-8 border border-white/5 mb-8">
+          <div className="bg-[#1d3d59] rounded-3xl p-8 border border-white/5 mb-8">
             <div className="flex flex-col md:flex-row items-center gap-6">
               {/* Avatar */}
               <div 
@@ -178,7 +178,7 @@ export const BattalionManager = ({ onBack }) => {
               
               {/* Score */}
               <div className="text-center">
-                <p className="text-4xl font-black text-[#fea52e]">{selectedPlayer.stats.totalScore.toLocaleString()}</p>
+                <p className="text-4xl font-black text-[#f4b942]">{selectedPlayer.stats.totalScore.toLocaleString()}</p>
                 <p className="text-xs text-gray-500 uppercase">Points Totaux</p>
               </div>
             </div>
@@ -190,7 +190,7 @@ export const BattalionManager = ({ onBack }) => {
                   <span className="text-gray-400">Progression vers {nextRank.name}</span>
                   <span className="text-white font-bold">{progressToNext}%</span>
                 </div>
-                <div className="h-2 bg-[#121225] rounded-full overflow-hidden">
+                <div className="h-2 bg-[#0f2539] rounded-full overflow-hidden">
                   <div 
                     className="h-full rounded-full transition-all"
                     style={{ 
@@ -208,27 +208,27 @@ export const BattalionManager = ({ onBack }) => {
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-[#1a1a2e] rounded-2xl p-5 border border-white/5">
+            <div className="bg-[#1d3d59] rounded-2xl p-5 border border-white/5">
               <p className="text-3xl font-black text-white">{selectedPlayer.stats.totalGames}</p>
               <p className="text-xs text-gray-500 uppercase mt-1">Parties Jouées</p>
             </div>
-            <div className="bg-[#1a1a2e] rounded-2xl p-5 border border-white/5">
+            <div className="bg-[#1d3d59] rounded-2xl p-5 border border-white/5">
               <p className="text-3xl font-black text-green-400">{selectedPlayer.stats.wins}</p>
               <p className="text-xs text-gray-500 uppercase mt-1">Victoires</p>
             </div>
-            <div className="bg-[#1a1a2e] rounded-2xl p-5 border border-white/5">
+            <div className="bg-[#1d3d59] rounded-2xl p-5 border border-white/5">
               <p className="text-3xl font-black text-red-400">{selectedPlayer.stats.losses}</p>
               <p className="text-xs text-gray-500 uppercase mt-1">Défaites</p>
             </div>
-            <div className="bg-[#1a1a2e] rounded-2xl p-5 border border-white/5">
-              <p className="text-3xl font-black text-[#699cff]">{winRate}%</p>
+            <div className="bg-[#1d3d59] rounded-2xl p-5 border border-white/5">
+              <p className="text-3xl font-black text-[#7fa99b]">{winRate}%</p>
               <p className="text-xs text-gray-500 uppercase mt-1">Win Rate</p>
             </div>
           </div>
 
           {/* Performance Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-[#1a1a2e] rounded-2xl p-6 border border-white/5">
+            <div className="bg-[#1d3d59] rounded-2xl p-6 border border-white/5">
               <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Performance</h3>
               <div className="space-y-4">
                 <div>
@@ -236,9 +236,9 @@ export const BattalionManager = ({ onBack }) => {
                     <span className="text-gray-400">Précision</span>
                     <span className="text-white font-bold">{accuracy}%</span>
                   </div>
-                  <div className="h-2 bg-[#121225] rounded-full overflow-hidden">
+                  <div className="h-2 bg-[#0f2539] rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-[#699cff] rounded-full"
+                      className="h-full bg-[#7fa99b] rounded-full"
                       style={{ width: `${accuracy}%` }}
                     />
                   </div>
@@ -248,9 +248,9 @@ export const BattalionManager = ({ onBack }) => {
                     <span className="text-gray-400">Meilleure Série</span>
                     <span className="text-white font-bold">{selectedPlayer.stats.bestStreak}</span>
                   </div>
-                  <div className="h-2 bg-[#121225] rounded-full overflow-hidden">
+                  <div className="h-2 bg-[#0f2539] rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-[#fea52e] rounded-full"
+                      className="h-full bg-[#f4b942] rounded-full"
                       style={{ width: `${Math.min(100, selectedPlayer.stats.bestStreak * 10)}%` }}
                     />
                   </div>
@@ -264,7 +264,7 @@ export const BattalionManager = ({ onBack }) => {
               </div>
             </div>
 
-            <div className="bg-[#1a1a2e] rounded-2xl p-6 border border-white/5">
+            <div className="bg-[#1d3d59] rounded-2xl p-6 border border-white/5">
               <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Succès Débloqués</h3>
               {selectedPlayer.achievements.length === 0 ? (
                 <div className="text-center py-8">
@@ -276,10 +276,10 @@ export const BattalionManager = ({ onBack }) => {
                   {selectedPlayer.achievements.map((achievement, index) => (
                     <div 
                       key={index}
-                      className="aspect-square rounded-xl bg-[#121225] flex items-center justify-center"
+                      className="aspect-square rounded-xl bg-[#0f2539] flex items-center justify-center"
                       title={achievement.name}
                     >
-                      <span className="material-icons text-[#fea52e]">{achievement.icon}</span>
+                      <span className="material-icons text-[#f4b942]">{achievement.icon}</span>
                     </div>
                   ))}
                 </div>
@@ -293,14 +293,14 @@ export const BattalionManager = ({ onBack }) => {
 
   // List View
   return (
-    <div className="min-h-screen bg-[#0c0c1f]">
+    <div className="min-h-screen bg-[#17314a]">
       {/* Header */}
-      <header className="bg-[#121225] border-b border-white/5 px-6 py-4">
+      <header className="bg-[#0f2539] border-b border-white/5 px-6 py-4">
         <div className="flex items-center justify-between max-w-6xl mx-auto">
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="w-10 h-10 rounded-xl bg-[#1a1a2e] hover:bg-[#252538] flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-xl bg-[#1d3d59] hover:bg-[#234a68] flex items-center justify-center transition-colors"
             >
               <span className="material-icons text-gray-400">arrow_back</span>
             </button>
@@ -313,7 +313,7 @@ export const BattalionManager = ({ onBack }) => {
           {!showCreateForm && (
             <button
               onClick={() => setShowCreateForm(true)}
-              className="px-4 py-2 bg-[#fea52e] hover:bg-[#e89420] rounded-xl text-[#0c0c1f] font-bold text-sm flex items-center gap-2 transition-colors"
+              className="px-4 py-2 bg-[#f4b942] hover:bg-[#d99926] rounded-xl text-[#17314a] font-bold text-sm flex items-center gap-2 transition-colors"
             >
               <span className="material-icons text-sm">add</span>
               Nouveau Joueur
@@ -332,7 +332,7 @@ export const BattalionManager = ({ onBack }) => {
               exit={{ opacity: 0, height: 0 }}
               className="mb-8"
             >
-              <div className="bg-[#1a1a2e] rounded-3xl p-6 border border-white/5">
+              <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5">
                 <h2 className="text-lg font-bold text-white mb-4">Nouveau Joueur</h2>
                 
                 <form onSubmit={createPlayer} className="space-y-6">
@@ -343,7 +343,7 @@ export const BattalionManager = ({ onBack }) => {
                       value={newPlayerName}
                       onChange={(e) => setNewPlayerName(e.target.value)}
                       placeholder="Ex: Jean Dupont"
-                      className="w-full bg-[#121225] border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#fea52e] focus:outline-none"
+                      className="w-full bg-[#0f2539] border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#f4b942] focus:outline-none"
                       autoFocus
                     />
                   </div>
@@ -358,7 +358,7 @@ export const BattalionManager = ({ onBack }) => {
                           onClick={() => setSelectedAvatar(avatar)}
                           className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all ${
                             selectedAvatar.id === avatar.id
-                              ? 'ring-2 ring-[#fea52e]'
+                              ? 'ring-2 ring-[#f4b942]'
                               : ''
                           }`}
                           style={{ 
@@ -381,14 +381,14 @@ export const BattalionManager = ({ onBack }) => {
                     <button
                       type="button"
                       onClick={() => setShowCreateForm(false)}
-                      className="flex-1 py-3 bg-[#121225] hover:bg-[#252538] rounded-xl text-white font-bold transition-colors"
+                      className="flex-1 py-3 bg-[#0f2539] hover:bg-[#234a68] rounded-xl text-white font-bold transition-colors"
                     >
                       Annuler
                     </button>
                     <button
                       type="submit"
                       disabled={!newPlayerName.trim()}
-                      className="flex-1 py-3 bg-[#fea52e] hover:bg-[#e89420] disabled:opacity-50 rounded-xl text-[#0c0c1f] font-bold transition-colors"
+                      className="flex-1 py-3 bg-[#f4b942] hover:bg-[#d99926] disabled:opacity-50 rounded-xl text-[#17314a] font-bold transition-colors"
                     >
                       Créer
                     </button>
@@ -402,14 +402,14 @@ export const BattalionManager = ({ onBack }) => {
         {/* Players Grid */}
         {players.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-20 h-20 rounded-full bg-[#1a1a2e] flex items-center justify-center mx-auto mb-4">
+            <div className="w-20 h-20 rounded-full bg-[#1d3d59] flex items-center justify-center mx-auto mb-4">
               <span className="material-icons text-4xl text-gray-600">groups</span>
             </div>
             <h2 className="text-xl font-bold text-white mb-2">Aucun joueur</h2>
             <p className="text-gray-500 mb-6">Créez votre premier joueur pour commencer</p>
             <button
               onClick={() => setShowCreateForm(true)}
-              className="px-6 py-3 bg-[#fea52e] hover:bg-[#e89420] rounded-xl text-[#0c0c1f] font-bold transition-colors"
+              className="px-6 py-3 bg-[#f4b942] hover:bg-[#d99926] rounded-xl text-[#17314a] font-bold transition-colors"
             >
               Créer un joueur
             </button>
@@ -417,7 +417,7 @@ export const BattalionManager = ({ onBack }) => {
         ) : (
           <>
             <div className="mb-6">
-              <p className="text-[#fea52e] text-xs font-bold uppercase tracking-[0.2em] mb-2">Régiment</p>
+              <p className="text-[#f4b942] text-xs font-bold uppercase tracking-[0.2em] mb-2">Régiment</p>
               <h2 className="text-3xl font-black text-white italic">MES OPÉRATEURS</h2>
               <p className="text-gray-400 mt-2">{players.length} joueur{players.length > 1 ? 's' : ''} enregistré{players.length > 1 ? 's' : ''}</p>
             </div>
@@ -437,7 +437,7 @@ export const BattalionManager = ({ onBack }) => {
                       setSelectedPlayer(player)
                       setView('detail')
                     }}
-                    className="bg-[#1a1a2e] rounded-3xl p-5 border border-white/5 hover:border-[#fea52e]/30 cursor-pointer transition-all group"
+                    className="bg-[#1d3d59] rounded-3xl p-5 border border-white/5 hover:border-[#f4b942]/30 cursor-pointer transition-all group"
                   >
                     <div className="flex items-center gap-4 mb-4">
                       <div 
@@ -472,7 +472,7 @@ export const BattalionManager = ({ onBack }) => {
                         <p className="text-[10px] text-gray-500 uppercase">Win</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-lg font-black text-[#fea52e]">{player.stats.totalScore}</p>
+                        <p className="text-lg font-black text-[#f4b942]">{player.stats.totalScore}</p>
                         <p className="text-[10px] text-gray-500 uppercase">Points</p>
                       </div>
                     </div>
@@ -485,13 +485,13 @@ export const BattalionManager = ({ onBack }) => {
 
         {/* Rank Info */}
         {players.length > 0 && (
-          <div className="mt-12 bg-[#1a1a2e] rounded-2xl p-6 border border-white/5">
+          <div className="mt-12 bg-[#1d3d59] rounded-2xl p-6 border border-white/5">
             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Système de Grades</h3>
             <div className="flex flex-wrap gap-3">
               {RANKS.map((rank) => (
                 <div 
                   key={rank.name}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#121225]"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#0f2539]"
                 >
                   <div 
                     className="w-3 h-3 rounded-full"

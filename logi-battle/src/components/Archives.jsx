@@ -83,7 +83,7 @@ export const Archives = ({ onBack }) => {
 
   const getResultColor = (result) => {
     if (result === 'challenger') return 'text-green-400'
-    if (result === 'champion') return 'text-[#fea52e]'
+    if (result === 'champion') return 'text-[#f4b942]'
     return 'text-gray-400'
   }
 
@@ -94,14 +94,14 @@ export const Archives = ({ onBack }) => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0c1f]">
+    <div className="min-h-screen bg-[#17314a]">
       {/* Header */}
-      <header className="bg-[#121225] border-b border-white/5 px-6 py-4">
+      <header className="bg-[#0f2539] border-b border-white/5 px-6 py-4">
         <div className="flex items-center justify-between max-w-6xl mx-auto">
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="w-10 h-10 rounded-xl bg-[#1a1a2e] hover:bg-[#252538] flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-xl bg-[#1d3d59] hover:bg-[#234a68] flex items-center justify-center transition-colors"
             >
               <span className="material-icons text-gray-400">arrow_back</span>
             </button>
@@ -115,7 +115,7 @@ export const Archives = ({ onBack }) => {
 
       <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Tabs */}
-        <div className="flex gap-2 mb-8 bg-[#1a1a2e] p-1 rounded-xl">
+        <div className="flex gap-2 mb-8 bg-[#1d3d59] p-1 rounded-xl">
           {[
             { id: 'matches', label: 'Matchs', icon: 'sports_kabaddi' },
             { id: 'leaderboard', label: 'Classement', icon: 'emoji_events' },
@@ -126,7 +126,7 @@ export const Archives = ({ onBack }) => {
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 py-3 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 ${
                 activeTab === tab.id
-                  ? 'bg-[#fea52e] text-[#0c0c1f]'
+                  ? 'bg-[#f4b942] text-[#17314a]'
                   : 'text-gray-400 hover:text-white'
               }`}
             >
@@ -145,7 +145,7 @@ export const Archives = ({ onBack }) => {
           >
             {matches.length === 0 ? (
               <div className="text-center py-20">
-                <div className="w-20 h-20 rounded-full bg-[#1a1a2e] flex items-center justify-center mx-auto mb-4">
+                <div className="w-20 h-20 rounded-full bg-[#1d3d59] flex items-center justify-center mx-auto mb-4">
                   <span className="material-icons text-4xl text-gray-600">history</span>
                 </div>
                 <h2 className="text-xl font-bold text-white mb-2">Aucun match enregistré</h2>
@@ -165,14 +165,14 @@ export const Archives = ({ onBack }) => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
                       onClick={() => setSelectedMatch(match)}
-                      className="bg-[#1a1a2e] rounded-2xl p-5 border border-white/5 hover:border-[#fea52e]/30 cursor-pointer transition-all"
+                      className="bg-[#1d3d59] rounded-2xl p-5 border border-white/5 hover:border-[#f4b942]/30 cursor-pointer transition-all"
                     >
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         {/* Teams */}
                         <div className="flex items-center gap-4 flex-1">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-[#699cff]/20 flex items-center justify-center">
-                              <span className="material-icons text-[#699cff]">groups</span>
+                            <div className="w-10 h-10 rounded-xl bg-[#7fa99b]/20 flex items-center justify-center">
+                              <span className="material-icons text-[#7fa99b]">groups</span>
                             </div>
                             <div>
                               <p className="text-white font-bold">{match.challengerName}</p>
@@ -180,12 +180,12 @@ export const Archives = ({ onBack }) => {
                             </div>
                           </div>
 
-                          <div className="px-4 py-2 bg-[#121225] rounded-lg">
+                          <div className="px-4 py-2 bg-[#0f2539] rounded-lg">
                             <span className="text-2xl font-black text-gray-400">VS</span>
                           </div>
 
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-[#fea52e]/20 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-[#f4b942]/20 flex items-center justify-center">
                               <span className="text-2xl">👑</span>
                             </div>
                             <div>
@@ -227,7 +227,7 @@ export const Archives = ({ onBack }) => {
           >
             {leaderboard.length === 0 ? (
               <div className="text-center py-20">
-                <div className="w-20 h-20 rounded-full bg-[#1a1a2e] flex items-center justify-center mx-auto mb-4">
+                <div className="w-20 h-20 rounded-full bg-[#1d3d59] flex items-center justify-center mx-auto mb-4">
                   <span className="material-icons text-4xl text-gray-600">emoji_events</span>
                 </div>
                 <h2 className="text-xl font-bold text-white mb-2">Aucun joueur classé</h2>
@@ -235,7 +235,7 @@ export const Archives = ({ onBack }) => {
               </div>
             ) : (
               <>
-                <div className="bg-[#1a1a2e] rounded-3xl p-6 border border-white/5 mb-6">
+                <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5 mb-6">
                   <h2 className="text-lg font-bold text-white mb-4">🏆 Top 3</h2>
                   <div className="grid grid-cols-3 gap-4">
                     {leaderboard.slice(0, 3).map((player, index) => (
@@ -252,23 +252,23 @@ export const Archives = ({ onBack }) => {
                         </div>
                         <div 
                           className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2"
-                          style={{ backgroundColor: `${player.avatar?.color || '#fea52e'}40` }}
+                          style={{ backgroundColor: `${player.avatar?.color || '#f4b942'}40` }}
                         >
                           <span 
                             className="material-icons"
-                            style={{ color: player.avatar?.color || '#fea52e' }}
+                            style={{ color: player.avatar?.color || '#f4b942' }}
                           >
                             {player.avatar?.icon || 'person'}
                           </span>
                         </div>
                         <p className="text-white font-bold truncate">{player.name}</p>
-                        <p className="text-lg font-black text-[#fea52e]">{player.stats?.totalScore || 0} pts</p>
+                        <p className="text-lg font-black text-[#f4b942]">{player.stats?.totalScore || 0} pts</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="bg-[#1a1a2e] rounded-3xl border border-white/5 overflow-hidden">
+                <div className="bg-[#1d3d59] rounded-3xl border border-white/5 overflow-hidden">
                   <div className="p-4 border-b border-white/5">
                     <h3 className="font-bold text-white">Classement Complet</h3>
                   </div>
@@ -276,23 +276,23 @@ export const Archives = ({ onBack }) => {
                     {leaderboard.map((player, index) => (
                       <div
                         key={player.id}
-                        className="flex items-center gap-4 p-4 hover:bg-[#252538] transition-colors"
+                        className="flex items-center gap-4 p-4 hover:bg-[#234a68] transition-colors"
                       >
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold ${
                           index < 3 
-                            ? 'bg-[#fea52e]/20 text-[#fea52e]' 
-                            : 'bg-[#121225] text-gray-400'
+                            ? 'bg-[#f4b942]/20 text-[#f4b942]'
+                            : 'bg-[#0f2539] text-gray-400'
                         }`}>
                           {index + 1}
                         </div>
                         
                         <div 
                           className="w-10 h-10 rounded-lg flex items-center justify-center"
-                          style={{ backgroundColor: `${player.avatar?.color || '#fea52e'}20` }}
+                          style={{ backgroundColor: `${player.avatar?.color || '#f4b942'}20` }}
                         >
                           <span 
                             className="material-icons"
-                            style={{ color: player.avatar?.color || '#fea52e' }}
+                            style={{ color: player.avatar?.color || '#f4b942' }}
                           >
                             {player.avatar?.icon || 'person'}
                           </span>
@@ -306,7 +306,7 @@ export const Archives = ({ onBack }) => {
                         </div>
                         
                         <div className="text-right">
-                          <p className="text-lg font-black text-[#fea52e]">{player.stats?.totalScore || 0}</p>
+                          <p className="text-lg font-black text-[#f4b942]">{player.stats?.totalScore || 0}</p>
                           <p className="text-xs text-gray-500">{player.winRate}% Win</p>
                         </div>
                       </div>
@@ -328,12 +328,12 @@ export const Archives = ({ onBack }) => {
             {/* Achievement Categories */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               {[
-                { icon: 'emoji_events', label: 'Victoires', count: 0, color: '#fea52e' },
+                { icon: 'emoji_events', label: 'Victoires', count: 0, color: '#f4b942' },
                 { icon: 'local_fire_department', label: 'Séries', count: 0, color: '#ef4444' },
-                { icon: 'psychology', label: 'Connaissances', count: 0, color: '#699cff' },
+                { icon: 'psychology', label: 'Connaissances', count: 0, color: '#7fa99b' },
                 { icon: 'groups', label: 'Social', count: 0, color: '#22c55e' },
               ].map((cat) => (
-                <div key={cat.label} className="bg-[#1a1a2e] rounded-2xl p-4 border border-white/5 text-center">
+                <div key={cat.label} className="bg-[#1d3d59] rounded-2xl p-4 border border-white/5 text-center">
                   <div 
                     className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2"
                     style={{ backgroundColor: `${cat.color}20` }}
@@ -348,7 +348,7 @@ export const Archives = ({ onBack }) => {
 
             {achievements.length === 0 ? (
               <div className="text-center py-20">
-                <div className="w-20 h-20 rounded-full bg-[#1a1a2e] flex items-center justify-center mx-auto mb-4">
+                <div className="w-20 h-20 rounded-full bg-[#1d3d59] flex items-center justify-center mx-auto mb-4">
                   <span className="material-icons text-4xl text-gray-600">military_tech</span>
                 </div>
                 <h2 className="text-xl font-bold text-white mb-2">Aucun succès débloqué</h2>
@@ -362,11 +362,11 @@ export const Archives = ({ onBack }) => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.05 }}
-                    className="bg-[#1a1a2e] rounded-2xl p-5 border border-white/5"
+                    className="bg-[#1d3d59] rounded-2xl p-5 border border-white/5"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-xl bg-[#fea52e]/20 flex items-center justify-center">
-                        <span className="material-icons text-3xl text-[#fea52e]">
+                      <div className="w-14 h-14 rounded-xl bg-[#f4b942]/20 flex items-center justify-center">
+                        <span className="material-icons text-3xl text-[#f4b942]">
                           {achievement.icon || 'emoji_events'}
                         </span>
                       </div>
@@ -376,11 +376,11 @@ export const Archives = ({ onBack }) => {
                         <div className="flex items-center gap-2 mt-2">
                           <div 
                             className="w-6 h-6 rounded flex items-center justify-center"
-                            style={{ backgroundColor: `${achievement.playerAvatar?.color || '#fea52e'}20` }}
+                            style={{ backgroundColor: `${achievement.playerAvatar?.color || '#f4b942'}20` }}
                           >
                             <span 
                               className="material-icons text-xs"
-                              style={{ color: achievement.playerAvatar?.color || '#fea52e' }}
+                              style={{ color: achievement.playerAvatar?.color || '#f4b942' }}
                             >
                               {achievement.playerAvatar?.icon || 'person'}
                             </span>
@@ -414,7 +414,7 @@ export const Archives = ({ onBack }) => {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="bg-[#1a1a2e] rounded-3xl p-8 max-w-lg w-full border border-white/5"
+              className="bg-[#1d3d59] rounded-3xl p-8 max-w-lg w-full border border-white/5"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="text-center mb-6">
@@ -425,8 +425,8 @@ export const Archives = ({ onBack }) => {
 
               <div className="flex items-center justify-center gap-6 mb-8">
                 <div className="text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-[#699cff]/20 flex items-center justify-center mb-2">
-                    <span className="material-icons text-3xl text-[#699cff]">groups</span>
+                  <div className="w-16 h-16 rounded-2xl bg-[#7fa99b]/20 flex items-center justify-center mb-2">
+                    <span className="material-icons text-3xl text-[#7fa99b]">groups</span>
                   </div>
                   <p className="text-white font-bold">{selectedMatch.challengerName}</p>
                   <p className="text-xs text-gray-500">Challenger</p>
@@ -435,14 +435,14 @@ export const Archives = ({ onBack }) => {
                 <div className="text-center">
                   <p className="text-3xl font-black text-gray-400">VS</p>
                   {selectedMatch.score && (
-                    <p className="text-2xl font-bold text-[#fea52e]">
+                    <p className="text-2xl font-bold text-[#f4b942]">
                       {selectedMatch.score.teamA} - {selectedMatch.score.teamB}
                     </p>
                   )}
                 </div>
 
                 <div className="text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-[#fea52e]/20 flex items-center justify-center mb-2">
+                  <div className="w-16 h-16 rounded-2xl bg-[#f4b942]/20 flex items-center justify-center mb-2">
                     <span className="text-3xl">👑</span>
                   </div>
                   <p className="text-white font-bold">{selectedMatch.championName}</p>
@@ -453,7 +453,7 @@ export const Archives = ({ onBack }) => {
               <div className={`text-center p-4 rounded-xl mb-6 ${
                 selectedMatch.winner === 'challenger' 
                   ? 'bg-green-500/20 border border-green-500/30' 
-                  : 'bg-[#fea52e]/20 border border-[#fea52e]/30'
+                  : 'bg-[#f4b942]/20 border border-[#f4b942]/30'
               }`}>
                 <p className="text-sm text-gray-400 mb-1">Résultat</p>
                 <p className={`text-xl font-bold ${getResultColor(selectedMatch.winner)}`}>
@@ -465,11 +465,11 @@ export const Archives = ({ onBack }) => {
 
               {selectedMatch.duration && (
                 <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-[#121225] rounded-xl p-4 text-center">
+                  <div className="bg-[#0f2539] rounded-xl p-4 text-center">
                     <p className="text-xs text-gray-500 uppercase">Durée</p>
                     <p className="text-xl font-bold text-white">{Math.floor(selectedMatch.duration / 60)}m {selectedMatch.duration % 60}s</p>
                   </div>
-                  <div className="bg-[#121225] rounded-xl p-4 text-center">
+                  <div className="bg-[#0f2539] rounded-xl p-4 text-center">
                     <p className="text-xs text-gray-500 uppercase">Manches</p>
                     <p className="text-xl font-bold text-white">{selectedMatch.rounds || 'N/A'}</p>
                   </div>
@@ -478,7 +478,7 @@ export const Archives = ({ onBack }) => {
 
               <button
                 onClick={() => setSelectedMatch(null)}
-                className="w-full py-3 bg-[#121225] hover:bg-[#252538] rounded-xl text-white font-bold transition-colors"
+                className="w-full py-3 bg-[#0f2539] hover:bg-[#234a68] rounded-xl text-white font-bold transition-colors"
               >
                 Fermer
               </button>

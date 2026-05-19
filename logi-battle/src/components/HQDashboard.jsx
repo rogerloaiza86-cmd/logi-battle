@@ -110,14 +110,14 @@ export const HQDashboard = ({ onBack }) => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0c1f]">
+    <div className="min-h-screen bg-[#17314a]">
       {/* Header */}
-      <header className="bg-[#121225] border-b border-white/5 px-6 py-4">
+      <header className="bg-[#0f2539] border-b border-white/5 px-6 py-4">
         <div className="flex items-center justify-between max-w-6xl mx-auto">
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="w-10 h-10 rounded-xl bg-[#1a1a2e] hover:bg-[#252538] flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-xl bg-[#1d3d59] hover:bg-[#234a68] flex items-center justify-center transition-colors"
             >
               <span className="material-icons text-gray-400">arrow_back</span>
             </button>
@@ -131,7 +131,7 @@ export const HQDashboard = ({ onBack }) => {
 
       <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Tabs */}
-        <div className="flex gap-2 mb-8 bg-[#1a1a2e] p-1 rounded-xl">
+        <div className="flex gap-2 mb-8 bg-[#1d3d59] p-1 rounded-xl">
           {[
             { id: 'overview', label: 'Vue d\'ensemble', icon: 'dashboard' },
             { id: 'stats', label: 'Statistiques', icon: 'bar_chart' },
@@ -142,7 +142,7 @@ export const HQDashboard = ({ onBack }) => {
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 py-3 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 ${
                 activeTab === tab.id
-                  ? 'bg-[#fea52e] text-[#0c0c1f]'
+                  ? 'bg-[#f4b942] text-[#17314a]'
                   : 'text-gray-400 hover:text-white'
               }`}
             >
@@ -161,23 +161,23 @@ export const HQDashboard = ({ onBack }) => {
           >
             {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-[#1a1a2e] rounded-3xl p-6 border border-white/5">
-                <div className="w-12 h-12 rounded-xl bg-[#fea52e]/20 flex items-center justify-center mb-4">
-                  <span className="material-icons text-[#fea52e]">sports_esports</span>
+              <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5">
+                <div className="w-12 h-12 rounded-xl bg-[#f4b942]/20 flex items-center justify-center mb-4">
+                  <span className="material-icons text-[#f4b942]">sports_esports</span>
                 </div>
                 <p className="text-3xl font-black text-white">{stats.totalGames}</p>
                 <p className="text-xs text-gray-500 uppercase mt-1">Parties Jouées</p>
               </div>
               
-              <div className="bg-[#1a1a2e] rounded-3xl p-6 border border-white/5">
-                <div className="w-12 h-12 rounded-xl bg-[#699cff]/20 flex items-center justify-center mb-4">
-                  <span className="material-icons text-[#699cff]">person</span>
+              <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5">
+                <div className="w-12 h-12 rounded-xl bg-[#7fa99b]/20 flex items-center justify-center mb-4">
+                  <span className="material-icons text-[#7fa99b]">person</span>
                 </div>
                 <p className="text-3xl font-black text-white">{stats.totalPlayers}</p>
                 <p className="text-xs text-gray-500 uppercase mt-1">Joueurs</p>
               </div>
               
-              <div className="bg-[#1a1a2e] rounded-3xl p-6 border border-white/5">
+              <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5">
                 <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center mb-4">
                   <span className="material-icons text-green-400">school</span>
                 </div>
@@ -185,7 +185,7 @@ export const HQDashboard = ({ onBack }) => {
                 <p className="text-xs text-gray-500 uppercase mt-1">Classes</p>
               </div>
               
-              <div className="bg-[#1a1a2e] rounded-3xl p-6 border border-white/5">
+              <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5">
                 <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-4">
                   <span className="material-icons text-purple-400">schedule</span>
                 </div>
@@ -195,9 +195,9 @@ export const HQDashboard = ({ onBack }) => {
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-[#1a1a2e] rounded-3xl p-6 border border-white/5">
+            <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5">
               <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <span className="material-icons text-[#fea52e]">history</span>
+                <span className="material-icons text-[#f4b942]">history</span>
                 Activité Récente
               </h2>
               
@@ -211,10 +211,10 @@ export const HQDashboard = ({ onBack }) => {
                   {recentActivity.map((activity, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-4 p-4 bg-[#121225] rounded-xl"
+                      className="flex items-center gap-4 p-4 bg-[#0f2539] rounded-xl"
                     >
-                      <div className="w-10 h-10 rounded-lg bg-[#fea52e]/20 flex items-center justify-center flex-shrink-0">
-                        <span className="material-icons text-[#fea52e]">sports_kabaddi</span>
+                      <div className="w-10 h-10 rounded-lg bg-[#f4b942]/20 flex items-center justify-center flex-shrink-0">
+                        <span className="material-icons text-[#f4b942]">sports_kabaddi</span>
                       </div>
                       <div className="flex-1">
                         <p className="text-white font-medium">{activity.description}</p>
@@ -230,7 +230,7 @@ export const HQDashboard = ({ onBack }) => {
                       <span className={`text-xs px-2 py-1 rounded-full ${
                         activity.result.includes('Champion')
                           ? 'bg-green-500/20 text-green-400'
-                          : 'bg-[#fea52e]/20 text-[#fea52e]'
+                          : 'bg-[#f4b942]/20 text-[#f4b942]'
                       }`}>
                         {activity.result}
                       </span>
@@ -244,7 +244,7 @@ export const HQDashboard = ({ onBack }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <button
                 onClick={() => window.open('https://github.com', '_blank')}
-                className="bg-[#1a1a2e] rounded-2xl p-6 border border-white/5 hover:border-[#fea52e]/30 transition-all text-left group"
+                className="bg-[#1d3d59] rounded-2xl p-6 border border-white/5 hover:border-[#f4b942]/30 transition-all text-left group"
               >
                 <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-4">
                   <span className="material-icons text-blue-400">help_outline</span>
@@ -255,7 +255,7 @@ export const HQDashboard = ({ onBack }) => {
 
               <button
                 onClick={() => alert('Fonctionnalité à venir dans une prochaine mise à jour !')}
-                className="bg-[#1a1a2e] rounded-2xl p-6 border border-white/5 hover:border-[#fea52e]/30 transition-all text-left group"
+                className="bg-[#1d3d59] rounded-2xl p-6 border border-white/5 hover:border-[#f4b942]/30 transition-all text-left group"
               >
                 <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-4">
                   <span className="material-icons text-purple-400">update</span>
@@ -266,7 +266,7 @@ export const HQDashboard = ({ onBack }) => {
 
               <button
                 onClick={() => alert('Merci de votre soutien ! Contactez-nous pour toute question.')}
-                className="bg-[#1a1a2e] rounded-2xl p-6 border border-white/5 hover:border-[#fea52e]/30 transition-all text-left group"
+                className="bg-[#1d3d59] rounded-2xl p-6 border border-white/5 hover:border-[#f4b942]/30 transition-all text-left group"
               >
                 <div className="w-12 h-12 rounded-xl bg-pink-500/20 flex items-center justify-center mb-4">
                   <span className="material-icons text-pink-400">favorite</span>
@@ -285,7 +285,7 @@ export const HQDashboard = ({ onBack }) => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            <div className="bg-[#1a1a2e] rounded-3xl p-6 border border-white/5">
+            <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5">
               <h2 className="text-lg font-bold text-white mb-4">Performance Globale</h2>
               
               <div className="space-y-6">
@@ -294,9 +294,9 @@ export const HQDashboard = ({ onBack }) => {
                     <span className="text-gray-400">Parties Terminées</span>
                     <span className="text-white font-bold">{stats.totalGames}</span>
                   </div>
-                  <div className="h-3 bg-[#121225] rounded-full overflow-hidden">
+                  <div className="h-3 bg-[#0f2539] rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-[#fea52e] rounded-full"
+                      className="h-full bg-[#f4b942] rounded-full"
                       style={{ width: `${Math.min(100, stats.totalGames)}%` }}
                     />
                   </div>
@@ -307,9 +307,9 @@ export const HQDashboard = ({ onBack }) => {
                     <span className="text-gray-400">Joueurs Actifs</span>
                     <span className="text-white font-bold">{stats.totalPlayers}</span>
                   </div>
-                  <div className="h-3 bg-[#121225] rounded-full overflow-hidden">
+                  <div className="h-3 bg-[#0f2539] rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-[#699cff] rounded-full"
+                      className="h-full bg-[#7fa99b] rounded-full"
                       style={{ width: `${Math.min(100, stats.totalPlayers * 10)}%` }}
                     />
                   </div>
@@ -320,7 +320,7 @@ export const HQDashboard = ({ onBack }) => {
                     <span className="text-gray-400">Classes Créées</span>
                     <span className="text-white font-bold">{stats.totalClasses}</span>
                   </div>
-                  <div className="h-3 bg-[#121225] rounded-full overflow-hidden">
+                  <div className="h-3 bg-[#0f2539] rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-green-500 rounded-full"
                       style={{ width: `${Math.min(100, stats.totalClasses * 20)}%` }}
@@ -330,16 +330,16 @@ export const HQDashboard = ({ onBack }) => {
               </div>
             </div>
 
-            <div className="bg-[#1a1a2e] rounded-3xl p-6 border border-white/5">
+            <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5">
               <h2 className="text-lg font-bold text-white mb-4">Distribution des Compétences</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { name: 'Palettisation', progress: 75, color: '#fea52e' },
-                  { name: 'Transport', progress: 60, color: '#699cff' },
+                  { name: 'Palettisation', progress: 75, color: '#f4b942' },
+                  { name: 'Transport', progress: 60, color: '#7fa99b' },
                   { name: 'Chargement', progress: 45, color: '#22c55e' },
                   { name: 'Vocabulaire', progress: 80, color: '#ef4444' },
                 ].map((skill) => (
-                  <div key={skill.name} className="text-center p-4 bg-[#121225] rounded-xl">
+                  <div key={skill.name} className="text-center p-4 bg-[#0f2539] rounded-xl">
                     <div className="relative w-20 h-20 mx-auto mb-3">
                       <svg className="w-full h-full transform -rotate-90">
                         <circle
@@ -347,7 +347,7 @@ export const HQDashboard = ({ onBack }) => {
                           cy="40"
                           r="35"
                           fill="none"
-                          stroke="#252538"
+                          stroke="#234a68"
                           strokeWidth="6"
                         />
                         <circle
@@ -382,14 +382,14 @@ export const HQDashboard = ({ onBack }) => {
             className="space-y-6"
           >
             {/* Audio Settings */}
-            <div className="bg-[#1a1a2e] rounded-3xl p-6 border border-white/5">
+            <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5">
               <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <span className="material-icons text-[#fea52e]">volume_up</span>
+                <span className="material-icons text-[#f4b942]">volume_up</span>
                 Audio
               </h2>
               
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-[#121225] rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-[#0f2539] rounded-xl">
                   <div>
                     <p className="text-white font-medium">Effets Sonores</p>
                     <p className="text-xs text-gray-500">Sons des boutons et réponses</p>
@@ -397,7 +397,7 @@ export const HQDashboard = ({ onBack }) => {
                   <button
                     onClick={() => saveSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
                     className={`w-14 h-8 rounded-full transition-colors relative ${
-                      settings.soundEnabled ? 'bg-[#fea52e]' : 'bg-gray-600'
+                      settings.soundEnabled ? 'bg-[#f4b942]' : 'bg-gray-600'
                     }`}
                   >
                     <div className={`absolute top-1 w-6 h-6 rounded-full bg-white transition-all ${
@@ -406,7 +406,7 @@ export const HQDashboard = ({ onBack }) => {
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-[#121225] rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-[#0f2539] rounded-xl">
                   <div>
                     <p className="text-white font-medium">Musique de Fond</p>
                     <p className="text-xs text-gray-500">Musique ambiante pendant le jeu</p>
@@ -414,7 +414,7 @@ export const HQDashboard = ({ onBack }) => {
                   <button
                     onClick={() => saveSettings({ ...settings, musicEnabled: !settings.musicEnabled })}
                     className={`w-14 h-8 rounded-full transition-colors relative ${
-                      settings.musicEnabled ? 'bg-[#fea52e]' : 'bg-gray-600'
+                      settings.musicEnabled ? 'bg-[#f4b942]' : 'bg-gray-600'
                     }`}
                   >
                     <div className={`absolute top-1 w-6 h-6 rounded-full bg-white transition-all ${
@@ -426,20 +426,20 @@ export const HQDashboard = ({ onBack }) => {
             </div>
 
             {/* Game Settings */}
-            <div className="bg-[#1a1a2e] rounded-3xl p-6 border border-white/5">
+            <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5">
               <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <span className="material-icons text-[#fea52e]">timer</span>
+                <span className="material-icons text-[#f4b942]">timer</span>
                 Paramètres de Jeu
               </h2>
               
               <div className="space-y-4">
-                <div className="p-4 bg-[#121225] rounded-xl">
+                <div className="p-4 bg-[#0f2539] rounded-xl">
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <p className="text-white font-medium">Durée par Question</p>
                       <p className="text-xs text-gray-500">Temps limite pour répondre</p>
                     </div>
-                    <span className="text-2xl font-black text-[#fea52e]">{settings.timerDuration}s</span>
+                    <span className="text-2xl font-black text-[#f4b942]">{settings.timerDuration}s</span>
                   </div>
                   <input
                     type="range"
@@ -448,7 +448,7 @@ export const HQDashboard = ({ onBack }) => {
                     step="5"
                     value={settings.timerDuration}
                     onChange={(e) => saveSettings({ ...settings, timerDuration: parseInt(e.target.value) })}
-                    className="w-full h-2 bg-[#252538] rounded-lg appearance-none cursor-pointer accent-[#fea52e]"
+                    className="w-full h-2 bg-[#234a68] rounded-lg appearance-none cursor-pointer accent-[#f4b942]"
                   />
                   <div className="flex justify-between text-xs text-gray-500 mt-1">
                     <span>15s</span>
@@ -466,7 +466,7 @@ export const HQDashboard = ({ onBack }) => {
               </h2>
               
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-[#121225] rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-[#0f2539] rounded-xl">
                   <div>
                     <p className="text-white font-medium">Réinitialiser Toutes les Données</p>
                     <p className="text-xs text-red-400">Cette action est irréversible !</p>
@@ -483,7 +483,7 @@ export const HQDashboard = ({ onBack }) => {
 
             {/* Version */}
             <div className="text-center text-gray-500 text-sm">
-              <p>Logi-Battle v1.0.0</p>
+              <p>Geronimo Coop v1.0.0</p>
               <p className="mt-1">© 2025 - Tous droits réservés</p>
             </div>
           </motion.div>

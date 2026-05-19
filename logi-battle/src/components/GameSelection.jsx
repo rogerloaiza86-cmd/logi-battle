@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useGameStore } from '../hooks/useGameStore'
+import BrandMark from './BrandMark'
 
 const modules = [
   {
@@ -209,7 +210,7 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0c1f] flex">
+    <div className="min-h-screen geronimo-screen flex">
       {/* Mobile Sidebar Overlay */}
       {mobileMenuOpen && (
         <div 
@@ -220,7 +221,7 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
 
       {/* Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-[60] w-64 bg-[#121225] border-r border-white/5 flex flex-col transform transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-[60] w-64 bg-[#0f2539]/95 border-r border-white/5 flex flex-col transform transition-transform duration-300 ease-in-out
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         md:relative md:translate-x-0
       `}>
@@ -235,13 +236,14 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
         </div>
         {/* User Profile */}
         <div className="p-6 border-b border-white/5">
+          <BrandMark className="mb-5" nameClassName="text-[1.3rem]" />
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
               <span className="material-icons text-white">person</span>
             </div>
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wider">{userProfile?.class || 'OPÉRATEUR'}</p>
-              <p className="text-xs text-[#fea52e] font-bold">{userProfile?.name?.toUpperCase() || 'DIAMOND BOLT'}</p>
+              <p className="text-xs text-[#f4b942] font-bold">{userProfile?.name?.toUpperCase() || 'DIAMOND BOLT'}</p>
             </div>
           </div>
         </div>
@@ -254,8 +256,8 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
               onClick={() => handleNavClick(item.id)}
               className={`w-full flex items-center gap-3 px-6 py-3 text-left transition-all ${
                 activeNav === item.id
-                  ? 'bg-[#1a1a2e] text-[#fea52e] border-l-3 border-[#fea52e]'
-                  : 'text-gray-500 hover:bg-[#1a1a2e]/50 hover:text-gray-300'
+                  ? 'bg-[#1d3d59] text-[#f4b942] border-l-3 border-[#f4b942]'
+                  : 'text-gray-500 hover:bg-[#1d3d59]/50 hover:text-gray-300'
               }`}
             >
               <span className="material-icons text-lg">{item.icon}</span>
@@ -268,7 +270,7 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
         <div className="p-4 border-t border-white/5">
           <button
             onClick={() => onGameSelect('all')}
-            className="w-full py-4 bg-gradient-to-r from-[#fea52e] to-[#e89420] rounded-xl text-[#0c0c1f] font-bold text-sm tracking-wider shadow-lg shadow-orange-500/25 hover:scale-105 transition-transform"
+            className="w-full py-4 bg-gradient-to-r from-[#f4b942] to-[#d99926] rounded-xl text-[#17314a] font-bold text-sm tracking-wider shadow-lg shadow-orange-500/25 hover:scale-105 transition-transform"
           >
             COMMENCER LE COMBAT
           </button>
@@ -293,35 +295,35 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
       {/* Main Content */}
       <main className="flex-1 overflow-auto w-full">
         {/* Header */}
-        <header className="sticky top-0 z-40 bg-[#0c0c1f]/80 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 py-4">
+        <header className="sticky top-0 z-40 bg-[#0f2539]/86 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button 
-                className="md:hidden text-[#fea52e] hover:text-white transition-colors"
+                className="md:hidden text-[#f4b942] hover:text-white transition-colors"
                 onClick={() => setMobileMenuOpen(true)}
               >
                 <span className="material-icons">menu</span>
               </button>
-              <span className="text-xl md:text-2xl font-black text-[#fea52e]">LOGI-BATTLE</span>
+              <BrandMark className="md:hidden" nameClassName="text-[1.3rem]" />
             </div>
             
             {/* Navigation top (Desktop uniquement) */}
             <nav className="hidden lg:flex items-center gap-8">
               <button 
                 onClick={() => handleNavClick('arena')}
-                className={`text-sm font-bold tracking-wider transition-colors ${activeNav === 'arena' ? 'text-[#fea52e]' : 'text-gray-500 hover:text-gray-300'}`}
+                className={`text-sm font-bold tracking-wider transition-colors ${activeNav === 'arena' ? 'text-[#f4b942]' : 'text-gray-500 hover:text-gray-300'}`}
               >
                 ARÈNE
               </button>
               <button 
                 onClick={() => handleNavClick('training')}
-                className={`text-sm font-bold tracking-wider transition-colors ${activeNav === 'training' ? 'text-[#fea52e]' : 'text-gray-500 hover:text-gray-300'}`}
+                className={`text-sm font-bold tracking-wider transition-colors ${activeNav === 'training' ? 'text-[#f4b942]' : 'text-gray-500 hover:text-gray-300'}`}
               >
                 ENTRAÎNEMENT
               </button>
               <button 
                 onClick={() => handleNavClick('battalion')}
-                className={`text-sm font-bold tracking-wider transition-colors ${activeNav === 'battalion' ? 'text-[#fea52e]' : 'text-gray-500 hover:text-gray-300'}`}
+                className={`text-sm font-bold tracking-wider transition-colors ${activeNav === 'battalion' ? 'text-[#f4b942]' : 'text-gray-500 hover:text-gray-300'}`}
               >
                 BATAILLON
               </button>
@@ -331,14 +333,14 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
               <button 
                 onClick={() => handleNavClick('hq')}
                 title="Tableau de bord (QG)"
-                className="hidden sm:flex w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[#1a1a2e] items-center justify-center text-gray-400 hover:text-[#fea52e] hover:bg-[#fea52e]/10 transition-colors"
+                className="hidden sm:flex w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[#1d3d59] items-center justify-center text-gray-400 hover:text-[#f4b942] hover:bg-[#f4b942]/10 transition-colors"
               >
                 <span className="material-icons text-sm md:text-base">bar_chart</span>
               </button>
               <button 
                 onClick={() => alert("⚙️ Modale de Paramètres (En construction)")}
                 title="Paramètres"
-                className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[#1a1a2e] flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[#1d3d59] flex items-center justify-center text-gray-400 hover:text-white transition-colors"
               >
                 <span className="material-icons text-sm md:text-base">settings</span>
               </button>
@@ -360,21 +362,20 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative overflow-hidden rounded-3xl bg-[#1a1a2e] border border-white/5 p-6 group cursor-pointer"
+              className="relative overflow-hidden brand-card battle-trajectory p-6 group cursor-pointer"
               onClick={onChampionshipMode}
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#fea52e]/10 rounded-full blur-3xl group-hover:bg-[#fea52e]/20 transition-all" />
               <div className="relative z-10">
                 <h3 className="text-2xl font-black text-white mb-2 italic">MODE CHAMPION</h3>
                 <p className="text-gray-400 text-sm mb-4 max-w-md">
-                  Entrez dans le classement mondial et affrontez les meilleurs opérateurs logistiques pour le prestige et les récompenses.
+                  Défiez les meilleurs groupes, tenez votre rang et faites avancer votre équipe vers l'étoile.
                 </p>
-                <button className="px-6 py-3 bg-[#fea52e] rounded-xl text-[#0c0c1f] font-bold text-sm tracking-wider hover:scale-105 transition-transform">
+                <button className="px-6 py-3 bg-[#f4b942] rounded-xl text-[#17314a] font-bold text-sm tracking-wider hover:scale-105 transition-transform">
                   ENTRER DANS L'ARÈNE
                 </button>
               </div>
               <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-20">
-                <span className="material-icons text-8xl text-[#fea52e]">emoji_events</span>
+                <span className="material-icons text-8xl text-[#f4b942]">emoji_events</span>
               </div>
             </motion.div>
 
@@ -383,29 +384,28 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="relative overflow-hidden rounded-3xl bg-[#1a1a2e] border border-white/5 p-6 group cursor-pointer"
+              className="relative overflow-hidden brand-card battle-trajectory p-6 group cursor-pointer"
               onClick={() => onHostMode('culture')}
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#699cff]/10 rounded-full blur-3xl group-hover:bg-[#699cff]/20 transition-all" />
               <div className="relative z-10">
                 <h3 className="text-2xl font-black text-white mb-2 italic">SCANNER QR</h3>
                 <p className="text-gray-400 text-sm mb-4 max-w-md">
-                  Rejoignez rapidement des batailles locales ou scannez des IDs de palettes pour débloquer des modules de défi spécifiques.
+                  Rejoignez rapidement des affrontements locaux ou scannez des IDs de palettes pour débloquer des défis ciblés.
                 </p>
-                <button className="px-6 py-3 bg-[#699cff] rounded-xl text-white font-bold text-sm tracking-wider hover:scale-105 transition-transform">
+                <button className="px-6 py-3 bg-[#7fa99b] rounded-xl text-white font-bold text-sm tracking-wider hover:scale-105 transition-transform">
                   INITIALISER LE SCAN
                 </button>
               </div>
               <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-20">
-                <span className="material-icons text-8xl text-[#699cff]">qr_code_scanner</span>
+                <span className="material-icons text-8xl text-[#7fa99b]">qr_code_scanner</span>
               </div>
             </motion.div>
           </div>
 
           {/* Section Title */}
           <div className="mb-6">
-            <p className="text-[#fea52e] text-xs font-bold tracking-[0.2em] mb-1">SÉLECTIONNER OPÉRATIONS</p>
-            <h2 className="text-3xl font-black text-white italic">MODULES LOGI-CORE</h2>
+            <p className="brand-kicker mb-1">Sélectionner les duels</p>
+            <h2 className="text-3xl font-black text-white italic font-display">Modules Geronimo Coop</h2>
           </div>
 
           {/* Modules Grid */}
@@ -420,15 +420,15 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
                 disabled={activeModule === module.id}
                 className={`relative rounded-3xl p-5 text-left transition-all duration-300 group ${
                   activeModule === module.id
-                    ? 'bg-[#252538] border-2 border-[#fea52e]'
-                    : 'bg-[#1a1a2e] border border-white/5 hover:border-white/10 hover:bg-[#252538]'
+                    ? 'bg-[#234a68] border-2 border-[#f4b942]'
+                    : 'bg-[#1d3d59] border border-white/5 hover:border-white/10 hover:bg-[#234a68]'
                 }`}
               >
                 {/* Level Badge */}
                 <div className="flex items-center justify-between mb-4">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    module.color === 'orange' ? 'bg-[#fea52e]/20 text-[#fea52e]' :
-                    module.color === 'blue' ? 'bg-[#699cff]/20 text-[#699cff]' :
+                    module.color === 'orange' ? 'bg-[#f4b942]/20 text-[#f4b942]' :
+                    module.color === 'blue' ? 'bg-[#7fa99b]/20 text-[#7fa99b]' :
                     module.color === 'red' ? 'bg-red-500/20 text-red-400' :
                     'bg-green-500/20 text-green-400'
                   }`}>
@@ -449,11 +449,11 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
 
                 {/* Progress Bar */}
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-1.5 bg-[#121225] rounded-full overflow-hidden">
+                  <div className="flex-1 h-1.5 bg-[#0f2539] rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
-                        module.color === 'orange' ? 'bg-[#fea52e]' :
-                        module.color === 'blue' ? 'bg-[#699cff]' :
+                        module.color === 'orange' ? 'bg-[#f4b942]' :
+                        module.color === 'blue' ? 'bg-[#7fa99b]' :
                         module.color === 'red' ? 'bg-red-400' :
                         'bg-green-400'
                       }`}
@@ -461,14 +461,14 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
                     />
                   </div>
                   <span className={`text-xs font-bold ${
-                    module.progress === 100 ? 'text-[#fea52e]' : 'text-gray-500'
+                    module.progress === 100 ? 'text-[#f4b942]' : 'text-gray-500'
                   }`}>
                     {module.progress === 100 ? 'MAX' : `${module.progress}%`}
                   </span>
                 </div>
 
                 {/* Hover Effect */}
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-t from-[#fea52e]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-t from-[#f4b942]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
               </motion.button>
             ))}
           </div>

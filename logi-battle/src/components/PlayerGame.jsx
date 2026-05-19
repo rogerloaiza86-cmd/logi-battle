@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { gamesService } from '../services/database'
+import BrandMark from './BrandMark'
 
 export const PlayerGame = ({ gameId, playerName, team }) => {
   const channelRef = useRef(null)
@@ -101,7 +102,8 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
   // Écran d'attente
   if (gameStatus === 'waiting') {
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen geronimo-screen flex flex-col items-center justify-center p-6">
+        <BrandMark className="mb-8" nameClassName="text-2xl" />
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
@@ -121,7 +123,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col ${isTeamA ? 'bg-slate-900' : 'bg-[#1a1510]'}`}>
+    <div className="min-h-screen geronimo-screen flex flex-col">
       {/* Header */}
       <header className={`p-4 border-b ${isTeamA ? 'border-blue-500/20 bg-blue-500/5' : 'border-primary/20 bg-primary/5'}`}>
         <div className="flex items-center justify-between">
@@ -257,7 +259,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
 
       {/* Footer */}
       <footer className="p-4 text-center text-xs text-gray-500 border-t border-white/5">
-        <p>LogiDuel Mobile • Partie {gameId}</p>
+        <p>Geronimo Coop Mobile • Partie {gameId}</p>
       </footer>
     </div>
   )

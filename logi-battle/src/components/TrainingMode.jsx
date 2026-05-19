@@ -155,14 +155,14 @@ export const TrainingMode = ({ onBack }) => {
   // Mode jeu actif
   if (isPlaying && !showResults) {
     return (
-      <div className="min-h-screen bg-[#0c0c1f] flex flex-col">
+      <div className="min-h-screen bg-[#17314a] flex flex-col">
         {/* Header */}
-        <header className="bg-[#121225] border-b border-white/5 px-6 py-4">
+        <header className="bg-[#0f2539] border-b border-white/5 px-6 py-4">
           <div className="flex items-center justify-between max-w-6xl mx-auto">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowResults(true)}
-                className="w-10 h-10 rounded-xl bg-[#1a1a2e] hover:bg-[#252538] flex items-center justify-center transition-colors"
+                className="w-10 h-10 rounded-xl bg-[#1d3d59] hover:bg-[#234a68] flex items-center justify-center transition-colors"
               >
                 <span className="material-icons text-gray-400">close</span>
               </button>
@@ -178,13 +178,13 @@ export const TrainingMode = ({ onBack }) => {
               {/* Score */}
               <div className="text-right">
                 <p className="text-xs text-gray-500 uppercase">Score</p>
-                <p className="text-2xl font-black text-[#fea52e]">{score.toLocaleString()}</p>
+                <p className="text-2xl font-black text-[#f4b942]">{score.toLocaleString()}</p>
               </div>
               
               {/* Streak */}
               <div className="text-right">
                 <p className="text-xs text-gray-500 uppercase">Série</p>
-                <p className="text-2xl font-black text-[#699cff]">{streak}🔥</p>
+                <p className="text-2xl font-black text-[#7fa99b]">{streak}🔥</p>
               </div>
               
               {/* Progress */}
@@ -197,10 +197,10 @@ export const TrainingMode = ({ onBack }) => {
         </header>
 
         {/* Timer Bar */}
-        <div className="w-full h-1 bg-[#1a1a2e]">
+        <div className="w-full h-1 bg-[#1d3d59]">
           <motion.div
             className={`h-full ${
-              timeLeft <= 10 ? 'bg-red-500' : timeLeft <= 20 ? 'bg-yellow-500' : 'bg-[#fea52e]'
+              timeLeft <= 10 ? 'bg-red-500' : timeLeft <= 20 ? 'bg-yellow-500' : 'bg-[#f4b942]'
             }`}
             initial={{ width: '100%' }}
             animate={{ width: `${(timeLeft / ROUND_TIME) * 100}%` }}
@@ -236,7 +236,7 @@ export const TrainingMode = ({ onBack }) => {
         </main>
 
         {/* Footer Stats */}
-        <footer className="bg-[#121225] border-t border-white/5 px-6 py-4">
+        <footer className="bg-[#0f2539] border-t border-white/5 px-6 py-4">
           <div className="flex items-center justify-between max-w-6xl mx-auto text-sm">
             <div className="flex items-center gap-4">
               <span className="text-gray-500">
@@ -261,13 +261,13 @@ export const TrainingMode = ({ onBack }) => {
   // Résultats
   if (showResults) {
     return (
-      <div className="min-h-screen bg-[#0c0c1f] flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#17314a] flex items-center justify-center p-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="max-w-2xl w-full"
         >
-          <div className="bg-[#1a1a2e] rounded-3xl border border-white/5 p-8">
+          <div className="bg-[#1d3d59] rounded-3xl border border-white/5 p-8">
             {/* Header */}
             <div className="text-center mb-8">
               <div className="text-6xl mb-4">🎯</div>
@@ -279,19 +279,19 @@ export const TrainingMode = ({ onBack }) => {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <div className="bg-[#121225] rounded-2xl p-4 text-center">
-                <p className="text-3xl font-black text-[#fea52e]">{score.toLocaleString()}</p>
+              <div className="bg-[#0f2539] rounded-2xl p-4 text-center">
+                <p className="text-3xl font-black text-[#f4b942]">{score.toLocaleString()}</p>
                 <p className="text-xs text-gray-500 uppercase mt-1">Score Total</p>
               </div>
-              <div className="bg-[#121225] rounded-2xl p-4 text-center">
-                <p className="text-3xl font-black text-[#699cff]">{accuracy}%</p>
+              <div className="bg-[#0f2539] rounded-2xl p-4 text-center">
+                <p className="text-3xl font-black text-[#7fa99b]">{accuracy}%</p>
                 <p className="text-xs text-gray-500 uppercase mt-1">Précision</p>
               </div>
-              <div className="bg-[#121225] rounded-2xl p-4 text-center">
+              <div className="bg-[#0f2539] rounded-2xl p-4 text-center">
                 <p className="text-3xl font-black text-green-400">{correctAnswers}</p>
                 <p className="text-xs text-gray-500 uppercase mt-1">Correctes</p>
               </div>
-              <div className="bg-[#121225] rounded-2xl p-4 text-center">
+              <div className="bg-[#0f2539] rounded-2xl p-4 text-center">
                 <p className="text-3xl font-black text-purple-400">{bestStreak}</p>
                 <p className="text-xs text-gray-500 uppercase mt-1">Meilleure Série</p>
               </div>
@@ -329,7 +329,7 @@ export const TrainingMode = ({ onBack }) => {
             <div className="flex gap-4">
               <button
                 onClick={resetTraining}
-                className="flex-1 py-4 bg-[#121225] hover:bg-[#252538] rounded-xl text-white font-bold transition-colors"
+                className="flex-1 py-4 bg-[#0f2539] hover:bg-[#234a68] rounded-xl text-white font-bold transition-colors"
               >
                 Changer de module
               </button>
@@ -343,7 +343,7 @@ export const TrainingMode = ({ onBack }) => {
                   setQuestionHistory([])
                   startNewQuestion()
                 }}
-                className="flex-1 py-4 bg-[#fea52e] hover:bg-[#e89420] rounded-xl text-[#0c0c1f] font-bold transition-colors"
+                className="flex-1 py-4 bg-[#f4b942] hover:bg-[#d99926] rounded-xl text-[#17314a] font-bold transition-colors"
               >
                 Rejouer
               </button>
@@ -363,14 +363,14 @@ export const TrainingMode = ({ onBack }) => {
 
   // Sélection du module
   return (
-    <div className="min-h-screen bg-[#0c0c1f]">
+    <div className="min-h-screen bg-[#17314a]">
       {/* Header */}
-      <header className="bg-[#121225] border-b border-white/5 px-6 py-4">
+      <header className="bg-[#0f2539] border-b border-white/5 px-6 py-4">
         <div className="flex items-center justify-between max-w-6xl mx-auto">
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="w-10 h-10 rounded-xl bg-[#1a1a2e] hover:bg-[#252538] flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-xl bg-[#1d3d59] hover:bg-[#234a68] flex items-center justify-center transition-colors"
             >
               <span className="material-icons text-gray-400">arrow_back</span>
             </button>
@@ -386,7 +386,7 @@ export const TrainingMode = ({ onBack }) => {
       <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Intro */}
         <div className="mb-8">
-          <p className="text-[#fea52e] text-xs font-bold uppercase tracking-[0.2em] mb-2">Pratique Solo</p>
+          <p className="text-[#f4b942] text-xs font-bold uppercase tracking-[0.2em] mb-2">Pratique Solo</p>
           <h2 className="text-3xl font-black text-white italic">CHOISISSEZ VOTRE MODULE</h2>
           <p className="text-gray-400 mt-2">Entraînez-vous sur des questions spécifiques sans la pression du temps.</p>
         </div>
@@ -400,11 +400,11 @@ export const TrainingMode = ({ onBack }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               onClick={() => startTraining(module.id)}
-              className="bg-[#1a1a2e] rounded-3xl p-5 border border-white/5 hover:border-[#fea52e]/50 hover:bg-[#252538] transition-all text-left group"
+              className="bg-[#1d3d59] rounded-3xl p-5 border border-white/5 hover:border-[#f4b942]/50 hover:bg-[#234a68] transition-all text-left group"
             >
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
-                module.color === 'orange' ? 'bg-[#fea52e]/20 text-[#fea52e]' :
-                module.color === 'blue' ? 'bg-[#699cff]/20 text-[#699cff]' :
+                module.color === 'orange' ? 'bg-[#f4b942]/20 text-[#f4b942]' :
+                module.color === 'blue' ? 'bg-[#7fa99b]/20 text-[#7fa99b]' :
                 module.color === 'red' ? 'bg-red-500/20 text-red-400' :
                 'bg-green-500/20 text-green-400'
               }`}>
@@ -414,7 +414,7 @@ export const TrainingMode = ({ onBack }) => {
               <h3 className="text-white font-bold text-lg mb-1">{module.title}</h3>
               <p className="text-gray-500 text-sm">{module.description}</p>
               
-              <div className="mt-4 flex items-center gap-2 text-[#fea52e] text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="mt-4 flex items-center gap-2 text-[#f4b942] text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                 <span>Commencer</span>
                 <span className="material-icons text-sm">arrow_forward</span>
               </div>
@@ -424,10 +424,10 @@ export const TrainingMode = ({ onBack }) => {
 
         {/* Quick Stats */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-[#1a1a2e] rounded-2xl p-6 border border-white/5">
+          <div className="bg-[#1d3d59] rounded-2xl p-6 border border-white/5">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#fea52e]/20 flex items-center justify-center">
-                <span className="material-icons text-[#fea52e]">emoji_events</span>
+              <div className="w-12 h-12 rounded-xl bg-[#f4b942]/20 flex items-center justify-center">
+                <span className="material-icons text-[#f4b942]">emoji_events</span>
               </div>
               <div>
                 <p className="text-2xl font-black text-white">1,250</p>
@@ -436,10 +436,10 @@ export const TrainingMode = ({ onBack }) => {
             </div>
           </div>
           
-          <div className="bg-[#1a1a2e] rounded-2xl p-6 border border-white/5">
+          <div className="bg-[#1d3d59] rounded-2xl p-6 border border-white/5">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#699cff]/20 flex items-center justify-center">
-                <span className="material-icons text-[#699cff]">local_fire_department</span>
+              <div className="w-12 h-12 rounded-xl bg-[#7fa99b]/20 flex items-center justify-center">
+                <span className="material-icons text-[#7fa99b]">local_fire_department</span>
               </div>
               <div>
                 <p className="text-2xl font-black text-white">8</p>
@@ -448,7 +448,7 @@ export const TrainingMode = ({ onBack }) => {
             </div>
           </div>
           
-          <div className="bg-[#1a1a2e] rounded-2xl p-6 border border-white/5">
+          <div className="bg-[#1d3d59] rounded-2xl p-6 border border-white/5">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
                 <span className="material-icons text-green-400">check_circle</span>

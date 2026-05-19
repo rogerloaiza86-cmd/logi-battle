@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import PlayerGame from './PlayerGame'
+import BrandMark from './BrandMark'
 
 import { gamesService } from '../services/database'
 
@@ -48,7 +49,7 @@ export const PlayerJoin = ({ userProfile }) => {
   }
 
   return (
-    <div className="min-h-screen bg-background-dark flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen geronimo-screen flex flex-col items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -56,10 +57,7 @@ export const PlayerJoin = ({ userProfile }) => {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
-            <span className="material-icons text-3xl text-white">sports_esports</span>
-          </div>
-          <h1 className="text-2xl font-bold text-white">LogiDuel Mobile</h1>
+          <BrandMark className="justify-center mb-4" nameClassName="text-2xl" />
           <p className="text-gray-400 text-sm">Rejoignez une partie</p>
         </div>
 

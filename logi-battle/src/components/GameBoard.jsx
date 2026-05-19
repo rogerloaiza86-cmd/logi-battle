@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import RopeAnimation from './RopeAnimation'
 import QuestionCard from './QuestionCard'
 import VocabularyCard from './VocabularyCard'
+import BrandMark from './BrandMark'
 import { generateNextQuestion } from '../utils/questionGenerator'
 import { useGameStore } from '../hooks/useGameStore'
 import { gamesService } from '../services/database'
@@ -213,15 +214,15 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
 
   // Calculate timer circle progress
   const timerProgress = (timeLeft / roundTime) * 283
-  const timerColor = timeLeft <= 5 ? '#ef4444' : timeLeft <= 10 ? '#eab308' : '#fea52e'
+  const timerColor = timeLeft <= 5 ? '#ef4444' : timeLeft <= 10 ? '#eab308' : '#f4b942'
 
   return (
-    <div className="min-h-screen bg-[#0c0c1f] flex flex-col">
+    <div className="min-h-screen geronimo-screen flex flex-col">
       {/* Header */}
-      <header className="bg-[#121225] border-b border-white/5 px-8 py-4">
+      <header className="bg-[#0f2539]/92 border-b border-white/5 px-8 py-4 relative z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xl font-black text-[#fea52e]">LOGI-BATTLE</span>
+            <BrandMark nameClassName="text-[1.35rem]" />
           </div>
           <div className="flex items-center gap-6">
             <button 
@@ -246,41 +247,41 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
       </header>
 
       {/* Score Bar */}
-      <div className="bg-[#121225] px-8 py-4">
+      <div className="bg-[#0f2539]/92 px-8 py-4 relative z-10">
         <div className="flex items-center justify-between mb-4">
           {/* Team Alpha */}
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[#699cff]/20 flex items-center justify-center border border-[#699cff]/30">
-              <span className="material-icons text-[#699cff]">local_shipping</span>
+            <div className="w-12 h-12 rounded-xl bg-[#7fa99b]/20 flex items-center justify-center border border-[#7fa99b]/30">
+              <span className="material-icons text-[#7fa99b]">local_shipping</span>
             </div>
             <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wider">ÉQUIPE ALPHA</p>
-              <p className="text-3xl font-black text-[#699cff]">{gameStore.teamA.score.toLocaleString()}</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wider">ÉQUIPE ÉTOILE</p>
+              <p className="text-3xl font-black text-[#7fa99b]">{gameStore.teamA.score.toLocaleString()}</p>
             </div>
           </div>
 
           {/* VS */}
-          <div className="w-12 h-12 rounded-full bg-[#1a1a2e] border border-white/10 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-[#1d3d59] border border-white/10 flex items-center justify-center">
             <span className="text-gray-500 font-bold text-sm">VS</span>
           </div>
 
           {/* Team Omega */}
           <div className="flex items-center gap-4 text-right">
             <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wider">ÉQUIPE OMEGA</p>
-              <p className="text-3xl font-black text-[#fea52e]">{gameStore.teamB.score.toLocaleString()}</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wider">ÉQUIPE BOUSSOLE</p>
+              <p className="text-3xl font-black text-[#f4b942]">{gameStore.teamB.score.toLocaleString()}</p>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-[#fea52e]/20 flex items-center justify-center border border-[#fea52e]/30">
-              <span className="material-icons text-[#fea52e]">bolt</span>
+            <div className="w-12 h-12 rounded-xl bg-[#f4b942]/20 flex items-center justify-center border border-[#f4b942]/30">
+              <span className="material-icons text-[#f4b942]">bolt</span>
             </div>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="relative h-10 bg-[#1a1a2e] rounded-xl overflow-hidden">
+        <div className="relative h-10 bg-[#1d3d59] rounded-xl overflow-hidden">
           {/* Blue Side */}
           <div 
-            className="absolute left-0 top-0 h-full bg-gradient-to-r from-[#699cff] to-[#699cff]/80 transition-all duration-500 flex items-center px-4"
+            className="absolute left-0 top-0 h-full bg-gradient-to-r from-[#7fa99b] to-[#7fa99b]/80 transition-all duration-500 flex items-center px-4"
             style={{ width: `${Math.max(0, 50 + gameStore.ropePosition / 2)}%` }}
           >
             <span className="text-xs font-bold text-white/80 uppercase tracking-wider">
@@ -290,7 +291,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
           
           {/* Orange Side */}
           <div 
-            className="absolute right-0 top-0 h-full bg-gradient-to-l from-[#fea52e] to-[#fea52e]/80 transition-all duration-500 flex items-center justify-end px-4"
+            className="absolute right-0 top-0 h-full bg-gradient-to-l from-[#f4b942] to-[#f4b942]/80 transition-all duration-500 flex items-center justify-end px-4"
             style={{ width: `${Math.max(0, 50 - gameStore.ropePosition / 2)}%` }}
           >
             <span className="text-xs font-bold text-white/80 uppercase tracking-wider">
@@ -308,7 +309,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
         {/* Left Panel - Timer & Events */}
         <aside className="w-72 p-6 space-y-4">
           {/* Circular Timer */}
-          <div className="bg-[#1a1a2e] rounded-3xl p-6 border border-white/5">
+          <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5">
             <div className="relative w-32 h-32 mx-auto">
               <svg className="w-full h-full transform -rotate-90">
                 <circle
@@ -316,7 +317,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
                   cy="64"
                   r="56"
                   fill="none"
-                  stroke="#252538"
+                  stroke="#234a68"
                   strokeWidth="8"
                 />
                 <circle
@@ -341,7 +342,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
           </div>
 
           {/* Critical Event */}
-          <div className="bg-[#1a1a2e] rounded-3xl p-5 border border-red-500/20">
+          <div className="bg-[#1d3d59] rounded-3xl p-5 border border-red-500/20">
             <div className="flex items-center gap-2 mb-3">
               <span className="material-icons text-red-400 text-sm">warning</span>
               <span className="text-xs font-bold text-red-400 uppercase tracking-wider">ÉVÉNEMENT CRITIQUE</span>
@@ -357,16 +358,16 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
           <div className="max-w-2xl mx-auto">
             {/* Question Badge */}
             <div className="flex justify-center mb-6">
-              <span className="px-4 py-2 bg-[#fea52e] text-[#0c0c1f] text-xs font-bold uppercase tracking-wider rounded-full">
+              <span className="px-4 py-2 bg-[#f4b942] text-[#17314a] text-xs font-bold uppercase tracking-wider rounded-full">
                 QUESTION {roundNumber}/20
               </span>
             </div>
 
             {/* Question Card */}
             {question && (
-              <div className="bg-[#1a1a2e] rounded-3xl p-8 border border-white/5">
+              <div className="bg-[#1d3d59] rounded-3xl p-8 border border-white/5">
                 {/* Category */}
-                <p className="text-[#699cff] text-xs font-bold uppercase tracking-[0.2em] mb-4">
+                <p className="text-[#7fa99b] text-xs font-bold uppercase tracking-[0.2em] mb-4">
                   {question.type === 'palettisation' && 'GESTION DU FRET'}
                   {question.type === 'cout_transport' && 'DYNAMIQUE DE FLOTTE'}
                   {question.type === 'vocabulaire' && 'TERMINOLOGIE'}
@@ -383,7 +384,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
                   {['A', 'B', 'C', 'D'].map((letter, index) => (
                     <button
                       key={letter}
-                      className="group relative bg-[#252538] hover:bg-[#2d2d42] rounded-2xl p-5 text-left transition-all border border-transparent hover:border-white/10"
+                      className="group relative bg-[#234a68] hover:bg-[#2d5875] rounded-2xl p-5 text-left transition-all border border-transparent hover:border-white/10"
                     >
                       <span className="absolute top-4 left-4 text-gray-500 text-sm font-bold">{letter}</span>
                       <p className="text-white font-medium pl-6">
@@ -402,20 +403,20 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
 
         {/* Right Panel - Battle Logs */}
         <aside className="w-80 p-6">
-          <div className="bg-[#1a1a2e] rounded-3xl p-5 border border-white/5 h-full">
+          <div className="bg-[#1d3d59] rounded-3xl p-5 border border-white/5 h-full">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">JOURNAL DE COMBAT EN DIRECT</span>
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Journal d'affrontement en direct</span>
             </div>
 
             <div className="space-y-4">
               {logs.map((log) => (
                 <div key={log.id} className="flex gap-3">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    log.team === 'A' ? 'bg-[#699cff]/20' : 'bg-[#fea52e]/20'
+                    log.team === 'A' ? 'bg-[#7fa99b]/20' : 'bg-[#f4b942]/20'
                   }`}>
                     <span className={`material-icons text-sm ${
-                      log.team === 'A' ? 'text-[#699cff]' : 'text-[#fea52e]'
+                      log.team === 'A' ? 'text-[#7fa99b]' : 'text-[#f4b942]'
                     }`}>
                       {log.points.startsWith('+') ? 'check' : 'close'}
                     </span>
@@ -423,12 +424,12 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
                   <div className="flex-1">
                     <p className="text-sm">
                       <span className={`font-bold ${
-                        log.team === 'A' ? 'text-[#699cff]' : 'text-[#fea52e]'
+                        log.team === 'A' ? 'text-[#7fa99b]' : 'text-[#f4b942]'
                       }`}>{log.user}</span>
                       {' '}{log.action}
                     </p>
                     <p className={`text-xs ${
-                      log.points.startsWith('+') ? 'text-[#699cff]' : 'text-red-400'
+                      log.points.startsWith('+') ? 'text-[#7fa99b]' : 'text-red-400'
                     }`}>{log.points}</p>
                   </div>
                 </div>
@@ -439,10 +440,10 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
             <div className="mt-6 pt-6 border-t border-white/5">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs text-gray-500 uppercase">MORAL GLOBAL</span>
-                <span className="text-xs font-bold text-[#699cff]">88%</span>
+                <span className="text-xs font-bold text-[#7fa99b]">88%</span>
               </div>
-              <div className="h-1.5 bg-[#252538] rounded-full overflow-hidden">
-                <div className="h-full w-[88%] bg-[#699cff] rounded-full" />
+              <div className="h-1.5 bg-[#234a68] rounded-full overflow-hidden">
+                <div className="h-full w-[88%] bg-[#7fa99b] rounded-full" />
               </div>
             </div>
           </div>
