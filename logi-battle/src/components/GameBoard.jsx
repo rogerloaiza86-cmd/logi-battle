@@ -48,21 +48,39 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   }, [gameStore.teamA.score, gameStore.teamB.score, gameStore.ropePosition, isHost, gameStore.gameId])
 
   useEffect(() => {
+    let isMounted = true
+
     // Configuration du Broadcast
     if (isHost && gameStore.gameId) {
       const channel = gamesService.getGameChannel(gameStore.gameId)
       if (channel) {
         channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
           handleAnswer(payload.team, payload.isCorrect)
-        }).subscribe()
+        })
         channelRef.current = channel
-      }
-    }
 
-    startNewRound()
+        channel.subscribe((status) => {
+          if (!isMounted) return
+
+          if (status === 'SUBSCRIBED') {
+            startNewRound()
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            console.error(`Erreur de connexion au canal de partie ${gameStore.gameId}: ${status}`)
+          }
+        })
+      } else {
+        startNewRound()
+      }
+    } else {
+      startNewRound()
+    }
     
     return () => {
-      // Nettoyage au démontage
+      isMounted = false
+      channelRef.current = null
+      if (gameStore.gameId) {
+        gamesService.removeGameChannel(gameStore.gameId)
+      }
     }
   }, [])
 
