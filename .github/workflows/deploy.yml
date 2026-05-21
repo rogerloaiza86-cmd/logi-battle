@@ -32,6 +32,10 @@ jobs:
       - name: Install dependencies
         run: cd logi-battle && npm ci
       - name: Build
+        env:
+          VITE_DB_MODE: ${{ secrets.VITE_DB_MODE }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: cd logi-battle && npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v4
