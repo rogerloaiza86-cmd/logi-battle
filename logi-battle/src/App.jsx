@@ -16,8 +16,13 @@ import './styles/index.css'
 
 function App() {
   const [userProfile, setUserProfile] = useState(() => {
-    const saved = localStorage.getItem('user_profile')
-    return saved ? JSON.parse(saved) : null
+    try {
+      const saved = localStorage.getItem('user_profile')
+      return saved ? JSON.parse(saved) : null
+    } catch {
+      localStorage.removeItem('user_profile')
+      return null
+    }
   })
   
   const [currentPath, setCurrentPath] = useState(window.location.pathname)
@@ -57,8 +62,13 @@ function App() {
     setUserProfile(null)
   }
 
+  const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+  const appPath = basePath && currentPath.startsWith(basePath)
+    ? currentPath.slice(basePath.length) || '/'
+    : currentPath
+
   // Route: /join - Page pour les joueurs qui scannent le QR
-  if (currentPath === '/join' || window.location.search.includes('game=')) {
+  if (appPath === '/join' || window.location.search.includes('game=')) {
     return (
       <div className="dark">
         <PlayerJoin userProfile={userProfile} />
