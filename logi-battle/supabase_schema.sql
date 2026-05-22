@@ -26,17 +26,33 @@ CREATE TABLE IF NOT EXISTS public.questions (
 );
 
 -- Sécurité RLS (Row Level Security)
--- Autorise la lecture, l'insertion et la modification publique
+-- Les clients anonymes peuvent créer/lire/mettre à jour les parties en cours,
+-- mais ne peuvent pas supprimer les données de jeu.
 ALTER TABLE public.games ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Activer l'accès anonyme général sur games" 
-ON public.games FOR ALL 
-USING (true) 
+DROP POLICY IF EXISTS "Activer l'accès anonyme général sur games" ON public.games;
+DROP POLICY IF EXISTS "Autoriser la lecture publique sur games" ON public.games;
+DROP POLICY IF EXISTS "Autoriser la création publique sur games" ON public.games;
+DROP POLICY IF EXISTS "Autoriser la modification publique sur games" ON public.games;
+CREATE POLICY "Autoriser la lecture publique sur games"
+ON public.games FOR SELECT
+USING (true);
+CREATE POLICY "Autoriser la création publique sur games"
+ON public.games FOR INSERT
+WITH CHECK (true);
+CREATE POLICY "Autoriser la modification publique sur games"
+ON public.games FOR UPDATE
+USING (true)
 WITH CHECK (true);
 
 ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Activer l'accès anonyme général sur questions" 
-ON public.questions FOR ALL 
-USING (true) 
+DROP POLICY IF EXISTS "Activer l'accès anonyme général sur questions" ON public.questions;
+DROP POLICY IF EXISTS "Autoriser la lecture publique sur questions" ON public.questions;
+DROP POLICY IF EXISTS "Autoriser la création publique sur questions" ON public.questions;
+CREATE POLICY "Autoriser la lecture publique sur questions"
+ON public.questions FOR SELECT
+USING (true);
+CREATE POLICY "Autoriser la création publique sur questions"
+ON public.questions FOR INSERT
 WITH CHECK (true);
 
 -- Activer le temps réel (Realtime) sur la table games
