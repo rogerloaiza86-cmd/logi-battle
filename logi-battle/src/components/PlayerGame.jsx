@@ -18,25 +18,31 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
   useEffect(() => {
     const channel = gamesService.getGameChannel(gameId)
     if (channel) {
-      channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
-        setCurrentQuestion({
-          question: payload.questionData.description,
-          answer: payload.questionData.correctAnswer || payload.questionData.answer,
-          hint: payload.questionData.hints?.[0] || '',
-          type: payload.questionData.type,
-          category: payload.questionData.category || ''
+      channel
+        .on('broadcast', { event: 'new_question' }, ({ payload }) => {
+          setCurrentQuestion({
+            question: payload.questionData.description,
+            answer: payload.questionData.correctAnswer || payload.questionData.answer,
+            hint: payload.questionData.hints?.[0] || '',
+            type: payload.questionData.type,
+            category: payload.questionData.category || ''
+          })
+          setTimeLeft(payload.time || 30)
+          setGameStatus('playing')
+          setUserAnswer('')
+          setResult(null)
         })
-        setTimeLeft(payload.time || 30)
-        setGameStatus('playing')
-        setUserAnswer('')
-        setResult(null)
-      })
-
-      channel.on('broadcast', { event: 'round_end' }, ({ payload }) => {
-        setGameStatus('waiting')
-      })
+        .on('broadcast', { event: 'round_end' }, ({ payload }) => {
+          setGameStatus('waiting')
+        })
+        .subscribe()
 
       channelRef.current = channel
+    }
+
+    return () => {
+      channelRef.current = null
+      gamesService.removeGameChannel(gameId)
     }
   }, [gameId])
 
