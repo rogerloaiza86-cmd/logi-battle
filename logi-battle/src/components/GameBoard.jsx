@@ -14,6 +14,7 @@ const VOCABULARY_TIME = 20
 export const GameBoard = ({ onBack, gameMode, isHost }) => {
   const gameStore = useGameStore()
   const channelRef = useRef(null)
+  const hasStartedRef = useRef(false)
   
   const [question, setQuestion] = useState(null)
   const [showIncorrect, setShowIncorrect] = useState(false)
@@ -48,21 +49,40 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   }, [gameStore.teamA.score, gameStore.teamB.score, gameStore.ropePosition, isHost, gameStore.gameId])
 
   useEffect(() => {
+    const beginFirstRound = () => {
+      if (hasStartedRef.current) return
+      hasStartedRef.current = true
+      startNewRound()
+    }
+
+    let didUnsubscribe = false
+    const currentGameId = gameStore.gameId
+
     // Configuration du Broadcast
-    if (isHost && gameStore.gameId) {
-      const channel = gamesService.getGameChannel(gameStore.gameId)
+    if (isHost && currentGameId) {
+      const channel = gamesService.getGameChannel(currentGameId)
       if (channel) {
         channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
           handleAnswer(payload.team, payload.isCorrect)
-        }).subscribe()
-        channelRef.current = channel
+        }).subscribe((status) => {
+          if (status === 'SUBSCRIBED' && !didUnsubscribe) {
+            channelRef.current = channel
+            beginFirstRound()
+          }
+        })
+      } else {
+        beginFirstRound()
       }
+    } else {
+      beginFirstRound()
     }
-
-    startNewRound()
     
     return () => {
-      // Nettoyage au démontage
+      didUnsubscribe = true
+      channelRef.current = null
+      if (currentGameId) {
+        gamesService.releaseGameChannel(currentGameId)
+      }
     }
   }, [])
 
