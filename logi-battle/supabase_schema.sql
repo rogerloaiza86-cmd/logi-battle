@@ -26,16 +26,29 @@ CREATE TABLE IF NOT EXISTS public.questions (
 );
 
 -- Sécurité RLS (Row Level Security)
--- Autorise la lecture, l'insertion et la modification publique
+-- Autorise la lecture, l'insertion et la modification publique nécessaires au jeu,
+-- sans exposer la suppression de parties/questions à la clé anonyme.
 ALTER TABLE public.games ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Activer l'accès anonyme général sur games" 
-ON public.games FOR ALL 
+CREATE POLICY "Autoriser la lecture anonyme sur games"
+ON public.games FOR SELECT
+USING (true);
+CREATE POLICY "Autoriser l'insertion anonyme sur games"
+ON public.games FOR INSERT
+WITH CHECK (true);
+CREATE POLICY "Autoriser la mise à jour anonyme sur games"
+ON public.games FOR UPDATE
 USING (true) 
 WITH CHECK (true);
 
 ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Activer l'accès anonyme général sur questions" 
-ON public.questions FOR ALL 
+CREATE POLICY "Autoriser la lecture anonyme sur questions"
+ON public.questions FOR SELECT
+USING (true);
+CREATE POLICY "Autoriser l'insertion anonyme sur questions"
+ON public.questions FOR INSERT
+WITH CHECK (true);
+CREATE POLICY "Autoriser la mise à jour anonyme sur questions"
+ON public.questions FOR UPDATE
 USING (true) 
 WITH CHECK (true);
 
