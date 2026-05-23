@@ -17,8 +17,12 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
   // Écoute en temps réel Supabase
   useEffect(() => {
     const channel = gamesService.getGameChannel(gameId)
-    if (channel) {
-      channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
+    if (!channel) {
+      return undefined
+    }
+
+    channel
+      .on('broadcast', { event: 'new_question' }, ({ payload }) => {
         setCurrentQuestion({
           question: payload.questionData.description,
           answer: payload.questionData.correctAnswer || payload.questionData.answer,
@@ -31,12 +35,16 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
         setUserAnswer('')
         setResult(null)
       })
-
-      channel.on('broadcast', { event: 'round_end' }, ({ payload }) => {
+      .on('broadcast', { event: 'round_end' }, () => {
         setGameStatus('waiting')
       })
+      .subscribe()
 
-      channelRef.current = channel
+    channelRef.current = channel
+
+    return () => {
+      channelRef.current = null
+      gamesService.removeGameChannel(gameId)
     }
   }, [gameId])
 
