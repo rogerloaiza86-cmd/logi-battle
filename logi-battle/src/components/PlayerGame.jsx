@@ -21,7 +21,8 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
       channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
         setCurrentQuestion({
           question: payload.questionData.description,
-          answer: payload.questionData.correctAnswer || payload.questionData.answer,
+          answer: payload.questionData.correctAnswer ?? payload.questionData.answer,
+          options: payload.questionData.data?.options || [],
           hint: payload.questionData.hints?.[0] || '',
           type: payload.questionData.type,
           category: payload.questionData.category || ''
@@ -34,9 +35,14 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
 
       channel.on('broadcast', { event: 'round_end' }, ({ payload }) => {
         setGameStatus('waiting')
-      })
+      }).subscribe()
 
       channelRef.current = channel
+    }
+
+    return () => {
+      channelRef.current = null
+      gamesService.removeGameChannel(gameId)
     }
   }, [gameId])
 
@@ -184,6 +190,16 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                   <p className="text-xs text-gray-500 mt-3 italic">
                     💡 {currentQuestion.hint}
                   </p>
+                )}
+                {currentQuestion?.options?.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {currentQuestion.options.map((option, index) => (
+                      <div key={`${index}-${option}`} className="flex gap-2 text-sm text-gray-300">
+                        <span className="font-bold text-primary">{index}</span>
+                        <span>{option}</span>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
 

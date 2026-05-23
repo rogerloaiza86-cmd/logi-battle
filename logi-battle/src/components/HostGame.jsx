@@ -13,32 +13,48 @@ export const HostGame = ({ onBack, gameMode }) => {
   const [gameStarted, setGameStarted] = useState(false)
   const [copied, setCopied] = useState(false)
   const [isInitializing, setIsInitializing] = useState(true)
+  const [initError, setInitError] = useState(null)
 
   // Générer un ID de jeu unique et l'enregistrer dans Supabase
   useEffect(() => {
+    let isMounted = true
+
     const initGame = async () => {
       try {
         const id = `GAME-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-        setGameId(id)
-        gameStore.setGameId(id)
-        
-        // Créer la partie dans Supabase
-        await gamesService.createGame('ÉQUIPE ALPHA', 'ÉQUIPE OMEGA', id)
+        const createdGameId = await gamesService.createGame('ÉQUIPE ALPHA', 'ÉQUIPE OMEGA', id)
+
+        if (!isMounted) return
+        setGameId(createdGameId)
+        gameStore.setGameId(createdGameId)
+        setInitError(null)
       } catch (err) {
-        console.error('Erreur lors de la création de la partie sur Supabase:', err)
+        console.error('Erreur lors de la création de la partie:', err)
+        if (!isMounted) return
+        setGameId(null)
+        gameStore.setGameId(null)
+        setInitError('Impossible de créer la partie. Vérifiez la configuration de la base de données.')
       } finally {
-        setIsInitializing(false)
+        if (isMounted) {
+          setIsInitializing(false)
+        }
       }
     }
     
     initGame()
+
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   // URL pour les joueurs (à adapter selon votre déploiement)
   const getPlayerUrl = () => {
-    // En production, remplacez par votre vraie URL
-    const baseUrl = window.location.origin
-    return `${baseUrl}/join?game=${gameId}`
+    if (!gameId) return ''
+    const basePath = import.meta.env.BASE_URL === '/'
+      ? ''
+      : import.meta.env.BASE_URL.replace(/\/$/, '')
+    return `${window.location.origin}${basePath}/join?game=${encodeURIComponent(gameId)}`
   }
 
   // URL du QR Code (utilisation d'une API gratuite)
@@ -48,12 +64,14 @@ export const HostGame = ({ onBack, gameMode }) => {
   }
 
   const copyLink = () => {
+    if (!gameId) return
     navigator.clipboard.writeText(getPlayerUrl())
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
   const startGame = () => {
+    if (!gameId || isInitializing || initError) return
     setGameStarted(true)
     gameStore.setGameStatus('active')
   }
@@ -107,7 +125,17 @@ export const HostGame = ({ onBack, gameMode }) => {
 
             {/* QR Code */}
             <div className="bg-white rounded-xl p-4 w-fit mx-auto mb-6">
-              {gameId && (
+              {isInitializing && (
+                <div className="w-48 h-48 flex items-center justify-center text-slate-500 text-sm text-center">
+                  Création de la partie...
+                </div>
+              )}
+              {!isInitializing && initError && (
+                <div className="w-48 h-48 flex items-center justify-center text-red-600 text-sm text-center px-2">
+                  {initError}
+                </div>
+              )}
+              {!isInitializing && !initError && gameId && (
                 <img
                   src={getQrCodeUrl()}
                   alt="QR Code"
@@ -122,11 +150,12 @@ export const HostGame = ({ onBack, gameMode }) => {
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-slate-900 rounded-lg px-4 py-3 text-center">
                   <span className="text-2xl font-mono font-bold text-primary tracking-widest">
-                    {gameId}
+                    {isInitializing ? '...' : gameId || 'ERREUR'}
                   </span>
                 </div>
                 <button
                   onClick={copyLink}
+                  disabled={!gameId}
                   className="p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
                   title="Copier le lien"
                 >
@@ -140,7 +169,7 @@ export const HostGame = ({ onBack, gameMode }) => {
             {/* Lien URL */}
             <div className="mt-4 p-3 bg-slate-900/50 rounded-lg">
               <p className="text-xs text-gray-500 mb-1">URL directe :</p>
-              <p className="text-xs text-gray-400 truncate">{getPlayerUrl()}</p>
+              <p className="text-xs text-gray-400 truncate">{gameId ? getPlayerUrl() : 'Création impossible'}</p>
             </div>
           </motion.div>
 
@@ -219,7 +248,8 @@ export const HostGame = ({ onBack, gameMode }) => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={startGame}
-              className="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary text-white font-bold py-4 rounded-xl text-lg uppercase tracking-wider shadow-lg shadow-primary/20 transition-all"
+              disabled={!gameId || isInitializing || Boolean(initError)}
+              className="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl text-lg uppercase tracking-wider shadow-lg shadow-primary/20 transition-all"
             >
               Lancer la partie
             </motion.button>
