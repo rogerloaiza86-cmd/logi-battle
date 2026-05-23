@@ -49,8 +49,9 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
 
   useEffect(() => {
     // Configuration du Broadcast
+    const channelGameId = gameStore.gameId
     if (isHost && gameStore.gameId) {
-      const channel = gamesService.getGameChannel(gameStore.gameId)
+      const channel = gamesService.getGameChannel(channelGameId)
       if (channel) {
         channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
           handleAnswer(payload.team, payload.isCorrect)
@@ -62,7 +63,10 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
     startNewRound()
     
     return () => {
-      // Nettoyage au démontage
+      channelRef.current = null
+      if (channelGameId) {
+        gamesService.removeGameChannel(channelGameId)
+      }
     }
   }, [])
 
