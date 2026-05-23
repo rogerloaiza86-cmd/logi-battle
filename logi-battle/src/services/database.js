@@ -54,7 +54,7 @@ export const gamesService = {
     }
 
     if (!USE_FIREBASE) {
-      const gameId = `game_${localDB.nextGameId++}`
+      const gameId = customGameId || `game_${localDB.nextGameId++}`
       const newGame = {
         gameId,
         teamAName,
@@ -71,7 +71,7 @@ export const gamesService = {
       return gameId
     }
 
-    const gameId = `game_${Date.now()}`
+    const gameId = customGameId || `game_${Date.now()}`
     try {
       await setDoc(doc(db, 'games', gameId), {
         gameId,
