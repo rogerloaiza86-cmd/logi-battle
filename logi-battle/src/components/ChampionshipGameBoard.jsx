@@ -52,12 +52,20 @@ export const ChampionshipGameBoard = ({
   const [roundNumber, setRoundNumber] = useState(1)
   const [totalRounds, setTotalRounds] = useState(10)
   const roundStartTime = useRef(null)
+  const gameStatusRef = useRef(gameStatus)
+  const nextRoundTimeoutRef = useRef(null)
   const [matchStartTime, setMatchStartTime] = useState(Date.now())
 
   useEffect(() => {
     startNewRound()
     setMatchStartTime(Date.now())
+
+    return () => clearTimeout(nextRoundTimeoutRef.current)
   }, [])
+
+  useEffect(() => {
+    gameStatusRef.current = gameStatus
+  }, [gameStatus])
 
   useEffect(() => {
     let interval
@@ -123,8 +131,8 @@ export const ChampionshipGameBoard = ({
     
     const delay = question?.type === 'vocabulaire' ? 4000 : 2500
     
-    setTimeout(() => {
-      if (gameStatus !== 'finished') {
+    nextRoundTimeoutRef.current = setTimeout(() => {
+      if (gameStatusRef.current !== 'finished') {
         setRoundNumber(prev => prev + 1)
         startNewRound()
       }

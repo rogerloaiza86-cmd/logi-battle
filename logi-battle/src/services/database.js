@@ -14,7 +14,11 @@ import {
 // Mode DB : 'local', 'firebase', ou 'supabase'
 const DB_MODE = import.meta.env.VITE_DB_MODE || 'local'
 const USE_FIREBASE = DB_MODE === 'firebase'
-const USE_SUPABASE = DB_MODE === 'supabase'
+const USE_SUPABASE = DB_MODE === 'supabase' && Boolean(supabase)
+
+if (DB_MODE === 'supabase' && !supabase) {
+  console.warn('Mode Supabase demandé, mais configuration manquante. Bascule en mode local.')
+}
 
 // ===== LOCAL DATABASE =====
 const localDB = {
@@ -45,7 +49,7 @@ export const gamesService = {
     }
 
     if (!USE_FIREBASE) {
-      const gameId = `game_${localDB.nextGameId++}`
+      const gameId = customGameId || `game_${localDB.nextGameId++}`
       const newGame = {
         gameId,
         teamAName,
@@ -211,6 +215,15 @@ export const gamesService = {
       return localDB.channels[gameId]
     }
     return null
+  },
+
+  removeGameChannel(gameId) {
+    if (USE_SUPABASE && localDB.channels?.[gameId]) {
+      const channel = localDB.channels[gameId]
+      delete localDB.channels[gameId]
+      return supabase.removeChannel(channel)
+    }
+    return Promise.resolve()
   }
 }
 

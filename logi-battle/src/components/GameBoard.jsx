@@ -14,6 +14,7 @@ const VOCABULARY_TIME = 20
 export const GameBoard = ({ onBack, gameMode, isHost }) => {
   const gameStore = useGameStore()
   const channelRef = useRef(null)
+  const nextRoundTimeoutRef = useRef(null)
   
   const [question, setQuestion] = useState(null)
   const [showIncorrect, setShowIncorrect] = useState(false)
@@ -52,17 +53,36 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
     if (isHost && gameStore.gameId) {
       const channel = gamesService.getGameChannel(gameStore.gameId)
       if (channel) {
+        let hasStarted = false
+        const startRoundOnce = () => {
+          if (hasStarted) return
+          hasStarted = true
+          startNewRound()
+        }
+
         channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
           handleAnswer(payload.team, payload.isCorrect)
-        }).subscribe()
+        }).subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            startRoundOnce()
+          }
+        })
         channelRef.current = channel
+
+        const fallback = setTimeout(startRoundOnce, 2000)
+
+        return () => {
+          clearTimeout(fallback)
+          clearTimeout(nextRoundTimeoutRef.current)
+          gamesService.removeGameChannel(gameStore.gameId).catch(console.error)
+        }
       }
     }
 
     startNewRound()
     
     return () => {
-      // Nettoyage au démontage
+      clearTimeout(nextRoundTimeoutRef.current)
     }
   }, [])
 
@@ -147,8 +167,8 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
     
     const delay = question?.type === 'vocabulaire' ? 4000 : 2500
     
-    setTimeout(() => {
-      if (gameStore.gameStatus !== 'finished') {
+    nextRoundTimeoutRef.current = setTimeout(() => {
+      if (useGameStore.getState().gameStatus !== 'finished') {
         setRoundNumber((prev) => prev + 1)
         startNewRound()
       }
@@ -215,6 +235,26 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   // Calculate timer circle progress
   const timerProgress = (timeLeft / roundTime) * 283
   const timerColor = timeLeft <= 5 ? '#ef4444' : timeLeft <= 10 ? '#eab308' : '#f4b942'
+  const questionOptions = question?.data?.options || question?.options || null
+  const isChoiceQuestion = Boolean(question?.isMCQ || question?.isVocabulary || questionOptions)
+
+  const renderTeamQuestion = (team, status, responseTime) => {
+    const commonProps = {
+      question,
+      team,
+      onAnswer: (isCorrect) => handleAnswer(team, isCorrect),
+      isAnswering: !isRoundActive || status !== 'playing',
+      disabled: !isRoundActive || status !== 'playing',
+      responseTime,
+      showCorrectAnswer: bothTeamsAnswered || timeLeft === 0,
+    }
+
+    return isChoiceQuestion ? (
+      <VocabularyCard {...commonProps} />
+    ) : (
+      <QuestionCard {...commonProps} />
+    )
+  }
 
   return (
     <div className="min-h-screen geronimo-screen flex flex-col">
@@ -379,23 +419,42 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
                   {question.description}
                 </h2>
 
-                {/* Options */}
-                <div className="grid grid-cols-2 gap-4">
-                  {['A', 'B', 'C', 'D'].map((letter, index) => (
-                    <button
-                      key={letter}
-                      className="group relative bg-[#234a68] hover:bg-[#2d5875] rounded-2xl p-5 text-left transition-all border border-transparent hover:border-white/10"
-                    >
-                      <span className="absolute top-4 left-4 text-gray-500 text-sm font-bold">{letter}</span>
-                      <p className="text-white font-medium pl-6">
-                        {index === 0 && '1,2 Mètres'}
-                        {index === 1 && '2,4 Mètres'}
-                        {index === 2 && 'Sans Limite'}
-                        {index === 3 && 'Limité par le Poids'}
+                {isHost ? (
+                  questionOptions ? (
+                    <div className="grid grid-cols-2 gap-4">
+                      {questionOptions.map((option, index) => (
+                        <div
+                          key={index}
+                          className="group relative bg-[#234a68] rounded-2xl p-5 text-left border border-transparent"
+                        >
+                          <span className="absolute top-4 left-4 text-gray-500 text-sm font-bold">
+                            {String.fromCharCode(65 + index)}
+                          </span>
+                          <p className="text-white font-medium pl-6">{option}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="bg-[#234a68] rounded-2xl p-5 text-sm text-gray-300">
+                      Les joueurs répondent depuis leur appareil mobile.
+                    </div>
+                  )
+                ) : (
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider text-[#7fa99b] mb-3">
+                        Équipe Étoile
                       </p>
-                    </button>
-                  ))}
-                </div>
+                      {renderTeamQuestion('A', teamAStatus, teamATime)}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider text-[#f4b942] mb-3">
+                        Équipe Boussole
+                      </p>
+                      {renderTeamQuestion('B', teamBStatus, teamBTime)}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

@@ -36,9 +36,10 @@ export const HostGame = ({ onBack, gameMode }) => {
 
   // URL pour les joueurs (à adapter selon votre déploiement)
   const getPlayerUrl = () => {
-    // En production, remplacez par votre vraie URL
-    const baseUrl = window.location.origin
-    return `${baseUrl}/join?game=${gameId}`
+    const basePath = import.meta.env.BASE_URL === '/'
+      ? ''
+      : import.meta.env.BASE_URL.replace(/\/$/, '')
+    return `${window.location.origin}${basePath}/join?game=${gameId}`
   }
 
   // URL du QR Code (utilisation d'une API gratuite)
