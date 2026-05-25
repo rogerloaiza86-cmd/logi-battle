@@ -36,6 +36,11 @@ function App() {
   const [isArchivesMode, setIsArchivesMode] = useState(false)
   
   const { recordMatch } = useChampionshipStore()
+  const appBasePath = import.meta.env.BASE_URL.replace(/\/$/, '')
+  const isJoinRoute =
+    currentPath === '/join' ||
+    (appBasePath && currentPath === `${appBasePath}/join`) ||
+    window.location.search.includes('game=')
 
   // Écouter les changements d'URL
   useEffect(() => {
@@ -58,7 +63,7 @@ function App() {
   }
 
   // Route: /join - Page pour les joueurs qui scannent le QR
-  if (currentPath === '/join' || window.location.search.includes('game=')) {
+  if (isJoinRoute) {
     return (
       <div className="dark">
         <PlayerJoin userProfile={userProfile} />
