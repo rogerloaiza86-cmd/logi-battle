@@ -48,21 +48,37 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   }, [gameStore.teamA.score, gameStore.teamB.score, gameStore.ropePosition, isHost, gameStore.gameId])
 
   useEffect(() => {
+    let didStartRound = false
+    const startRoundOnce = () => {
+      if (didStartRound) return
+      didStartRound = true
+      startNewRound()
+    }
+
     // Configuration du Broadcast
     if (isHost && gameStore.gameId) {
       const channel = gamesService.getGameChannel(gameStore.gameId)
       if (channel) {
         channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
           handleAnswer(payload.team, payload.isCorrect)
-        }).subscribe()
-        channelRef.current = channel
+        }).subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            channelRef.current = channel
+            startRoundOnce()
+          }
+        })
+
+        return () => {
+          channelRef.current = null
+          gamesService.removeGameChannel(gameStore.gameId)
+        }
       }
     }
 
-    startNewRound()
+    startRoundOnce()
     
     return () => {
-      // Nettoyage au démontage
+      channelRef.current = null
     }
   }, [])
 
@@ -130,7 +146,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
         event: 'round_end',
         payload: {
           winner: winner,
-          correctAnswer: question?.answer
+          correctAnswer: question?.correctAnswer ?? question?.answer
         }
       })
     }
