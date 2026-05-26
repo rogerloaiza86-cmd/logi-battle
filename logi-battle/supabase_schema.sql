@@ -26,17 +26,32 @@ CREATE TABLE IF NOT EXISTS public.questions (
 );
 
 -- Sécurité RLS (Row Level Security)
--- Autorise la lecture, l'insertion et la modification publique
+-- Le client public doit pouvoir créer/lire/mettre à jour les parties en classe,
+-- mais aucun client anon ne doit pouvoir supprimer les données.
 ALTER TABLE public.games ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Activer l'accès anonyme général sur games" 
-ON public.games FOR ALL 
-USING (true) 
+DROP POLICY IF EXISTS "Activer l'accès anonyme général sur games" ON public.games;
+CREATE POLICY "Autoriser la lecture publique sur games"
+ON public.games FOR SELECT
+USING (true);
+CREATE POLICY "Autoriser la creation publique sur games"
+ON public.games FOR INSERT
+WITH CHECK (true);
+CREATE POLICY "Autoriser la mise a jour publique sur games"
+ON public.games FOR UPDATE
+USING (true)
 WITH CHECK (true);
 
 ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Activer l'accès anonyme général sur questions" 
-ON public.questions FOR ALL 
-USING (true) 
+DROP POLICY IF EXISTS "Activer l'accès anonyme général sur questions" ON public.questions;
+CREATE POLICY "Autoriser la lecture publique sur questions"
+ON public.questions FOR SELECT
+USING (true);
+CREATE POLICY "Autoriser la creation publique sur questions"
+ON public.questions FOR INSERT
+WITH CHECK (true);
+CREATE POLICY "Autoriser la mise a jour publique sur questions"
+ON public.questions FOR UPDATE
+USING (true)
 WITH CHECK (true);
 
 -- Activer le temps réel (Realtime) sur la table games

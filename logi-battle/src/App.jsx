@@ -47,11 +47,6 @@ function App() {
     return () => window.removeEventListener('popstate', handleLocationChange)
   }, [])
 
-  // Écran de connexion prioritaire
-  if (!userProfile) {
-    return <Login onLogin={setUserProfile} />
-  }
-
   const handleLogout = () => {
     localStorage.removeItem('user_profile')
     setUserProfile(null)
@@ -64,6 +59,11 @@ function App() {
         <PlayerJoin userProfile={userProfile} />
       </div>
     )
+  }
+
+  // Écran de connexion prioritaire pour l'application hôte.
+  if (!userProfile) {
+    return <Login onLogin={setUserProfile} />
   }
 
   // Route: /host - Mode hôte avec QR code
