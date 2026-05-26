@@ -19,11 +19,9 @@ export const HostGame = ({ onBack, gameMode }) => {
     const initGame = async () => {
       try {
         const id = `GAME-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+        await gamesService.createGame('ÉQUIPE ALPHA', 'ÉQUIPE OMEGA', id)
         setGameId(id)
         gameStore.setGameId(id)
-        
-        // Créer la partie dans Supabase
-        await gamesService.createGame('ÉQUIPE ALPHA', 'ÉQUIPE OMEGA', id)
       } catch (err) {
         console.error('Erreur lors de la création de la partie sur Supabase:', err)
       } finally {
@@ -34,11 +32,13 @@ export const HostGame = ({ onBack, gameMode }) => {
     initGame()
   }, [])
 
-  // URL pour les joueurs (à adapter selon votre déploiement)
+  // URL pour les joueurs, compatible avec le base path GitHub Pages.
   const getPlayerUrl = () => {
-    // En production, remplacez par votre vraie URL
-    const baseUrl = window.location.origin
-    return `${baseUrl}/join?game=${gameId}`
+    const appBase = import.meta.env.BASE_URL || '/'
+    const basePath = appBase.endsWith('/') ? appBase : `${appBase}/`
+    const url = new URL(basePath, window.location.origin)
+    url.searchParams.set('game', gameId)
+    return url.toString()
   }
 
   // URL du QR Code (utilisation d'une API gratuite)
@@ -54,6 +54,7 @@ export const HostGame = ({ onBack, gameMode }) => {
   }
 
   const startGame = () => {
+    if (!gameId || isInitializing) return
     setGameStarted(true)
     gameStore.setGameStatus('active')
   }
@@ -219,9 +220,10 @@ export const HostGame = ({ onBack, gameMode }) => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={startGame}
-              className="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary text-white font-bold py-4 rounded-xl text-lg uppercase tracking-wider shadow-lg shadow-primary/20 transition-all"
+              disabled={!gameId || isInitializing}
+              className="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary text-white font-bold py-4 rounded-xl text-lg uppercase tracking-wider shadow-lg shadow-primary/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Lancer la partie
+              {isInitializing ? 'Création de la partie...' : 'Lancer la partie'}
             </motion.button>
 
             <p className="text-xs text-gray-500 text-center">
