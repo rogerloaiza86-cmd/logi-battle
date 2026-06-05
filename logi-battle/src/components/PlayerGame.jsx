@@ -19,12 +19,21 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
     const channel = gamesService.getGameChannel(gameId)
     if (channel) {
       channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
+        const questionData = payload.questionData
+        const answer = questionData?.data?.correctOption ??
+          questionData?.correctOption ??
+          questionData?.correctAnswer ??
+          questionData?.answer
+
         setCurrentQuestion({
-          question: payload.questionData.description,
-          answer: payload.questionData.correctAnswer || payload.questionData.answer,
-          hint: payload.questionData.hints?.[0] || '',
-          type: payload.questionData.type,
-          category: payload.questionData.category || ''
+          question: questionData?.description,
+          answer,
+          options: questionData?.data?.options || questionData?.options || null,
+          explanation: questionData?.data?.explanation || questionData?.explanation || '',
+          hint: questionData?.hints?.[0] || '',
+          type: questionData?.type,
+          category: questionData?.data?.category || questionData?.category || '',
+          timeLimit: payload.time || 30
         })
         setTimeLeft(payload.time || 30)
         setGameStatus('playing')
@@ -36,7 +45,15 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
         setGameStatus('waiting')
       })
 
+      channel.subscribe()
       channelRef.current = channel
+    }
+
+    return () => {
+      if (channelRef.current) {
+        gamesService.removeGameChannel(channelRef.current)
+        channelRef.current = null
+      }
     }
   }, [gameId])
 
@@ -48,7 +65,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
         setTimeLeft((prev) => prev - 1)
       }, 1000)
     } else if (timeLeft === 0 && gameStatus === 'playing') {
-      handleSubmit()
+      handleSubmit('', true)
     }
     return () => clearInterval(interval)
   }, [gameStatus, timeLeft])
@@ -67,14 +84,21 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
     }
   }
 
-  const handleSubmit = () => {
-    if (!userAnswer || gameStatus !== 'playing') return
+  const handleOptionClick = (index) => {
+    if (gameStatus !== 'playing') return
+    setUserAnswer(String(index))
+  }
+
+  const handleSubmit = (answerOverride = userAnswer, forceSubmit = false) => {
+    const submittedAnswer = String(answerOverride ?? '').trim()
+    if ((!submittedAnswer && !forceSubmit) || gameStatus !== 'playing') return
     
     // Pour vocabulaire ou culture (lettres A,B,C,D transformées potentiellement) ou chiffres
     // La logique existante comparait parseInt avec number. Ajustons si qcm.
-    const isCorrect = 
-      String(userAnswer).trim().toLowerCase() === String(currentQuestion?.answer).trim().toLowerCase() ||
-      parseInt(userAnswer) === currentQuestion?.answer
+    const isCorrect = submittedAnswer
+      ? String(submittedAnswer).toLowerCase() === String(currentQuestion?.answer).trim().toLowerCase() ||
+        parseInt(submittedAnswer) === currentQuestion?.answer
+      : false
       
     setResult(isCorrect ? 'correct' : 'wrong')
     setGameStatus('answered')
@@ -97,6 +121,14 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
     if (timeLeft <= 5) return 'text-red-500'
     if (timeLeft <= 10) return 'text-amber-500'
     return 'text-white'
+  }
+
+  const getAnswerLabel = (answer) => {
+    if (!currentQuestion?.options) return answer
+    const index = Number(answer)
+    return Number.isInteger(index) && currentQuestion.options[index]
+      ? `${String.fromCharCode(65 + index)} - ${currentQuestion.options[index]}`
+      : answer
   }
 
   // Écran d'attente
@@ -187,36 +219,60 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                 )}
               </div>
 
-              {/* Answer Display */}
-              <div className={`bg-slate-900 rounded-xl p-4 mb-4 border-2 text-center ${
-                isTeamA ? 'border-blue-500/30' : 'border-primary/30'
-              }`}>
-                <span className={`text-4xl font-black ${userAnswer ? 'text-white' : 'text-gray-600'}`}>
-                  {userAnswer || '---'}
-                </span>
-              </div>
+              {currentQuestion?.options ? (
+                <div className="grid gap-2">
+                  {currentQuestion.options.map((option, index) => (
+                    <motion.button
+                      key={option}
+                      onClick={() => handleOptionClick(index)}
+                      whileTap={{ scale: 0.98 }}
+                      className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
+                        userAnswer === String(index)
+                          ? isTeamA
+                            ? 'border-blue-500 bg-blue-500/20 text-blue-100'
+                            : 'border-primary bg-primary/20 text-amber-100'
+                          : 'border-white/10 bg-slate-900 text-gray-300'
+                      }`}
+                    >
+                      <span className="mr-3 font-black">{String.fromCharCode(65 + index)}</span>
+                      {option}
+                    </motion.button>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {/* Answer Display */}
+                  <div className={`bg-slate-900 rounded-xl p-4 mb-4 border-2 text-center ${
+                    isTeamA ? 'border-blue-500/30' : 'border-primary/30'
+                  }`}>
+                    <span className={`text-4xl font-black ${userAnswer ? 'text-white' : 'text-gray-600'}`}>
+                      {userAnswer || '---'}
+                    </span>
+                  </div>
 
-              {/* Keypad */}
-              <div className="grid grid-cols-3 gap-2">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'C', 0, 'backspace'].map((num) => (
-                  <motion.button
-                    key={num}
-                    onClick={() => handleNumberClick(num)}
-                    whileTap={{ scale: 0.95 }}
-                    className={`aspect-square rounded-xl font-bold text-xl transition-colors ${
-                      isTeamA
-                        ? 'bg-slate-800 active:bg-blue-500/30 text-white'
-                        : 'bg-slate-800 active:bg-primary/30 text-white'
-                    }`}
-                  >
-                    {num === 'backspace' ? (
-                      <span className="material-icons">backspace</span>
-                    ) : (
-                      num
-                    )}
-                  </motion.button>
-                ))}
-              </div>
+                  {/* Keypad */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'C', 0, 'backspace'].map((num) => (
+                      <motion.button
+                        key={num}
+                        onClick={() => handleNumberClick(num)}
+                        whileTap={{ scale: 0.95 }}
+                        className={`aspect-square rounded-xl font-bold text-xl transition-colors ${
+                          isTeamA
+                            ? 'bg-slate-800 active:bg-blue-500/30 text-white'
+                            : 'bg-slate-800 active:bg-primary/30 text-white'
+                        }`}
+                      >
+                        {num === 'backspace' ? (
+                          <span className="material-icons">backspace</span>
+                        ) : (
+                          num
+                        )}
+                      </motion.button>
+                    ))}
+                  </div>
+                </>
+              )}
 
               {/* Submit Button */}
               <motion.button
@@ -249,7 +305,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                 {result === 'correct' ? 'Bonne réponse !' : 'Mauvaise réponse'}
               </h2>
               <p className="text-gray-400 mt-2">
-                La réponse était : <span className="text-white font-bold">{currentQuestion?.answer}</span>
+                La réponse était : <span className="text-white font-bold">{getAnswerLabel(currentQuestion?.answer)}</span>
               </p>
               <p className="text-gray-500 text-sm mt-4">Prochaine question dans quelques secondes...</p>
             </motion.div>
