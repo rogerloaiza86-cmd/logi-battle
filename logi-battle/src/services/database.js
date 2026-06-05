@@ -1,5 +1,5 @@
 import db from './firebase'
-import { supabase } from './supabase'
+import { supabase, isSupabaseConfigured } from './supabase'
 import {
   collection,
   doc,
@@ -14,7 +14,7 @@ import {
 // Mode DB : 'local', 'firebase', ou 'supabase'
 const DB_MODE = import.meta.env.VITE_DB_MODE || 'local'
 const USE_FIREBASE = DB_MODE === 'firebase'
-const USE_SUPABASE = DB_MODE === 'supabase'
+const USE_SUPABASE = DB_MODE === 'supabase' && isSupabaseConfigured
 
 // ===== LOCAL DATABASE =====
 const localDB = {
@@ -45,7 +45,7 @@ export const gamesService = {
     }
 
     if (!USE_FIREBASE) {
-      const gameId = `game_${localDB.nextGameId++}`
+      const gameId = customGameId || `game_${localDB.nextGameId++}`
       const newGame = {
         gameId,
         teamAName,
@@ -211,6 +211,13 @@ export const gamesService = {
       return localDB.channels[gameId]
     }
     return null
+  },
+
+  removeGameChannel(channel) {
+    if (USE_SUPABASE && channel) {
+      return supabase.removeChannel(channel)
+    }
+    return Promise.resolve()
   }
 }
 

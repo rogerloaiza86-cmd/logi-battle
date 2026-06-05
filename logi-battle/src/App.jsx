@@ -17,7 +17,15 @@ import './styles/index.css'
 function App() {
   const [userProfile, setUserProfile] = useState(() => {
     const saved = localStorage.getItem('user_profile')
-    return saved ? JSON.parse(saved) : null
+    if (!saved) return null
+
+    try {
+      return JSON.parse(saved)
+    } catch (error) {
+      console.warn('Profil localStorage invalide, réinitialisation.', error)
+      localStorage.removeItem('user_profile')
+      return null
+    }
   })
   
   const [currentPath, setCurrentPath] = useState(window.location.pathname)
@@ -57,8 +65,10 @@ function App() {
     setUserProfile(null)
   }
 
+  const isJoinRoute = currentPath.endsWith('/join') || window.location.search.includes('game=')
+
   // Route: /join - Page pour les joueurs qui scannent le QR
-  if (currentPath === '/join' || window.location.search.includes('game=')) {
+  if (isJoinRoute) {
     return (
       <div className="dark">
         <PlayerJoin userProfile={userProfile} />
