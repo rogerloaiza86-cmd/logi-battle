@@ -7,6 +7,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
   const channelRef = useRef(null)
   const [gameStatus, setGameStatus] = useState('waiting') // waiting, playing, answered, finished
   const [currentQuestion, setCurrentQuestion] = useState(null)
+  const [answerOptions, setAnswerOptions] = useState([])
   const [userAnswer, setUserAnswer] = useState('')
   const [timeLeft, setTimeLeft] = useState(30)
   const [score, setScore] = useState(0)
@@ -19,13 +20,15 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
     const channel = gamesService.getGameChannel(gameId)
     if (channel) {
       channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
+        const questionData = payload.questionData
         setCurrentQuestion({
-          question: payload.questionData.description,
-          answer: payload.questionData.correctAnswer || payload.questionData.answer,
-          hint: payload.questionData.hints?.[0] || '',
-          type: payload.questionData.type,
-          category: payload.questionData.category || ''
+          question: questionData.description,
+          answer: questionData.correctAnswer ?? questionData.answer,
+          hint: questionData.hints?.[0] || '',
+          type: questionData.type,
+          category: questionData.data?.category || questionData.category || ''
         })
+        setAnswerOptions(questionData.data?.options || questionData.options || [])
         setTimeLeft(payload.time || 30)
         setGameStatus('playing')
         setUserAnswer('')
@@ -36,7 +39,13 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
         setGameStatus('waiting')
       })
 
+      channel.subscribe()
       channelRef.current = channel
+    }
+
+    return () => {
+      channelRef.current = null
+      gamesService.removeGameChannel(gameId)
     }
   }, [gameId])
 
@@ -48,7 +57,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
         setTimeLeft((prev) => prev - 1)
       }, 1000)
     } else if (timeLeft === 0 && gameStatus === 'playing') {
-      handleSubmit()
+      handleSubmit(true)
     }
     return () => clearInterval(interval)
   }, [gameStatus, timeLeft])
@@ -67,14 +76,15 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
     }
   }
 
-  const handleSubmit = () => {
-    if (!userAnswer || gameStatus !== 'playing') return
+  const handleSubmit = (forceWrong = false) => {
+    if ((!userAnswer && !forceWrong) || gameStatus !== 'playing') return
     
     // Pour vocabulaire ou culture (lettres A,B,C,D transformées potentiellement) ou chiffres
     // La logique existante comparait parseInt avec number. Ajustons si qcm.
-    const isCorrect = 
+    const isCorrect = !forceWrong && (
       String(userAnswer).trim().toLowerCase() === String(currentQuestion?.answer).trim().toLowerCase() ||
       parseInt(userAnswer) === currentQuestion?.answer
+    )
       
     setResult(isCorrect ? 'correct' : 'wrong')
     setGameStatus('answered')
@@ -92,6 +102,8 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
       })
     }
   }
+
+  const hasOptions = answerOptions.length > 0
 
   const getTimerColor = () => {
     if (timeLeft <= 5) return 'text-red-500'
@@ -187,6 +199,28 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                 )}
               </div>
 
+              {hasOptions && (
+                <div className="grid grid-cols-1 gap-2 mb-4">
+                  {answerOptions.map((option, index) => (
+                    <motion.button
+                      key={`${option}-${index}`}
+                      onClick={() => setUserAnswer(String(index))}
+                      whileTap={{ scale: 0.98 }}
+                      className={`rounded-xl p-3 text-left border transition-colors ${
+                        userAnswer === String(index)
+                          ? isTeamA
+                            ? 'bg-blue-500/20 border-blue-500 text-blue-100'
+                            : 'bg-primary/20 border-primary text-amber-100'
+                          : 'bg-slate-900 border-white/10 text-gray-300'
+                      }`}
+                    >
+                      <span className="font-black mr-2">{index}</span>
+                      {option}
+                    </motion.button>
+                  ))}
+                </div>
+              )}
+
               {/* Answer Display */}
               <div className={`bg-slate-900 rounded-xl p-4 mb-4 border-2 text-center ${
                 isTeamA ? 'border-blue-500/30' : 'border-primary/30'
@@ -220,7 +254,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
 
               {/* Submit Button */}
               <motion.button
-                onClick={handleSubmit}
+                onClick={() => handleSubmit()}
                 disabled={!userAnswer}
                 whileTap={{ scale: 0.98 }}
                 className={`w-full mt-3 py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all ${
@@ -249,7 +283,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                 {result === 'correct' ? 'Bonne réponse !' : 'Mauvaise réponse'}
               </h2>
               <p className="text-gray-400 mt-2">
-                La réponse était : <span className="text-white font-bold">{currentQuestion?.answer}</span>
+                La réponse était : <span className="text-white font-bold">{answerOptions[currentQuestion?.answer] ?? currentQuestion?.answer}</span>
               </p>
               <p className="text-gray-500 text-sm mt-4">Prochaine question dans quelques secondes...</p>
             </motion.div>
