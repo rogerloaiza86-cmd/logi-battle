@@ -54,4 +54,7 @@ const gameBoardSource = readAppFile('src/components/GameBoard.jsx')
 assert(gameBoardSource.includes("status === 'SUBSCRIBED'"), 'L’hôte doit attendre l’abonnement Broadcast avant la première question')
 assert(gameBoardSource.includes('roundStateRef'), 'Le scoring doit utiliser un snapshot synchronisé de la manche')
 
+const questionCardSource = readAppFile('src/components/QuestionCard.jsx')
+assert(questionCardSource.includes('/^\\d$/'), 'La saisie clavier ne doit accepter que des chiffres uniques')
+
 console.log('Critical fix invariants verified')
