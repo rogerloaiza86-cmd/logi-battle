@@ -12,6 +12,7 @@ import HQDashboard from './components/HQDashboard'
 import Archives from './components/Archives'
 import Login from './components/Login'
 import { useChampionshipStore } from './hooks/useChampionshipStore'
+import { stripAppBasePath } from './utils/url'
 import './styles/index.css'
 
 function App() {
@@ -20,7 +21,7 @@ function App() {
     return saved ? JSON.parse(saved) : null
   })
   
-  const [currentPath, setCurrentPath] = useState(window.location.pathname)
+  const [currentPath, setCurrentPath] = useState(() => stripAppBasePath(window.location.pathname, import.meta.env.BASE_URL))
   const [gameMode, setGameMode] = useState(null)
   const [showTeamSetup, setShowTeamSetup] = useState(false)
   const [isHostMode, setIsHostMode] = useState(false)
@@ -40,7 +41,7 @@ function App() {
   // Écouter les changements d'URL
   useEffect(() => {
     const handleLocationChange = () => {
-      setCurrentPath(window.location.pathname)
+      setCurrentPath(stripAppBasePath(window.location.pathname, import.meta.env.BASE_URL))
     }
 
     window.addEventListener('popstate', handleLocationChange)

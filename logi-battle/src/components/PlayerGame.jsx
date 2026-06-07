@@ -19,12 +19,14 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
     const channel = gamesService.getGameChannel(gameId)
     if (channel) {
       channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
+        const questionData = payload.questionData
         setCurrentQuestion({
-          question: payload.questionData.description,
-          answer: payload.questionData.correctAnswer || payload.questionData.answer,
-          hint: payload.questionData.hints?.[0] || '',
-          type: payload.questionData.type,
-          category: payload.questionData.category || ''
+          question: questionData.description,
+          answer: questionData.correctAnswer ?? questionData.answer,
+          options: questionData.data?.options || questionData.options || null,
+          hint: questionData.hints?.[0] || '',
+          type: questionData.type,
+          category: questionData.data?.category || questionData.category || ''
         })
         setTimeLeft(payload.time || 30)
         setGameStatus('playing')
@@ -37,6 +39,14 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
       })
 
       channelRef.current = channel
+      channel.subscribe()
+    }
+
+    return () => {
+      if (channelRef.current) {
+        gamesService.removeGameChannel(gameId)
+        channelRef.current = null
+      }
     }
   }, [gameId])
 
@@ -48,7 +58,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
         setTimeLeft((prev) => prev - 1)
       }, 1000)
     } else if (timeLeft === 0 && gameStatus === 'playing') {
-      handleSubmit()
+      handleSubmit({ force: true })
     }
     return () => clearInterval(interval)
   }, [gameStatus, timeLeft])
@@ -67,14 +77,18 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
     }
   }
 
-  const handleSubmit = () => {
-    if (!userAnswer || gameStatus !== 'playing') return
+  const handleSubmit = ({ force = false } = {}) => {
+    if (gameStatus !== 'playing') return
+    if (!force && !userAnswer) return
     
     // Pour vocabulaire ou culture (lettres A,B,C,D transformées potentiellement) ou chiffres
     // La logique existante comparait parseInt avec number. Ajustons si qcm.
+    const hasAnswer = String(userAnswer).trim() !== ''
     const isCorrect = 
-      String(userAnswer).trim().toLowerCase() === String(currentQuestion?.answer).trim().toLowerCase() ||
-      parseInt(userAnswer) === currentQuestion?.answer
+      hasAnswer && (
+        String(userAnswer).trim().toLowerCase() === String(currentQuestion?.answer).trim().toLowerCase() ||
+        parseInt(userAnswer) === currentQuestion?.answer
+      )
       
     setResult(isCorrect ? 'correct' : 'wrong')
     setGameStatus('answered')
@@ -195,6 +209,26 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                   {userAnswer || '---'}
                 </span>
               </div>
+
+              {currentQuestion?.options && (
+                <div className="grid gap-2 mb-4">
+                  {currentQuestion.options.map((option, index) => (
+                    <button
+                      type="button"
+                      key={index}
+                      onClick={() => gameStatus === 'playing' && setUserAnswer(String(index))}
+                      className={`bg-slate-900 border rounded-xl p-3 text-left text-sm transition-colors ${
+                        userAnswer === String(index)
+                          ? isTeamA ? 'border-blue-500 text-blue-300' : 'border-primary text-primary'
+                          : 'border-white/10 text-gray-300'
+                      }`}
+                    >
+                      <span className="font-bold mr-2">{index}</span>
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Keypad */}
               <div className="grid grid-cols-3 gap-2">
