@@ -52,11 +52,25 @@ export const ChampionshipGameBoard = ({
   const [roundNumber, setRoundNumber] = useState(1)
   const [totalRounds, setTotalRounds] = useState(10)
   const roundStartTime = useRef(null)
+  const roundTimeoutRef = useRef(null)
+  const roundActiveRef = useRef(true)
+  const gameStatusRef = useRef('active')
+  const teamAStatusRef = useRef('playing')
+  const teamBStatusRef = useRef('playing')
+  const teamATimeRef = useRef(null)
+  const teamBTimeRef = useRef(null)
+  const ropePositionRef = useRef(0)
   const [matchStartTime, setMatchStartTime] = useState(Date.now())
 
   useEffect(() => {
     startNewRound()
     setMatchStartTime(Date.now())
+
+    return () => {
+      if (roundTimeoutRef.current) {
+        clearTimeout(roundTimeoutRef.current)
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -74,11 +88,54 @@ export const ChampionshipGameBoard = ({
   // Vérifier fin de match
   useEffect(() => {
     if (ropePosition >= 100 || ropePosition <= -100 || roundNumber > totalRounds) {
-      setGameStatus('finished')
+      finishMatch()
     }
   }, [ropePosition, roundNumber])
 
+  useEffect(() => {
+    ropePositionRef.current = ropePosition
+  }, [ropePosition])
+
+  const finishMatch = () => {
+    gameStatusRef.current = 'finished'
+    roundActiveRef.current = false
+    setIsRoundActive(false)
+    setGameStatus('finished')
+  }
+
+  const setRoundActive = (active) => {
+    roundActiveRef.current = active
+    setIsRoundActive(active)
+  }
+
+  const resetTeamState = () => {
+    teamAStatusRef.current = 'playing'
+    teamBStatusRef.current = 'playing'
+    teamATimeRef.current = null
+    teamBTimeRef.current = null
+    setTeamAStatus('playing')
+    setTeamBStatus('playing')
+    setTeamATime(null)
+    setTeamBTime(null)
+  }
+
+  const setTeamAnswerState = (team, status, responseTime = null) => {
+    if (team === 'A') {
+      teamAStatusRef.current = status
+      teamATimeRef.current = responseTime
+      setTeamAStatus(status)
+      setTeamATime(responseTime)
+    } else {
+      teamBStatusRef.current = status
+      teamBTimeRef.current = responseTime
+      setTeamBStatus(status)
+      setTeamBTime(responseTime)
+    }
+  }
+
   const startNewRound = () => {
+    if (gameStatusRef.current === 'finished') return
+
     const newQuestion = {
       ...generateNextQuestion(gameMode),
       id: `q_${Date.now()}`,
@@ -87,44 +144,56 @@ export const ChampionshipGameBoard = ({
     const time = newQuestion.type === 'vocabulaire' ? VOCABULARY_TIME : ROUND_TIME
     setRoundTime(time)
     setTimeLeft(time)
-    setIsRoundActive(true)
-    setTeamAStatus('playing')
-    setTeamBStatus('playing')
-    setTeamATime(null)
-    setTeamBTime(null)
+    setRoundActive(true)
+    resetTeamState()
     setRoundWinner(null)
     setBothTeamsAnswered(false)
     roundStartTime.current = Date.now()
   }
 
   const endRound = () => {
-    setIsRoundActive(false)
+    if (!roundActiveRef.current) return
+
+    setRoundActive(false)
     setBothTeamsAnswered(true)
     
     let winner = null
     
-    if (teamAStatus === 'correct' && teamBStatus === 'correct') {
-      winner = teamATime < teamBTime ? 'A' : 'B'
-    } else if (teamAStatus === 'correct') {
+    if (teamAStatusRef.current === 'correct' && teamBStatusRef.current === 'correct') {
+      winner = teamATimeRef.current < teamBTimeRef.current ? 'A' : 'B'
+    } else if (teamAStatusRef.current === 'correct') {
       winner = 'A'
-    } else if (teamBStatus === 'correct') {
+    } else if (teamBStatusRef.current === 'correct') {
       winner = 'B'
     }
     
     setRoundWinner(winner)
     
+    const nextRopePosition = winner === 'A'
+      ? Math.min(100, ropePositionRef.current + 10)
+      : winner === 'B'
+        ? Math.max(-100, ropePositionRef.current - 10)
+        : ropePositionRef.current
+
     if (winner === 'A') {
       setTeamA(prev => ({ ...prev, score: prev.score + 1 }))
-      setRopePosition(prev => Math.min(100, prev + 10))
+      ropePositionRef.current = nextRopePosition
+      setRopePosition(nextRopePosition)
     } else if (winner === 'B') {
       setTeamB(prev => ({ ...prev, score: prev.score + 1 }))
-      setRopePosition(prev => Math.max(-100, prev - 10))
+      ropePositionRef.current = nextRopePosition
+      setRopePosition(nextRopePosition)
+    }
+    const willFinish = nextRopePosition >= 100 || nextRopePosition <= -100 || roundNumber >= totalRounds
+    if (willFinish) {
+      finishMatch()
+      return
     }
     
     const delay = question?.type === 'vocabulaire' ? 4000 : 2500
     
-    setTimeout(() => {
-      if (gameStatus !== 'finished') {
+    roundTimeoutRef.current = setTimeout(() => {
+      if (gameStatusRef.current !== 'finished') {
         setRoundNumber(prev => prev + 1)
         startNewRound()
       }
@@ -132,29 +201,31 @@ export const ChampionshipGameBoard = ({
   }
 
   const handleAnswer = (team, isCorrect) => {
+    if (!roundActiveRef.current) return
+    if (team === 'A' && teamAStatusRef.current !== 'playing') return
+    if (team === 'B' && teamBStatusRef.current !== 'playing') return
+
     const responseTime = Date.now() - roundStartTime.current
     
     if (team === 'A') {
       if (isCorrect) {
-        setTeamAStatus('correct')
-        setTeamATime(responseTime)
+        setTeamAnswerState('A', 'correct', responseTime)
       } else {
-        setTeamAStatus('wrong')
+        setTeamAnswerState('A', 'wrong')
         setShowIncorrect(true)
         setTimeout(() => setShowIncorrect(false), 400)
       }
     } else {
       if (isCorrect) {
-        setTeamBStatus('correct')
-        setTeamBTime(responseTime)
+        setTeamAnswerState('B', 'correct', responseTime)
       } else {
-        setTeamBStatus('wrong')
+        setTeamAnswerState('B', 'wrong')
         setShowIncorrect(true)
         setTimeout(() => setShowIncorrect(false), 400)
       }
     }
     
-    const otherTeamStatus = team === 'A' ? teamBStatus : teamAStatus
+    const otherTeamStatus = team === 'A' ? teamBStatusRef.current : teamAStatusRef.current
     
     if (otherTeamStatus !== 'playing') {
       setBothTeamsAnswered(true)

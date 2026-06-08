@@ -3,7 +3,8 @@ import { motion } from 'framer-motion'
 
 const STORAGE_KEYS = {
   players: 'logi-battle-players',
-  championship: 'logi-battle-championship',
+  championship: 'championship-storage',
+  legacyChampionship: 'logi-battle-championship',
   history: 'logi-battle-game-history',
   settings: 'logi-battle-settings',
 }
@@ -32,7 +33,12 @@ export const HQDashboard = ({ onBack }) => {
   const loadStats = () => {
     // Load from all storage keys
     const players = JSON.parse(localStorage.getItem(STORAGE_KEYS.players) || '[]')
-    const championship = JSON.parse(localStorage.getItem(STORAGE_KEYS.championship) || '{}')
+    const storedChampionship = JSON.parse(
+      localStorage.getItem(STORAGE_KEYS.championship) ||
+      localStorage.getItem(STORAGE_KEYS.legacyChampionship) ||
+      '{}'
+    )
+    const championship = storedChampionship.state || storedChampionship
     const history = JSON.parse(localStorage.getItem(STORAGE_KEYS.history) || '[]')
 
     const classes = championship.classes || []
@@ -68,13 +74,17 @@ export const HQDashboard = ({ onBack }) => {
           type: 'match',
           date: match.date,
           description: `Match: ${cls.groups?.find(g => g.id === match.challengerId)?.name || 'Challenger'} vs ${cls.groups?.find(g => g.id === match.championId)?.name || 'Champion'}`,
-          result: match.winner === 'challenger' ? 'Nouveau Champion!' : 'Défense réussie',
+          result: match.winner === 'challenger'
+            ? 'Nouveau Champion!'
+            : match.winner === 'champion'
+              ? 'Défense réussie'
+              : 'Match nul',
         })
       })
     })
 
     // Sort by date and take last 10
-    activities.sort((a, b) => b.date - a.date)
+    activities.sort((a, b) => new Date(b.date) - new Date(a.date))
     setRecentActivity(activities.slice(0, 10))
   }
 

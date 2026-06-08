@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const STORAGE_KEYS = {
-  championship: 'logi-battle-championship',
+  championship: 'championship-storage',
+  legacyChampionship: 'logi-battle-championship',
   players: 'logi-battle-players',
   history: 'logi-battle-game-history',
 }
@@ -20,7 +21,12 @@ export const Archives = ({ onBack }) => {
 
   const loadData = () => {
     // Load championship data
-    const championship = JSON.parse(localStorage.getItem(STORAGE_KEYS.championship) || '{}')
+    const storedChampionship = JSON.parse(
+      localStorage.getItem(STORAGE_KEYS.championship) ||
+      localStorage.getItem(STORAGE_KEYS.legacyChampionship) ||
+      '{}'
+    )
+    const championship = storedChampionship.state || storedChampionship
     const players = JSON.parse(localStorage.getItem(STORAGE_KEYS.players) || '[]')
     
     // Extract all matches
@@ -42,7 +48,7 @@ export const Archives = ({ onBack }) => {
     })
     
     // Sort by date (newest first)
-    allMatches.sort((a, b) => b.date - a.date)
+    allMatches.sort((a, b) => new Date(b.date) - new Date(a.date))
     setMatches(allMatches)
 
     // Build leaderboard from players
