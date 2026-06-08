@@ -47,6 +47,15 @@ function App() {
     return () => window.removeEventListener('popstate', handleLocationChange)
   }, [])
 
+  // Route: /join - Page pour les joueurs qui scannent le QR
+  if (currentPath === '/join' || window.location.search.includes('game=')) {
+    return (
+      <div className="dark">
+        <PlayerJoin userProfile={userProfile} />
+      </div>
+    )
+  }
+
   // Écran de connexion prioritaire
   if (!userProfile) {
     return <Login onLogin={setUserProfile} />
@@ -55,15 +64,6 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('user_profile')
     setUserProfile(null)
-  }
-
-  // Route: /join - Page pour les joueurs qui scannent le QR
-  if (currentPath === '/join' || window.location.search.includes('game=')) {
-    return (
-      <div className="dark">
-        <PlayerJoin userProfile={userProfile} />
-      </div>
-    )
   }
 
   // Route: /host - Mode hôte avec QR code
@@ -99,7 +99,11 @@ function App() {
           onMatchEnd={(result) => {
             // Enregistrer le résultat du match
             if (championshipMatch.type !== 'free') {
-              const winner = result.winner === 'A' ? 'challenger' : 'champion'
+              const winner = result.winner === 'A'
+                ? 'challenger'
+                : result.winner === 'B'
+                  ? 'champion'
+                  : 'draw'
               recordMatch(
                 championshipMatch.classId,
                 championshipMatch.challenger.id,
