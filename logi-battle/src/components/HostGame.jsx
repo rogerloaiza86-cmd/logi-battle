@@ -19,11 +19,11 @@ export const HostGame = ({ onBack, gameMode }) => {
     const initGame = async () => {
       try {
         const id = `GAME-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-        setGameId(id)
-        gameStore.setGameId(id)
         
-        // Créer la partie dans Supabase
-        await gamesService.createGame('ÉQUIPE ALPHA', 'ÉQUIPE OMEGA', id)
+        // Créer la partie avant d'exposer le code aux joueurs.
+        const createdGameId = await gamesService.createGame('ÉQUIPE ALPHA', 'ÉQUIPE OMEGA', id)
+        setGameId(createdGameId)
+        gameStore.setGameId(createdGameId)
       } catch (err) {
         console.error('Erreur lors de la création de la partie sur Supabase:', err)
       } finally {
@@ -36,9 +36,9 @@ export const HostGame = ({ onBack, gameMode }) => {
 
   // URL pour les joueurs (à adapter selon votre déploiement)
   const getPlayerUrl = () => {
-    // En production, remplacez par votre vraie URL
     const baseUrl = window.location.origin
-    return `${baseUrl}/join?game=${gameId}`
+    const appBase = import.meta.env.BASE_URL.replace(/\/$/, '')
+    return `${baseUrl}${appBase}/join?game=${gameId}`
   }
 
   // URL du QR Code (utilisation d'une API gratuite)

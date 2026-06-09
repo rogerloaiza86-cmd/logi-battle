@@ -12,6 +12,7 @@ import HQDashboard from './components/HQDashboard'
 import Archives from './components/Archives'
 import Login from './components/Login'
 import { useChampionshipStore } from './hooks/useChampionshipStore'
+import { toRecordMatchWinner } from './utils/championshipResults'
 import './styles/index.css'
 
 function App() {
@@ -47,23 +48,23 @@ function App() {
     return () => window.removeEventListener('popstate', handleLocationChange)
   }, [])
 
-  // Écran de connexion prioritaire
-  if (!userProfile) {
-    return <Login onLogin={setUserProfile} />
-  }
-
   const handleLogout = () => {
     localStorage.removeItem('user_profile')
     setUserProfile(null)
   }
 
   // Route: /join - Page pour les joueurs qui scannent le QR
-  if (currentPath === '/join' || window.location.search.includes('game=')) {
+  if (currentPath.endsWith('/join') || window.location.search.includes('game=')) {
     return (
       <div className="dark">
         <PlayerJoin userProfile={userProfile} />
       </div>
     )
+  }
+
+  // Écran de connexion prioritaire
+  if (!userProfile) {
+    return <Login onLogin={setUserProfile} />
   }
 
   // Route: /host - Mode hôte avec QR code
@@ -99,7 +100,7 @@ function App() {
           onMatchEnd={(result) => {
             // Enregistrer le résultat du match
             if (championshipMatch.type !== 'free') {
-              const winner = result.winner === 'A' ? 'challenger' : 'champion'
+              const winner = toRecordMatchWinner(result.winner)
               recordMatch(
                 championshipMatch.classId,
                 championshipMatch.challenger.id,

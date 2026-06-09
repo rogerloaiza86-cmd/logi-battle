@@ -52,7 +52,16 @@ export const ChampionshipGameBoard = ({
   const [roundNumber, setRoundNumber] = useState(1)
   const [totalRounds, setTotalRounds] = useState(10)
   const roundStartTime = useRef(null)
+  const gameStatusRef = useRef(gameStatus)
+  const teamAStatusRef = useRef(teamAStatus)
+  const teamBStatusRef = useRef(teamBStatus)
+  const teamATimeRef = useRef(teamATime)
+  const teamBTimeRef = useRef(teamBTime)
   const [matchStartTime, setMatchStartTime] = useState(Date.now())
+
+  useEffect(() => {
+    gameStatusRef.current = gameStatus
+  }, [gameStatus])
 
   useEffect(() => {
     startNewRound()
@@ -74,6 +83,7 @@ export const ChampionshipGameBoard = ({
   // Vérifier fin de match
   useEffect(() => {
     if (ropePosition >= 100 || ropePosition <= -100 || roundNumber > totalRounds) {
+      gameStatusRef.current = 'finished'
       setGameStatus('finished')
     }
   }, [ropePosition, roundNumber])
@@ -95,6 +105,10 @@ export const ChampionshipGameBoard = ({
     setRoundWinner(null)
     setBothTeamsAnswered(false)
     roundStartTime.current = Date.now()
+    teamAStatusRef.current = 'playing'
+    teamBStatusRef.current = 'playing'
+    teamATimeRef.current = null
+    teamBTimeRef.current = null
   }
 
   const endRound = () => {
@@ -103,28 +117,43 @@ export const ChampionshipGameBoard = ({
     
     let winner = null
     
-    if (teamAStatus === 'correct' && teamBStatus === 'correct') {
-      winner = teamATime < teamBTime ? 'A' : 'B'
-    } else if (teamAStatus === 'correct') {
+    if (teamAStatusRef.current === 'correct' && teamBStatusRef.current === 'correct') {
+      winner = teamATimeRef.current < teamBTimeRef.current ? 'A' : 'B'
+    } else if (teamAStatusRef.current === 'correct') {
       winner = 'A'
-    } else if (teamBStatus === 'correct') {
+    } else if (teamBStatusRef.current === 'correct') {
       winner = 'B'
     }
     
     setRoundWinner(winner)
     
+    let nextRopePosition = ropePosition
     if (winner === 'A') {
+      nextRopePosition = Math.min(100, ropePosition + 10)
       setTeamA(prev => ({ ...prev, score: prev.score + 1 }))
       setRopePosition(prev => Math.min(100, prev + 10))
     } else if (winner === 'B') {
+      nextRopePosition = Math.max(-100, ropePosition - 10)
       setTeamB(prev => ({ ...prev, score: prev.score + 1 }))
       setRopePosition(prev => Math.max(-100, prev - 10))
     }
     
     const delay = question?.type === 'vocabulaire' ? 4000 : 2500
+    const nextRoundNumber = roundNumber + 1
+    const shouldFinish = (
+      nextRopePosition >= 100 ||
+      nextRopePosition <= -100 ||
+      nextRoundNumber > totalRounds
+    )
     
     setTimeout(() => {
-      if (gameStatus !== 'finished') {
+      if (shouldFinish) {
+        gameStatusRef.current = 'finished'
+        setGameStatus('finished')
+        return
+      }
+
+      if (gameStatusRef.current !== 'finished') {
         setRoundNumber(prev => prev + 1)
         startNewRound()
       }
@@ -136,25 +165,31 @@ export const ChampionshipGameBoard = ({
     
     if (team === 'A') {
       if (isCorrect) {
+        teamAStatusRef.current = 'correct'
+        teamATimeRef.current = responseTime
         setTeamAStatus('correct')
         setTeamATime(responseTime)
       } else {
+        teamAStatusRef.current = 'wrong'
         setTeamAStatus('wrong')
         setShowIncorrect(true)
         setTimeout(() => setShowIncorrect(false), 400)
       }
     } else {
       if (isCorrect) {
+        teamBStatusRef.current = 'correct'
+        teamBTimeRef.current = responseTime
         setTeamBStatus('correct')
         setTeamBTime(responseTime)
       } else {
+        teamBStatusRef.current = 'wrong'
         setTeamBStatus('wrong')
         setShowIncorrect(true)
         setTimeout(() => setShowIncorrect(false), 400)
       }
     }
     
-    const otherTeamStatus = team === 'A' ? teamBStatus : teamAStatus
+    const otherTeamStatus = team === 'A' ? teamBStatusRef.current : teamAStatusRef.current
     
     if (otherTeamStatus !== 'playing') {
       setBothTeamsAnswered(true)
