@@ -266,6 +266,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   // Calculate timer circle progress
   const timerProgress = (timeLeft / roundTime) * 283
   const timerColor = timeLeft <= 5 ? '#ef4444' : timeLeft <= 10 ? '#eab308' : '#f4b942'
+  const finalWinner = getWinner()
 
   const renderAnswerCard = (team, status, responseTime) => {
     const disabled = !isRoundActive || status !== 'playing'
@@ -429,7 +430,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
             {/* Question Badge */}
             <div className="flex justify-center mb-6">
               <span className="px-4 py-2 bg-[#f4b942] text-[#17314a] text-xs font-bold uppercase tracking-wider rounded-full">
-                QUESTION {roundNumber}/20
+                QUESTION {Math.min(roundNumber, gameStore.totalRounds)}/{gameStore.totalRounds}
               </span>
             </div>
 
@@ -517,6 +518,55 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
           </div>
         </aside>
       </main>
+
+      <AnimatePresence>
+        {gameStore.gameStatus === 'finished' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-6"
+          >
+            <motion.div
+              initial={{ scale: 0.85, y: 40 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.85, y: 40 }}
+              className="bg-[#1d3d59] rounded-3xl p-8 max-w-lg w-full text-center border border-[#f4b942]/30"
+            >
+              <div className="text-6xl mb-4">{finalWinner ? '🏆' : '🤝'}</div>
+              <h2 className="text-3xl font-black text-white mb-2">
+                {finalWinner ? 'DUEL TERMINÉ !' : 'MATCH NUL !'}
+              </h2>
+              <p className={`text-xl font-bold mb-6 ${finalWinner === 'A' ? 'text-[#7fa99b]' : 'text-[#f4b942]'}`}>
+                {finalWinner === 'A'
+                  ? gameStore.teamA.name
+                  : finalWinner === 'B'
+                    ? gameStore.teamB.name
+                    : 'Égalité parfaite'}
+              </p>
+
+              <div className="flex justify-center gap-8 mb-8 py-4 bg-[#17314a] rounded-xl">
+                <div className="text-center">
+                  <p className="text-3xl font-black text-[#7fa99b]">{gameStore.teamA.score}</p>
+                  <p className="text-xs text-gray-400 uppercase">{gameStore.teamA.name}</p>
+                </div>
+                <div className="text-3xl font-black text-gray-600 self-center">-</div>
+                <div className="text-center">
+                  <p className="text-3xl font-black text-[#f4b942]">{gameStore.teamB.score}</p>
+                  <p className="text-xs text-gray-400 uppercase">{gameStore.teamB.name}</p>
+                </div>
+              </div>
+
+              <button
+                onClick={handleRestart}
+                className="w-full py-4 bg-[#f4b942] hover:bg-amber-500 rounded-xl text-[#17314a] font-bold text-lg transition-colors"
+              >
+                Retour au menu
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
