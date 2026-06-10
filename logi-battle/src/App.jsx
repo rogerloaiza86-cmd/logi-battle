@@ -12,12 +12,21 @@ import HQDashboard from './components/HQDashboard'
 import Archives from './components/Archives'
 import Login from './components/Login'
 import { useChampionshipStore } from './hooks/useChampionshipStore'
+import { isJoinRoute } from './utils/routing'
 import './styles/index.css'
 
 function App() {
   const [userProfile, setUserProfile] = useState(() => {
     const saved = localStorage.getItem('user_profile')
-    return saved ? JSON.parse(saved) : null
+    if (!saved) return null
+
+    try {
+      return JSON.parse(saved)
+    } catch (error) {
+      console.error('Profil utilisateur localStorage invalide:', error)
+      localStorage.removeItem('user_profile')
+      return null
+    }
   })
   
   const [currentPath, setCurrentPath] = useState(window.location.pathname)
@@ -47,6 +56,15 @@ function App() {
     return () => window.removeEventListener('popstate', handleLocationChange)
   }, [])
 
+  // Route: /join - Page pour les joueurs qui scannent le QR
+  if (isJoinRoute(currentPath, window.location.search)) {
+    return (
+      <div className="dark">
+        <PlayerJoin userProfile={userProfile} />
+      </div>
+    )
+  }
+
   // Écran de connexion prioritaire
   if (!userProfile) {
     return <Login onLogin={setUserProfile} />
@@ -55,15 +73,6 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('user_profile')
     setUserProfile(null)
-  }
-
-  // Route: /join - Page pour les joueurs qui scannent le QR
-  if (currentPath === '/join' || window.location.search.includes('game=')) {
-    return (
-      <div className="dark">
-        <PlayerJoin userProfile={userProfile} />
-      </div>
-    )
   }
 
   // Route: /host - Mode hôte avec QR code

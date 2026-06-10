@@ -32,7 +32,13 @@ jobs:
       - name: Install dependencies
         run: cd logi-battle && npm ci
       - name: Build
+        env:
+          VITE_DB_MODE: supabase
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: cd logi-battle && npm run build
+      - name: Add SPA fallback
+        run: cp logi-battle/dist/index.html logi-battle/dist/404.html
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
