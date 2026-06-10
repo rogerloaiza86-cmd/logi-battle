@@ -34,6 +34,18 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
     { id: 3, user: 'LogiMaster', action: 'est en série de 5 !', team: 'A', points: 'Bonus Combo Actif', time: '14:25' },
   ])
   const roundStartTime = useRef(null)
+  const roundTimeoutRef = useRef(null)
+  const questionRef = useRef(null)
+  const isRoundActiveRef = useRef(isRoundActive)
+  const teamAStatusRef = useRef(teamAStatus)
+  const teamBStatusRef = useRef(teamBStatus)
+  const teamATimeRef = useRef(teamATime)
+  const teamBTimeRef = useRef(teamBTime)
+  const gameStatusRef = useRef(gameStore.gameStatus)
+
+  useEffect(() => {
+    gameStatusRef.current = gameStore.gameStatus
+  }, [gameStore.gameStatus])
 
   // Enregistrement des scores dans la BD en temps réel
   useEffect(() => {
@@ -52,17 +64,41 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
     if (isHost && gameStore.gameId) {
       const channel = gamesService.getGameChannel(gameStore.gameId)
       if (channel) {
+        let roundStarted = false
+        const startRoundOnce = () => {
+          if (!roundStarted) {
+            roundStarted = true
+            startNewRound()
+          }
+        }
+
         channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
           handleAnswer(payload.team, payload.isCorrect)
-        }).subscribe()
+        }).subscribe((status, err) => {
+          if (status === 'SUBSCRIBED') {
+            startRoundOnce()
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            console.error('Erreur de souscription au canal hôte:', status, err)
+            startRoundOnce()
+          }
+        })
         channelRef.current = channel
+      } else {
+        startNewRound()
       }
+    } else {
+      startNewRound()
     }
-
-    startNewRound()
     
     return () => {
       // Nettoyage au démontage
+      if (roundTimeoutRef.current) {
+        clearTimeout(roundTimeoutRef.current)
+      }
+      channelRef.current = null
+      if (isHost && gameStore.gameId) {
+        gamesService.removeGameChannel(gameStore.gameId)
+      }
     }
   }, [])
 
@@ -79,17 +115,28 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   }, [isRoundActive, timeLeft])
 
   const startNewRound = () => {
+    if (roundTimeoutRef.current) {
+      clearTimeout(roundTimeoutRef.current)
+      roundTimeoutRef.current = null
+    }
+
     const newQuestion = {
       ...generateNextQuestion(gameMode),
       id: `q_${Date.now()}`,
     }
+    questionRef.current = newQuestion
     setQuestion(newQuestion)
     const time = newQuestion.type === 'vocabulaire' ? VOCABULARY_TIME : ROUND_TIME
     setRoundTime(time)
     setTimeLeft(time)
+    isRoundActiveRef.current = true
     setIsRoundActive(true)
+    teamAStatusRef.current = 'playing'
+    teamBStatusRef.current = 'playing'
     setTeamAStatus('playing')
     setTeamBStatus('playing')
+    teamATimeRef.current = null
+    teamBTimeRef.current = null
     setTeamATime(null)
     setTeamBTime(null)
     setRoundWinner(null)
@@ -109,16 +156,19 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   }
 
   const endRound = () => {
+    if (!isRoundActiveRef.current) return
+
+    isRoundActiveRef.current = false
     setIsRoundActive(false)
     setBothTeamsAnswered(true)
     
     let winner = null
     
-    if (teamAStatus === 'correct' && teamBStatus === 'correct') {
-      winner = teamATime < teamBTime ? 'A' : 'B'
-    } else if (teamAStatus === 'correct') {
+    if (teamAStatusRef.current === 'correct' && teamBStatusRef.current === 'correct') {
+      winner = teamATimeRef.current < teamBTimeRef.current ? 'A' : 'B'
+    } else if (teamAStatusRef.current === 'correct') {
       winner = 'A'
-    } else if (teamBStatus === 'correct') {
+    } else if (teamBStatusRef.current === 'correct') {
       winner = 'B'
     }
     
@@ -130,7 +180,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
         event: 'round_end',
         payload: {
           winner: winner,
-          correctAnswer: question?.answer
+          correctAnswer: questionRef.current?.answer ?? questionRef.current?.correctAnswer
         }
       })
     }
@@ -147,8 +197,9 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
     
     const delay = question?.type === 'vocabulaire' ? 4000 : 2500
     
-    setTimeout(() => {
-      if (gameStore.gameStatus !== 'finished') {
+    roundTimeoutRef.current = setTimeout(() => {
+      roundTimeoutRef.current = null
+      if (gameStatusRef.current !== 'finished') {
         setRoundNumber((prev) => prev + 1)
         startNewRound()
       }
@@ -162,13 +213,18 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   }
 
   const handleAnswer = (team, isCorrect) => {
+    if (!isRoundActiveRef.current) return
+
     const responseTime = Date.now() - roundStartTime.current
     
     if (team === 'A') {
       if (isCorrect) {
+        teamAStatusRef.current = 'correct'
+        teamATimeRef.current = responseTime
         setTeamAStatus('correct')
         setTeamATime(responseTime)
       } else {
+        teamAStatusRef.current = 'wrong'
         setTeamAStatus('wrong')
         setShowIncorrect(true)
         setTimeout(() => setShowIncorrect(false), 400)
@@ -176,9 +232,12 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
       }
     } else {
       if (isCorrect) {
+        teamBStatusRef.current = 'correct'
+        teamBTimeRef.current = responseTime
         setTeamBStatus('correct')
         setTeamBTime(responseTime)
       } else {
+        teamBStatusRef.current = 'wrong'
         setTeamBStatus('wrong')
         setShowIncorrect(true)
         setTimeout(() => setShowIncorrect(false), 400)
@@ -186,7 +245,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
       }
     }
     
-    const otherTeamStatus = team === 'A' ? teamBStatus : teamAStatus
+    const otherTeamStatus = team === 'A' ? teamBStatusRef.current : teamAStatusRef.current
 
     if (otherTeamStatus !== 'playing') {
       setBothTeamsAnswered(true)

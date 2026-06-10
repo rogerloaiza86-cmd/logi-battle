@@ -6,11 +6,12 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "node src/utils/routing.test.mjs",
     "lint": "eslint src --ext js,jsx"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.3",
-    "firebase": "^10.7.0",
+    "firebase": "^12.14.0",
     "framer-motion": "^10.16.0",
     "qrcode": "^1.5.4",
     "react": "^18.2.0",
