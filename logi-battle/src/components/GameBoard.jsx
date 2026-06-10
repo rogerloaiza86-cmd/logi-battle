@@ -274,6 +274,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   // Calculate timer circle progress
   const timerProgress = (timeLeft / roundTime) * 283
   const timerColor = timeLeft <= 5 ? '#ef4444' : timeLeft <= 10 ? '#eab308' : '#f4b942'
+  const answerOptions = question?.data?.options || question?.options || []
 
   return (
     <div className="min-h-screen geronimo-screen flex flex-col">
@@ -439,22 +440,30 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
                 </h2>
 
                 {/* Options */}
-                <div className="grid grid-cols-2 gap-4">
-                  {['A', 'B', 'C', 'D'].map((letter, index) => (
-                    <button
-                      key={letter}
-                      className="group relative bg-[#234a68] hover:bg-[#2d5875] rounded-2xl p-5 text-left transition-all border border-transparent hover:border-white/10"
-                    >
-                      <span className="absolute top-4 left-4 text-gray-500 text-sm font-bold">{letter}</span>
-                      <p className="text-white font-medium pl-6">
-                        {index === 0 && '1,2 Mètres'}
-                        {index === 1 && '2,4 Mètres'}
-                        {index === 2 && 'Sans Limite'}
-                        {index === 3 && 'Limité par le Poids'}
-                      </p>
-                    </button>
-                  ))}
-                </div>
+                {answerOptions.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    {answerOptions.map((option, index) => (
+                      <div
+                        key={`${question.id}-${index}`}
+                        className="group relative bg-[#234a68] rounded-2xl p-5 text-left border border-transparent"
+                      >
+                        <span className="absolute top-4 left-4 text-gray-500 text-sm font-bold">
+                          {String.fromCharCode(65 + index)}
+                        </span>
+                        <p className="text-white font-medium pl-6">{option}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-[#234a68] rounded-2xl p-5 border border-white/10">
+                    <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">
+                      Réponse attendue
+                    </p>
+                    <p className="text-white font-medium">
+                      Les joueurs saisissent leur réponse sur leur appareil.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
