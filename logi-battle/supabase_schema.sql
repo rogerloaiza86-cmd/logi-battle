@@ -1,43 +1,56 @@
--- Script SQL à exécuter dans l'éditeur SQL de Supabase (SQL Editor)
+-- Geronimo Coop (logi-battle) — schéma Supabase
+-- Tables préfixées logi_battle_* (hébergées dans le projet geronimo-compagnon).
+-- RLS durci : pas de DELETE public, UPDATE limité aux parties non terminées.
+-- Appliqué le 2026-06-11 via migration `logi_battle_schema_hardened`.
 
--- Table des parties (Games)
-CREATE TABLE IF NOT EXISTS public.games (
+CREATE TABLE IF NOT EXISTS public.logi_battle_games (
   "gameId" TEXT PRIMARY KEY,
-  "teamAName" TEXT,
-  "teamBName" TEXT,
-  "status" TEXT DEFAULT 'waiting',
-  "teamA_score" INTEGER DEFAULT 0,
-  "teamB_score" INTEGER DEFAULT 0,
-  "rope_position" INTEGER DEFAULT 0,
-  "current_question_id" TEXT,
-  "winner" TEXT,
-  "history" JSONB DEFAULT '[]'::jsonb,
-  "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  "teamAName" TEXT NOT NULL DEFAULT 'Équipe A',
+  "teamBName" TEXT NOT NULL DEFAULT 'Équipe B',
+  status TEXT NOT NULL DEFAULT 'waiting' CHECK (status IN ('waiting', 'playing', 'finished')),
+  "teamA_score" INTEGER NOT NULL DEFAULT 0 CHECK ("teamA_score" >= 0),
+  "teamB_score" INTEGER NOT NULL DEFAULT 0 CHECK ("teamB_score" >= 0),
+  rope_position INTEGER NOT NULL DEFAULT 0 CHECK (rope_position BETWEEN -100 AND 100),
+  current_question_id TEXT,
+  winner TEXT CHECK (winner IN ('A', 'B')),
+  history JSONB DEFAULT '[]'::jsonb,
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Table des questions (si vous souhaitez aussi les stocker sur Supabase)
-CREATE TABLE IF NOT EXISTS public.questions (
-  "id" TEXT PRIMARY KEY,
-  "type" TEXT,
-  "difficulty" INTEGER,
-  "data" JSONB,
+CREATE TABLE IF NOT EXISTS public.logi_battle_questions (
+  id TEXT PRIMARY KEY,
+  type TEXT NOT NULL,
+  difficulty INTEGER NOT NULL DEFAULT 1 CHECK (difficulty BETWEEN 1 AND 3),
+  data JSONB,
   "correctAnswer" JSONB,
-  "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Sécurité RLS (Row Level Security)
--- Autorise la lecture, l'insertion et la modification publique
-ALTER TABLE public.games ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Activer l'accès anonyme général sur games" 
-ON public.games FOR ALL 
-USING (true) 
-WITH CHECK (true);
+ALTER TABLE public.logi_battle_games ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.logi_battle_questions ENABLE ROW LEVEL SECURITY;
 
-ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Activer l'accès anonyme général sur questions" 
-ON public.questions FOR ALL 
-USING (true) 
-WITH CHECK (true);
+-- games : lecture et création publiques (jeu en classe sans compte),
+-- mise à jour uniquement tant que la partie n'est pas terminée, jamais de suppression.
+CREATE POLICY "logi_battle_games_select" ON public.logi_battle_games
+  FOR SELECT USING (true);
+CREATE POLICY "logi_battle_games_insert" ON public.logi_battle_games
+  FOR INSERT WITH CHECK (status = 'waiting');
+CREATE POLICY "logi_battle_games_update" ON public.logi_battle_games
+  FOR UPDATE USING (status <> 'finished') WITH CHECK (true);
 
--- Activer le temps réel (Realtime) sur la table games
-ALTER PUBLICATION supabase_realtime ADD TABLE public.games;
+-- questions : lecture publique, insertion publique, ni update ni delete.
+CREATE POLICY "logi_battle_questions_select" ON public.logi_battle_questions
+  FOR SELECT USING (true);
+CREATE POLICY "logi_battle_questions_insert" ON public.logi_battle_questions
+  FOR INSERT WITH CHECK (true);
+
+-- Realtime (postgres_changes) sur les parties
+ALTER PUBLICATION supabase_realtime ADD TABLE public.logi_battle_games;
+
+-- Purge RGPD : suppression automatique des parties de plus de 30 jours
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+SELECT cron.schedule(
+  'logi-battle-purge-old-games',
+  '0 4 * * *',
+  $$DELETE FROM public.logi_battle_games WHERE "createdAt" < now() - interval '30 days'$$
+);

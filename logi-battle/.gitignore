@@ -15,3 +15,8 @@ dist/
 .vercel/
 .netlify/
 coverage/
+
+# Secrets
+.env
+.env.*
+!.env.example

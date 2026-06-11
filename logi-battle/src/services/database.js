@@ -39,7 +39,7 @@ export const gamesService = {
         rope_position: 0,
         current_question_id: null,
       }
-      const { error } = await supabase.from('games').insert([newGame])
+      const { error } = await supabase.from('logi_battle_games').insert([newGame])
       if (error) throw error
       return gameId
     }
@@ -85,7 +85,7 @@ export const gamesService = {
 
   async getGame(gameId) {
     if (USE_SUPABASE) {
-      const { data, error } = await supabase.from('games').select('*').eq('gameId', gameId).single()
+      const { data, error } = await supabase.from('logi_battle_games').select('*').eq('gameId', gameId).single()
       if (error) {
         if (error.code === 'PGRST116') return null; // Not found
         throw error
@@ -122,7 +122,7 @@ export const gamesService = {
     }
 
     if (USE_SUPABASE) {
-      const { error } = await supabase.from('games').update(updateData).eq('gameId', gameId)
+      const { error } = await supabase.from('logi_battle_games').update(updateData).eq('gameId', gameId)
       if (error) throw error
       return true
     }
@@ -145,7 +145,7 @@ export const gamesService = {
 
   async updateGameStatus(gameId, status) {
     if (USE_SUPABASE) {
-      const { error } = await supabase.from('games').update({ status }).eq('gameId', gameId)
+      const { error } = await supabase.from('logi_battle_games').update({ status }).eq('gameId', gameId)
       if (error) throw error
       return true
     }
@@ -170,10 +170,10 @@ export const gamesService = {
   subscribeToGame(gameId, callback) {
     if (USE_SUPABASE) {
       const channel = supabase
-        .channel(`public:games:gameId=eq.${gameId}`)
+        .channel(`public:logi_battle_games:gameId=eq.${gameId}`)
         .on(
           'postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'games', filter: `gameId=eq.${gameId}` },
+          { event: 'UPDATE', schema: 'public', table: 'logi_battle_games', filter: `gameId=eq.${gameId}` },
           (payload) => {
             callback(payload.new)
           }
@@ -226,7 +226,7 @@ export const questionsService = {
         data,
         correctAnswer,
       }
-      const { error } = await supabase.from('questions').insert([newQuestion])
+      const { error } = await supabase.from('logi_battle_questions').insert([newQuestion])
       if (error) throw error
       return questionId
     }
@@ -264,7 +264,7 @@ export const questionsService = {
 
   async getQuestion(questionId) {
     if (USE_SUPABASE) {
-      const { data, error } = await supabase.from('questions').select('*').eq('id', questionId).single()
+      const { data, error } = await supabase.from('logi_battle_questions').select('*').eq('id', questionId).single()
       if (error) {
         if (error.code === 'PGRST116') return null;
         throw error
@@ -288,7 +288,7 @@ export const questionsService = {
   async getRandomQuestion(type, difficulty) {
     if (USE_SUPABASE) {
       const { data, error } = await supabase
-        .from('questions')
+        .from('logi_battle_questions')
         .select('*')
         .eq('type', type)
         .eq('difficulty', difficulty)

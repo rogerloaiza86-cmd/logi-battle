@@ -32,6 +32,12 @@ jobs:
       - name: Install dependencies
         run: cd logi-battle && npm ci
       - name: Build
+        # L'URL et la clé publishable Supabase sont publiques par conception
+        # (présentes dans le bundle JS) — la sécurité repose sur les politiques RLS.
+        env:
+          VITE_DB_MODE: supabase
+          VITE_SUPABASE_URL: https://zduojnjvjvdvrlhfmdip.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_OViYtCaiATp0H7tMEOGt_g_V1GCBp35
         run: cd logi-battle && npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v4
