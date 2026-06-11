@@ -4,10 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 export const QuestionCard = ({ 
   question, 
   team = 'A', 
-  onAnswer, 
-  isAnswering = false, 
-  disabled = false, 
-  responseTime = null 
+  onAnswer,
+  isAnswering: _isAnswering = false,
+  disabled = false,
+  responseTime = null,
+  // À désactiver quand deux cartes sont affichées côte à côte (split-screen),
+  // sinon les deux équipes reçoivent les mêmes frappes clavier.
+  enableKeyboard = true
 }) => {
   const [userInput, setUserInput] = useState('')
   const [isWrong, setIsWrong] = useState(false)
@@ -58,9 +61,16 @@ export const QuestionCard = ({
   }
 
   useEffect(() => {
+    if (!enableKeyboard) return
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [userInput, disabled])
+  }, [userInput, disabled, enableKeyboard])
+
+  // Réinitialiser la saisie quand la question change
+  useEffect(() => {
+    setUserInput('')
+    setIsWrong(false)
+  }, [question?.id])
 
   return (
     <motion.div

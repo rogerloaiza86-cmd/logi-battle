@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import QRCode from 'qrcode'
 import { useGameStore } from '../hooks/useGameStore'
 import GameBoard from './GameBoard'
 import BrandMark from './BrandMark'
@@ -13,6 +14,8 @@ export const HostGame = ({ onBack, gameMode }) => {
   const [gameStarted, setGameStarted] = useState(false)
   const [copied, setCopied] = useState(false)
   const [isInitializing, setIsInitializing] = useState(true)
+  const [initError, setInitError] = useState(null)
+  const [qrDataUrl, setQrDataUrl] = useState(null)
 
   // Générer un ID de jeu unique et l'enregistrer dans Supabase
   useEffect(() => {
@@ -21,31 +24,58 @@ export const HostGame = ({ onBack, gameMode }) => {
         const id = `GAME-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
         setGameId(id)
         gameStore.setGameId(id)
-        
-        // Créer la partie dans Supabase
+
         await gamesService.createGame('ÉQUIPE ALPHA', 'ÉQUIPE OMEGA', id)
       } catch (err) {
         console.error('Erreur lors de la création de la partie sur Supabase:', err)
+        setInitError("Impossible de créer la partie. Vérifiez la connexion internet.")
       } finally {
         setIsInitializing(false)
       }
     }
-    
+
     initGame()
   }, [])
 
-  // URL pour les joueurs (à adapter selon votre déploiement)
+  // Liste des joueurs connectés via Supabase Presence
+  useEffect(() => {
+    if (!gameId) return
+    const lobby = gamesService.getLobbyChannel(gameId, 'host')
+    if (!lobby) return
+
+    lobby
+      .on('presence', { event: 'sync' }, () => {
+        const state = lobby.presenceState()
+        const teamA = []
+        const teamB = []
+        Object.values(state).flat().forEach((p) => {
+          if (!p.playerName) return
+          if (p.team === 'A') teamA.push(p.playerName)
+          else if (p.team === 'B') teamB.push(p.playerName)
+        })
+        setPlayers({ teamA, teamB })
+      })
+      .subscribe()
+
+    return () => {
+      gamesService.releaseLobbyChannel(gameId)
+    }
+  }, [gameId])
+
+  // URL pour les joueurs : on garde la page courante et on ajoute ?game=
+  // (compatible GitHub Pages, pas de route /join à servir)
   const getPlayerUrl = () => {
-    // En production, remplacez par votre vraie URL
-    const baseUrl = window.location.origin
-    return `${baseUrl}/join?game=${gameId}`
+    const { origin, pathname } = window.location
+    return `${origin}${pathname}?game=${gameId}`
   }
 
-  // URL du QR Code (utilisation d'une API gratuite)
-  const getQrCodeUrl = () => {
-    const url = encodeURIComponent(getPlayerUrl())
-    return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${url}`
-  }
+  // QR code généré localement (paquet qrcode) — rien ne transite par un service tiers
+  useEffect(() => {
+    if (!gameId) return
+    QRCode.toDataURL(getPlayerUrl(), { width: 250, margin: 1 })
+      .then(setQrDataUrl)
+      .catch(console.error)
+  }, [gameId])
 
   const copyLink = () => {
     navigator.clipboard.writeText(getPlayerUrl())
@@ -56,11 +86,7 @@ export const HostGame = ({ onBack, gameMode }) => {
   const startGame = () => {
     setGameStarted(true)
     gameStore.setGameStatus('active')
-  }
-
-  const handlePlayerJoin = (playerData) => {
-    // Simuler l'arrivée d'un joueur
-    // En vrai, ça viendrait de Firebase
+    gamesService.updateGameStatus(gameId, 'playing').catch(console.error)
   }
 
   if (gameStarted) {
@@ -107,14 +133,18 @@ export const HostGame = ({ onBack, gameMode }) => {
 
             {/* QR Code */}
             <div className="bg-white rounded-xl p-4 w-fit mx-auto mb-6">
-              {gameId && (
-                <img
-                  src={getQrCodeUrl()}
-                  alt="QR Code"
-                  className="w-48 h-48"
-                />
+              {qrDataUrl ? (
+                <img src={qrDataUrl} alt="QR Code" className="w-48 h-48" />
+              ) : (
+                <div className="w-48 h-48 flex items-center justify-center text-gray-400 text-sm">
+                  Génération…
+                </div>
               )}
             </div>
+
+            {initError && (
+              <p className="text-red-400 text-sm text-center mb-4">{initError}</p>
+            )}
 
             {/* Ou lien manuel */}
             <div className="space-y-3">
@@ -185,13 +215,15 @@ export const HostGame = ({ onBack, gameMode }) => {
                   <h3 className="font-bold text-blue-400">Équipe A</h3>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-400 text-sm">
-                    <span className="material-icons text-sm">person</span>
-                    <span>En attente de joueurs...</span>
-                  </div>
-                  {/* Liste des joueurs connectés */}
-                  {players.teamA.length === 0 && (
-                    <p className="text-xs text-gray-500 italic">Aucun joueur</p>
+                  {players.teamA.length === 0 ? (
+                    <p className="text-xs text-gray-500 italic">En attente de joueurs…</p>
+                  ) : (
+                    players.teamA.map((name) => (
+                      <div key={name} className="flex items-center gap-2 text-gray-300 text-sm">
+                        <span className="material-icons text-sm text-blue-400">person</span>
+                        <span>{name}</span>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>
@@ -203,12 +235,15 @@ export const HostGame = ({ onBack, gameMode }) => {
                   <h3 className="font-bold text-primary">Équipe B</h3>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-400 text-sm">
-                    <span className="material-icons text-sm">person</span>
-                    <span>En attente de joueurs...</span>
-                  </div>
-                  {players.teamB.length === 0 && (
-                    <p className="text-xs text-gray-500 italic">Aucun joueur</p>
+                  {players.teamB.length === 0 ? (
+                    <p className="text-xs text-gray-500 italic">En attente de joueurs…</p>
+                  ) : (
+                    players.teamB.map((name) => (
+                      <div key={name} className="flex items-center gap-2 text-gray-300 text-sm">
+                        <span className="material-icons text-sm text-primary">person</span>
+                        <span>{name}</span>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>
@@ -219,9 +254,10 @@ export const HostGame = ({ onBack, gameMode }) => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={startGame}
-              className="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary text-white font-bold py-4 rounded-xl text-lg uppercase tracking-wider shadow-lg shadow-primary/20 transition-all"
+              disabled={isInitializing || !!initError}
+              className="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl text-lg uppercase tracking-wider shadow-lg shadow-primary/20 transition-all"
             >
-              Lancer la partie
+              {isInitializing ? 'Création de la partie…' : 'Lancer la partie'}
             </motion.button>
 
             <p className="text-xs text-gray-500 text-center">

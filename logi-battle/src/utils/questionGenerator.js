@@ -51,7 +51,7 @@ export const generatePalletizationQuestion = (difficulty = 1, forceCalculation =
   }
   
   // Question de calcul originale
-  let boxLength, boxWidth, boxHeight, boxWeight, maxHeight
+  let boxLength, boxWidth, boxHeight, maxHeight
   let answer, explanation
 
   // Palette standard: 120cm x 80cm
@@ -637,7 +637,7 @@ export const getRandomQuestionType = (includeCulture = true, includeVocabulary =
   return types[Math.floor(Math.random() * types.length)]
 }
 
-export const generateNextQuestion = (gameMode = 'all') => {
+export const generateNextQuestion = (gameMode = 'all', forcedDifficulty = null) => {
   let type
   
   if (gameMode === 'culture') {
@@ -674,6 +674,8 @@ export const generateNextQuestion = (gameMode = 'all') => {
   
   // Certains types gèrent leur propre difficulté
   const skipDifficultyTypes = ['vocabulaire', 'supply_chain', 'reception', 'stock', 'safety', 'traceability', 'green', 'team_leader', 'jit', 'route', 'legal', 'math']
-  const difficulty = skipDifficultyTypes.includes(type) ? null : getRandomDifficulty()
+  const difficulty = skipDifficultyTypes.includes(type)
+    ? null
+    : (forcedDifficulty ?? getRandomDifficulty())
   return generateRandomQuestion(type, difficulty)
 }

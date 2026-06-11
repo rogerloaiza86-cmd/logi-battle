@@ -1,25 +1,14 @@
-import db from './firebase'
 import { supabase } from './supabase'
-import {
-  collection,
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc,
-  query,
-  where,
-  getDocs
-} from 'firebase/firestore'
 
-// Mode DB : 'local', 'firebase', ou 'supabase'
+// Mode DB : 'local' (mémoire, mono-poste) ou 'supabase'
 const DB_MODE = import.meta.env.VITE_DB_MODE || 'local'
-const USE_FIREBASE = DB_MODE === 'firebase'
 const USE_SUPABASE = DB_MODE === 'supabase'
 
 // ===== LOCAL DATABASE =====
 const localDB = {
   games: {},
   questions: {},
+  channels: {},
   nextGameId: 1,
   nextQuestionId: 1,
 }
@@ -44,74 +33,36 @@ export const gamesService = {
       return gameId
     }
 
-    if (!USE_FIREBASE) {
-      const gameId = `game_${localDB.nextGameId++}`
-      const newGame = {
-        gameId,
-        teamAName,
-        teamBName,
-        status: 'waiting',
-        teamA_score: 0,
-        teamB_score: 0,
-        rope_position: 0,
-        current_question_id: null,
-        createdAt: Date.now(),
-        history: [],
-      }
-      localDB.games[gameId] = newGame
-      return gameId
+    const gameId = customGameId || `game_${localDB.nextGameId++}`
+    localDB.games[gameId] = {
+      gameId,
+      teamAName,
+      teamBName,
+      status: 'waiting',
+      teamA_score: 0,
+      teamB_score: 0,
+      rope_position: 0,
+      current_question_id: null,
+      createdAt: Date.now(),
+      history: [],
     }
-
-    const gameId = `game_${Date.now()}`
-    try {
-      await setDoc(doc(db, 'games', gameId), {
-        gameId,
-        teamAName,
-        teamBName,
-        status: 'waiting',
-        teamA_score: 0,
-        teamB_score: 0,
-        rope_position: 0,
-        current_question_id: null,
-        createdAt: new Date(),
-        history: [],
-      })
-      return gameId
-    } catch (error) {
-      console.error('Error creating game:', error)
-      throw error
-    }
+    return gameId
   },
 
   async getGame(gameId) {
     if (USE_SUPABASE) {
       const { data, error } = await supabase.from('logi_battle_games').select('*').eq('gameId', gameId).single()
       if (error) {
-        if (error.code === 'PGRST116') return null; // Not found
+        if (error.code === 'PGRST116') return null // Not found
         throw error
       }
       return data
     }
-
-    if (!USE_FIREBASE) {
-      return localDB.games[gameId] || null
-    }
-
-    try {
-      const gameDoc = await getDoc(doc(db, 'games', gameId))
-      return gameDoc.exists() ? gameDoc.data() : null
-    } catch (error) {
-      console.error('Error getting game:', error)
-      throw error
-    }
+    return localDB.games[gameId] || null
   },
 
   async updateGameScore(gameId, teamA_score, teamB_score, rope_position) {
-    let updateData = {
-      teamA_score,
-      teamB_score,
-      rope_position,
-    }
+    const updateData = { teamA_score, teamB_score, rope_position }
 
     if (rope_position >= 100) {
       updateData.status = 'finished'
@@ -127,20 +78,10 @@ export const gamesService = {
       return true
     }
 
-    if (!USE_FIREBASE) {
-      if (localDB.games[gameId]) {
-        Object.assign(localDB.games[gameId], updateData)
-      }
-      return true
+    if (localDB.games[gameId]) {
+      Object.assign(localDB.games[gameId], updateData)
     }
-
-    try {
-      await updateDoc(doc(db, 'games', gameId), updateData)
-      return true
-    } catch (error) {
-      console.error('Error updating game score:', error)
-      throw error
-    }
+    return true
   },
 
   async updateGameStatus(gameId, status) {
@@ -150,23 +91,13 @@ export const gamesService = {
       return true
     }
 
-    if (!USE_FIREBASE) {
-      if (localDB.games[gameId]) {
-        localDB.games[gameId].status = status
-      }
-      return true
+    if (localDB.games[gameId]) {
+      localDB.games[gameId].status = status
     }
-
-    try {
-      await updateDoc(doc(db, 'games', gameId), { status })
-      return true
-    } catch (error) {
-      console.error('Error updating game status:', error)
-      throw error
-    }
+    return true
   },
 
-  // ---- NEW: Realtime Subscription ----
+  // Souscription aux changements d'une partie (postgres_changes)
   subscribeToGame(gameId, callback) {
     if (USE_SUPABASE) {
       const channel = supabase
@@ -185,33 +116,53 @@ export const gamesService = {
       }
     }
 
-    if (!USE_FIREBASE) {
-      // Pas de vraie souscription en mode local par défaut
-      // On retourne une "dummy" unsubscribe function
-      return () => {}
-    }
-
-    if (!USE_FIREBASE) {
-      // Pas de vraie souscription en mode local par défaut
-      // On retourne une "dummy" unsubscribe function
-      return () => {}
-    }
-
-    // TODO: Implémenter Firestore onSnapshot si on repasse à Firebase un jour
+    // Pas de souscription en mode local
     return () => {}
   },
 
-  // ---- NEW: Realtime Broadcast Channel ----
+  // Canal Broadcast temps réel d'une partie
   getGameChannel(gameId) {
     if (USE_SUPABASE) {
-      if (!localDB.channels) localDB.channels = {}
       if (!localDB.channels[gameId]) {
         localDB.channels[gameId] = supabase.channel(`game_${gameId}`)
       }
       return localDB.channels[gameId]
     }
     return null
-  }
+  },
+
+  // Canal de lobby (Presence) : qui est connecté, dans quelle équipe.
+  // Séparé du canal broadcast pour éviter les doubles souscriptions.
+  getLobbyChannel(gameId, presenceKey) {
+    if (USE_SUPABASE) {
+      const key = `lobby_${gameId}`
+      if (!localDB.channels[key]) {
+        localDB.channels[key] = supabase.channel(`game_${gameId}_lobby`, {
+          config: { presence: { key: presenceKey || crypto.randomUUID() } },
+        })
+      }
+      return localDB.channels[key]
+    }
+    return null
+  },
+
+  releaseLobbyChannel(gameId) {
+    const key = `lobby_${gameId}`
+    const channel = localDB.channels[key]
+    if (channel) {
+      supabase.removeChannel(channel)
+      delete localDB.channels[key]
+    }
+  },
+
+  // Libère le canal d'une partie (à appeler au démontage)
+  releaseGameChannel(gameId) {
+    const channel = localDB.channels[gameId]
+    if (channel) {
+      supabase.removeChannel(channel)
+      delete localDB.channels[gameId]
+    }
+  },
 }
 
 // ===== QUESTIONS SERVICE =====
@@ -219,70 +170,35 @@ export const questionsService = {
   async createQuestion(type, difficulty, data, correctAnswer) {
     if (USE_SUPABASE) {
       const questionId = `q_${Date.now()}`
-      const newQuestion = {
-        id: questionId,
-        type,
-        difficulty,
-        data,
-        correctAnswer,
-      }
-      const { error } = await supabase.from('logi_battle_questions').insert([newQuestion])
+      const { error } = await supabase
+        .from('logi_battle_questions')
+        .insert([{ id: questionId, type, difficulty, data, correctAnswer }])
       if (error) throw error
       return questionId
     }
 
-    if (!USE_FIREBASE) {
-      const questionId = `q_${localDB.nextQuestionId++}`
-      const newQuestion = {
-        id: questionId,
-        type,
-        difficulty,
-        data,
-        correctAnswer,
-        createdAt: Date.now(),
-      }
-      localDB.questions[questionId] = newQuestion
-      return questionId
+    const questionId = `q_${localDB.nextQuestionId++}`
+    localDB.questions[questionId] = {
+      id: questionId,
+      type,
+      difficulty,
+      data,
+      correctAnswer,
+      createdAt: Date.now(),
     }
-
-    const questionId = `q_${Date.now()}`
-    try {
-      await setDoc(doc(db, 'questions', questionId), {
-        id: questionId,
-        type,
-        difficulty,
-        data,
-        correctAnswer,
-        createdAt: new Date(),
-      })
-      return questionId
-    } catch (error) {
-      console.error('Error creating question:', error)
-      throw error
-    }
+    return questionId
   },
 
   async getQuestion(questionId) {
     if (USE_SUPABASE) {
       const { data, error } = await supabase.from('logi_battle_questions').select('*').eq('id', questionId).single()
       if (error) {
-        if (error.code === 'PGRST116') return null;
+        if (error.code === 'PGRST116') return null
         throw error
       }
       return data
     }
-
-    if (!USE_FIREBASE) {
-      return localDB.questions[questionId] || null
-    }
-
-    try {
-      const questionDoc = await getDoc(doc(db, 'questions', questionId))
-      return questionDoc.exists() ? questionDoc.data() : null
-    } catch (error) {
-      console.error('Error getting question:', error)
-      throw error
-    }
+    return localDB.questions[questionId] || null
   },
 
   async getRandomQuestion(type, difficulty) {
@@ -295,28 +211,13 @@ export const questionsService = {
 
       if (error) throw error
       if (!data || data.length === 0) return null
-      
+
       return data[Math.floor(Math.random() * data.length)]
     }
 
-    if (!USE_FIREBASE) {
-      const allQuestions = Object.values(localDB.questions)
-      const filtered = allQuestions.filter(q => q.type === type && q.difficulty === difficulty)
-      return filtered[Math.floor(Math.random() * filtered.length)] || null
-    }
-
-    try {
-      const q = query(
-        collection(db, 'questions'),
-        where('type', '==', type),
-        where('difficulty', '==', difficulty)
-      )
-      const querySnapshot = await getDocs(q)
-      const questions = querySnapshot.docs.map(doc => doc.data())
-      return questions[Math.floor(Math.random() * questions.length)] || null
-    } catch (error) {
-      console.error('Error getting random question:', error)
-      throw error
-    }
+    const filtered = Object.values(localDB.questions).filter(
+      (q) => q.type === type && q.difficulty === difficulty
+    )
+    return filtered[Math.floor(Math.random() * filtered.length)] || null
   },
 }

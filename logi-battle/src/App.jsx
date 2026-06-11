@@ -143,12 +143,6 @@ function App() {
     setShowTeamSetup(false)
   }
 
-  const handleBackToMenu = () => {
-    setGameMode(null)
-    setShowTeamSetup(false)
-    setIsHostMode(false)
-  }
-
   const handleBackToTeamSetup = () => {
     setShowTeamSetup(true)
   }

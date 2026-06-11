@@ -518,15 +518,11 @@ export const receptionQuestions = [
     id: 'rec_018',
     type: 'calculation',
     difficulty: 2,
-    scenario: "Vous devez vérifier un poids total. 5 colis de 12kg + 3 colis de 8kg + 2 colis de 15kg.",
+    scenario: "Vous devez vérifier un poids total. 5 colis de 12 kg + 3 colis de 8 kg + 2 colis de 16 kg.",
     question: "Quel est le poids total reçu ?",
     options: ['96 kg', '106 kg', '116 kg', '126 kg'],
-    correctOption: 0,
-    explanation: "(5×12) + (3×8) + (2×15) = 60 + 24 + 30 = 114 kg. Attendez, erreur de calcul. Recalcul : 60+24+30 = 114. Hmm, aucune option 114. Je corrige la question : (5×10) + (3×8) + (2×15) = 50+24+30=104... Je vais ajuster les options. La bonne réponse devrait être 114kg mais ce n'est pas dans les options. Je modifie pour 104kg ou 116kg selon le calcul. Modifions pour avoir 96kg : 6×12 + 2×8 + 2×6 = 72+16+12=100... Gardons 116kg : 8×10 + 4×9 = 80+36=116...",
-    correction: "Recalculons : 6 colis × 12kg = 72, 4 × 8kg = 32, 2 × 6kg = 12. Total = 116kg",
-    options: ['96 kg', '106 kg', '116 kg', '126 kg'],
     correctOption: 2,
-    explanation: "6×12 + 4×8 + 2×6 = 72 + 32 + 12 = 116 kg",
+    explanation: "(5×12) + (3×8) + (2×16) = 60 + 24 + 32 = 116 kg",
     category: 'Calcul'
   },
 

@@ -24,7 +24,7 @@ L'application sera accessible sur `http://localhost:3000`
 - **Styling**: TailwindCSS + Custom CSS
 - **Animations**: Framer Motion
 - **State Management**: Zustand
-- **Backend**: Firebase (Firestore + Realtime DB)
+- **Backend**: Supabase (PostgreSQL + Realtime Broadcast)
 - **Font**: Lexend (Google Fonts)
 
 ### Structure du Projet
@@ -37,14 +37,11 @@ logi-battle/
 │   │   ├── RopeAnimation.jsx   # Animation de la corde
 │   │   ├── GameSelection.jsx   # Menu de sélection des modules
 │   │   ├── GameOver.jsx        # Écran de fin de jeu
-│   │   ├── ParticleEffect.jsx  # Effets de particules
-│   │   └── ScreenVibration.jsx # Vibration d'écran
 │   ├── hooks/
 │   │   └── useGameStore.js     # State management (Zustand)
 │   ├── services/
-│   │   ├── firebase.js         # Configuration Firebase
-│   │   ├── database.js         # Services de base de données
-│   │   └── firestoreSchema.js  # Documentation du schéma Firestore
+│   │   ├── supabase.js         # Client Supabase
+│   │   └── database.js         # Services de base de données (supabase / local)
 │   ├── utils/
 │   │   ├── questionGenerator.js # Générateur de questions (logique métier)
 │   │   └── gameUtils.js        # Utilitaires de jeu
@@ -57,7 +54,7 @@ logi-battle/
 ├── tailwind.config.js
 ├── postcss.config.js
 ├── package.json
-├── .env                        # Configuration Firebase
+├── .env                        # Configuration Supabase (non commité — voir .env.example)
 └── README.md
 ```
 
@@ -160,20 +157,17 @@ Logique:
 }
 ```
 
-## 🔧 Configuration Firebase
+## 🔧 Configuration Supabase
 
-1. Créez un projet Firebase sur [firebase.google.com](https://firebase.google.com)
-2. Activez Firestore et Realtime Database
-3. Remplissez les variables d'environnement dans `.env`:
+1. Créez un projet sur [supabase.com](https://supabase.com) (ou réutilisez un projet existant)
+2. Exécutez `supabase_schema.sql` dans le SQL Editor (tables `logi_battle_*`, RLS durci, purge 30 jours)
+3. Copiez `.env.example` en `.env` et remplissez :
 ```env
-VITE_FIREBASE_API_KEY=votre_api_key
-VITE_FIREBASE_AUTH_DOMAIN=votre_auth_domain
-VITE_FIREBASE_PROJECT_ID=votre_project_id
-VITE_FIREBASE_STORAGE_BUCKET=votre_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=votre_messaging_sender_id
-VITE_FIREBASE_APP_ID=votre_app_id
-VITE_DB_MODE=firebase  # ou 'local' pour le développement
+VITE_DB_MODE=supabase  # ou 'local' pour le mode mono-poste sans backend
+VITE_SUPABASE_URL=https://votre-projet.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_xxxx
 ```
+Le `.env` n'est jamais commité ; pour le déploiement, les variables sont injectées dans `.github/workflows/deploy.yml`.
 
 ## 🚀 Déploiement
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useChampionshipStore } from '../hooks/useChampionshipStore'
 
-export const ChampionshipBoard = ({ classData, onBack, onStartChallenge }) => {
+export const ChampionshipBoard = ({ classData, onStartChallenge }) => {
   const { getRankings, getCurrentChampion, getChallengers, getMatchHistory } = useChampionshipStore()
   
   const [selectedTab, setSelectedTab] = useState('ranking') // 'ranking', 'history', 'challenge'

@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { useGameStore } from '../hooks/useGameStore'
 import BrandMark from './BrandMark'
 
 const modules = [
@@ -179,7 +178,6 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
   const [activeModule, setActiveModule] = useState(null)
   const [activeNav, setActiveNav] = useState('arena')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const gameStore = useGameStore()
 
   const handleSelectModule = (module) => {
     setActiveModule(module.id)

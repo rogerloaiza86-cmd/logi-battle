@@ -8,7 +8,7 @@ export const ChampionshipManager = ({ onBack, onStartGame }) => {
   const [view, setView] = useState('list') // 'list', 'class', 'groups', 'championship'
   const [selectedClassId, setSelectedClassId] = useState(null)
   
-  const { classes, createClass, deleteClass, selectClass, currentClass } = useChampionshipStore()
+  const { classes, createClass, deleteClass, selectClass } = useChampionshipStore()
   
   const [newClassName, setNewClassName] = useState('')
   const [newClassDesc, setNewClassDesc] = useState('')

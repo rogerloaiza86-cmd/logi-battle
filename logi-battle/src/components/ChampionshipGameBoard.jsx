@@ -4,7 +4,6 @@ import RopeAnimation from './RopeAnimation'
 import QuestionCard from './QuestionCard'
 import VocabularyCard from './VocabularyCard'
 import { generateNextQuestion } from '../utils/questionGenerator'
-import { useChampionshipStore } from '../hooks/useChampionshipStore'
 
 const ROUND_TIME = 30
 const VOCABULARY_TIME = 20
@@ -13,12 +12,12 @@ export const ChampionshipGameBoard = ({
   gameMode, 
   challenger, 
   champion, 
-  classId,
+  classId: _classId,
   matchType,
   onBack, 
   onMatchEnd 
 }) => {
-  const { getGroup } = useChampionshipStore()
+  
   
   // Le challenger est Team A (Bleu), le Champion est Team B (Orange)
   const [teamA, setTeamA] = useState({
@@ -41,7 +40,7 @@ export const ChampionshipGameBoard = ({
   const [question, setQuestion] = useState(null)
   const [showIncorrect, setShowIncorrect] = useState(false)
   const [timeLeft, setTimeLeft] = useState(ROUND_TIME)
-  const [roundTime, setRoundTime] = useState(ROUND_TIME)
+  const [, setRoundTime] = useState(ROUND_TIME)
   const [isRoundActive, setIsRoundActive] = useState(true)
   const [teamAStatus, setTeamAStatus] = useState('playing')
   const [teamBStatus, setTeamBStatus] = useState('playing')
@@ -50,7 +49,7 @@ export const ChampionshipGameBoard = ({
   const [roundWinner, setRoundWinner] = useState(null)
   const [bothTeamsAnswered, setBothTeamsAnswered] = useState(false)
   const [roundNumber, setRoundNumber] = useState(1)
-  const [totalRounds, setTotalRounds] = useState(10)
+  const [totalRounds] = useState(10)
   const roundStartTime = useRef(null)
   const [matchStartTime, setMatchStartTime] = useState(Date.now())
 

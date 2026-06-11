@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import PlayerGame from './PlayerGame'
 import BrandMark from './BrandMark'
@@ -12,7 +12,7 @@ export const PlayerJoin = ({ userProfile }) => {
     return params.get('game')
   }
   
-  const [gameIdFromUrl, setGameIdFromUrl] = useState(getGameIdFromUrl())
+  const [gameIdFromUrl] = useState(getGameIdFromUrl())
   const [step, setStep] = useState(gameIdFromUrl ? 2 : 1)
   const [gameId, setGameId] = useState(gameIdFromUrl || '')
   const [playerName, setPlayerName] = useState(userProfile?.name || '')

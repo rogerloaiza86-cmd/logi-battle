@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useChampionshipStore } from '../hooks/useChampionshipStore'
 
-export const GroupManager = ({ classData, onBack, onViewChampionship, onStartGame }) => {
+export const GroupManager = ({ classData, onViewChampionship, onStartGame }) => {
   const { createGroup, deleteGroup, getCurrentChampion, resetChampionship } = useChampionshipStore()
   
   const [showCreateForm, setShowCreateForm] = useState(false)

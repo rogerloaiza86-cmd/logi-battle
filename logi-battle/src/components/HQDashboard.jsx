@@ -33,7 +33,7 @@ export const HQDashboard = ({ onBack }) => {
     // Load from all storage keys
     const players = JSON.parse(localStorage.getItem(STORAGE_KEYS.players) || '[]')
     const championship = JSON.parse(localStorage.getItem(STORAGE_KEYS.championship) || '{}')
-    const history = JSON.parse(localStorage.getItem(STORAGE_KEYS.history) || '[]')
+
 
     const classes = championship.classes || []
     
