@@ -189,7 +189,7 @@ function App() {
   if (isTrainingMode) {
     return (
       <div className="dark">
-        <TrainingMode onBack={resetAllModes} />
+        <TrainingMode onBack={resetAllModes} userProfile={userProfile} />
       </div>
     )
   }

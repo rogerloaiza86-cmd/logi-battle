@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { useStatsStore, BADGES, downloadStatsCSV } from '../hooks/useStatsStore'
 
 const STORAGE_KEYS = {
   players: 'logi-battle-players',
@@ -23,6 +24,26 @@ export const HQDashboard = ({ onBack }) => {
     darkMode: true,
     timerDuration: 30,
   })
+  const studentStats = useStatsStore((s) => s.players)
+
+  // Agrégats par module sur l'ensemble des élèves
+  const moduleAggregates = (() => {
+    const agg = {}
+    Object.values(studentStats).forEach((p) => {
+      Object.entries(p.modules || {}).forEach(([moduleId, m]) => {
+        if (!agg[moduleId]) agg[moduleId] = { answered: 0, correct: 0 }
+        agg[moduleId].answered += m.answered
+        agg[moduleId].correct += m.correct
+      })
+    })
+    return Object.entries(agg)
+      .map(([moduleId, m]) => ({
+        moduleId,
+        progress: m.answered ? Math.round((m.correct / m.answered) * 100) : 0,
+        answered: m.answered,
+      }))
+      .sort((a, b) => b.answered - a.answered)
+  })()
 
   useEffect(() => {
     loadStats()
@@ -330,46 +351,103 @@ export const HQDashboard = ({ onBack }) => {
               </div>
             </div>
 
+            {/* Taux de réussite par module (toutes sessions d'entraînement confondues) */}
             <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5">
-              <h2 className="text-lg font-bold text-white mb-4">Distribution des Compétences</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                  { name: 'Palettisation', progress: 75, color: '#f4b942' },
-                  { name: 'Transport', progress: 60, color: '#7fa99b' },
-                  { name: 'Chargement', progress: 45, color: '#22c55e' },
-                  { name: 'Vocabulaire', progress: 80, color: '#ef4444' },
-                ].map((skill) => (
-                  <div key={skill.name} className="text-center p-4 bg-[#0f2539] rounded-xl">
-                    <div className="relative w-20 h-20 mx-auto mb-3">
-                      <svg className="w-full h-full transform -rotate-90">
-                        <circle
-                          cx="40"
-                          cy="40"
-                          r="35"
-                          fill="none"
-                          stroke="#234a68"
-                          strokeWidth="6"
-                        />
-                        <circle
-                          cx="40"
-                          cy="40"
-                          r="35"
-                          fill="none"
-                          stroke={skill.color}
-                          strokeWidth="6"
-                          strokeLinecap="round"
-                          strokeDasharray="220"
-                          strokeDashoffset={220 - (220 * skill.progress / 100)}
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-lg font-bold text-white">{skill.progress}%</span>
+              <h2 className="text-lg font-bold text-white mb-4">Taux de réussite par module</h2>
+              {moduleAggregates.length === 0 ? (
+                <p className="text-gray-500 text-sm">
+                  Aucune donnée pour l'instant — les statistiques se remplissent au fil des entraînements des élèves.
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {moduleAggregates.map((skill) => (
+                    <div key={skill.moduleId} className="text-center p-4 bg-[#0f2539] rounded-xl">
+                      <div className="relative w-20 h-20 mx-auto mb-3">
+                        <svg className="w-full h-full transform -rotate-90">
+                          <circle cx="40" cy="40" r="35" fill="none" stroke="#234a68" strokeWidth="6" />
+                          <circle
+                            cx="40"
+                            cy="40"
+                            r="35"
+                            fill="none"
+                            stroke={skill.progress >= 70 ? '#22c55e' : skill.progress >= 40 ? '#f4b942' : '#ef4444'}
+                            strokeWidth="6"
+                            strokeLinecap="round"
+                            strokeDasharray="220"
+                            strokeDashoffset={220 - (220 * skill.progress / 100)}
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-lg font-bold text-white">{skill.progress}%</span>
+                        </div>
                       </div>
+                      <p className="text-sm text-gray-400">{skill.moduleId}</p>
+                      <p className="text-xs text-gray-600">{skill.answered} réponses</p>
                     </div>
-                    <p className="text-sm text-gray-400">{skill.name}</p>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Statistiques par élève + export CSV */}
+            <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-white">Statistiques par élève</h2>
+                <button
+                  onClick={() => downloadStatsCSV(studentStats)}
+                  disabled={Object.keys(studentStats).length === 0}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#f4b942] hover:bg-[#d99926] disabled:opacity-40 disabled:cursor-not-allowed text-[#17314a] text-sm font-bold rounded-xl transition-colors"
+                >
+                  <span className="material-icons text-sm">download</span>
+                  Export CSV
+                </button>
               </div>
+              {Object.keys(studentStats).length === 0 ? (
+                <p className="text-gray-500 text-sm">Aucun élève n'a encore joué en mode entraînement sur ce poste.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-gray-500 uppercase text-xs border-b border-white/5">
+                        <th className="py-2 pr-4">Élève</th>
+                        <th className="py-2 pr-4">Questions</th>
+                        <th className="py-2 pr-4">Précision</th>
+                        <th className="py-2 pr-4">Meilleur score</th>
+                        <th className="py-2 pr-4">Série max</th>
+                        <th className="py-2">Badges</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(studentStats)
+                        .sort(([, a], [, b]) => b.bestScore - a.bestScore)
+                        .map(([name, p]) => {
+                          const accuracy = p.totalAnswered ? Math.round((p.totalCorrect / p.totalAnswered) * 100) : 0
+                          const badges = BADGES.filter((badge) => badge.test(p))
+                          return (
+                            <tr key={name} className="border-b border-white/5 text-gray-300">
+                              <td className="py-3 pr-4 font-bold text-white">{name}</td>
+                              <td className="py-3 pr-4">{p.totalAnswered}</td>
+                              <td className={`py-3 pr-4 font-bold ${accuracy >= 70 ? 'text-green-400' : accuracy >= 40 ? 'text-[#f4b942]' : 'text-red-400'}`}>
+                                {accuracy}%
+                              </td>
+                              <td className="py-3 pr-4">{p.bestScore.toLocaleString()}</td>
+                              <td className="py-3 pr-4">{p.bestStreak}</td>
+                              <td className="py-3">
+                                {badges.length === 0
+                                  ? <span className="text-gray-600">—</span>
+                                  : badges.map((badge) => (
+                                      <span key={badge.id} title={`${badge.label} — ${badge.description}`} className="mr-1">
+                                        {badge.icon}
+                                      </span>
+                                    ))}
+                              </td>
+                            </tr>
+                          )
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

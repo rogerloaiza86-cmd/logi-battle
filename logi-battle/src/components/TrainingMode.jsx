@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import QuestionCard from './QuestionCard'
 import VocabularyCard from './VocabularyCard'
 import { generateNextQuestion } from '../utils/questionGenerator'
+import { useStatsStore, BADGES } from '../hooks/useStatsStore'
+import { playCorrect, playWrong } from '../utils/sounds'
 
 const ROUND_TIME = 45
 
-export const TrainingMode = ({ onBack }) => {
+export const TrainingMode = ({ onBack, userProfile }) => {
+  const playerName = userProfile?.name || null
+  const { recordAnswer, recordSession, getPlayerStats } = useStatsStore()
+  const sessionRecorded = useRef(false)
   const [selectedModule, setSelectedModule] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [question, setQuestion] = useState(null)
@@ -52,7 +57,21 @@ export const TrainingMode = ({ onBack }) => {
     return () => clearInterval(interval)
   }, [isRoundActive, timeLeft])
 
+  // Enregistre la session une seule fois à l'affichage des résultats
+  useEffect(() => {
+    if (showResults && totalAnswered > 0 && !sessionRecorded.current) {
+      sessionRecorded.current = true
+      recordSession(playerName, selectedModule, {
+        score,
+        bestStreak,
+        correct: correctAnswers,
+        answered: totalAnswered,
+      })
+    }
+  }, [showResults])
+
   const startTraining = (moduleId) => {
+    sessionRecorded.current = false
     setSelectedModule(moduleId)
     setIsPlaying(true)
     setScore(0)
@@ -81,7 +100,10 @@ export const TrainingMode = ({ onBack }) => {
     const responseTime = Date.now() - roundStartTime.current
     const timeBonus = Math.max(0, Math.floor(timeLeft / 5) * 10)
 
+    recordAnswer(playerName, selectedModule, isCorrect)
+
     if (isCorrect) {
+      playCorrect()
       const newStreak = streak + 1
       setCorrectAnswers(prev => prev + 1)
       setStreak(newStreak)
@@ -96,6 +118,7 @@ export const TrainingMode = ({ onBack }) => {
         points: 100 + timeBonus + streakBonus
       }])
     } else {
+      playWrong()
       setStreak(0)
       setQuestionHistory(prev => [...prev, {
         question: question?.title || 'Question',
@@ -117,6 +140,8 @@ export const TrainingMode = ({ onBack }) => {
   const handleTimeout = () => {
     setIsRoundActive(false)
     setStreak(0)
+    recordAnswer(playerName, selectedModule, false)
+    playWrong()
     setTotalAnswered(prev => prev + 1)
     setQuestionHistory(prev => [...prev, {
       question: question?.title || 'Question',
@@ -335,6 +360,7 @@ export const TrainingMode = ({ onBack }) => {
               </button>
               <button
                 onClick={() => {
+                  sessionRecorded.current = false
                   setShowResults(false)
                   setScore(0)
                   setStreak(0)
@@ -422,44 +448,76 @@ export const TrainingMode = ({ onBack }) => {
           ))}
         </div>
 
-        {/* Quick Stats */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-[#1d3d59] rounded-2xl p-6 border border-white/5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#f4b942]/20 flex items-center justify-center">
-                <span className="material-icons text-[#f4b942]">emoji_events</span>
+        {/* Statistiques réelles du joueur connecté */}
+        {playerName && (() => {
+          const stats = getPlayerStats(playerName)
+          const earnedBadges = BADGES.filter((b) => b.test(stats))
+          return (
+            <div className="mt-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-[#1d3d59] rounded-2xl p-6 border border-white/5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-[#f4b942]/20 flex items-center justify-center">
+                      <span className="material-icons text-[#f4b942]">emoji_events</span>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-black text-white">{stats.bestScore.toLocaleString()}</p>
+                      <p className="text-xs text-gray-500 uppercase">Meilleur Score</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#1d3d59] rounded-2xl p-6 border border-white/5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-[#7fa99b]/20 flex items-center justify-center">
+                      <span className="material-icons text-[#7fa99b]">local_fire_department</span>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-black text-white">{stats.bestStreak}</p>
+                      <p className="text-xs text-gray-500 uppercase">Série Max</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#1d3d59] rounded-2xl p-6 border border-white/5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+                      <span className="material-icons text-green-400">check_circle</span>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-black text-white">{stats.totalCorrect}</p>
+                      <p className="text-xs text-gray-500 uppercase">Questions Réussies</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-2xl font-black text-white">1,250</p>
-                <p className="text-xs text-gray-500 uppercase">Meilleur Score</p>
+
+              {/* Badges */}
+              <div className="mt-6 bg-[#1d3d59] rounded-2xl p-6 border border-white/5">
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Badges de {playerName}</p>
+                <div className="flex flex-wrap gap-3">
+                  {BADGES.map((badge) => {
+                    const earned = earnedBadges.includes(badge)
+                    return (
+                      <div
+                        key={badge.id}
+                        title={badge.description}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm ${
+                          earned
+                            ? 'bg-[#f4b942]/15 border-[#f4b942]/40 text-white'
+                            : 'bg-[#0f2539] border-white/5 text-gray-600'
+                        }`}
+                      >
+                        <span className={earned ? '' : 'grayscale opacity-40'}>{badge.icon}</span>
+                        <span>{badge.label}</span>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div className="bg-[#1d3d59] rounded-2xl p-6 border border-white/5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#7fa99b]/20 flex items-center justify-center">
-                <span className="material-icons text-[#7fa99b]">local_fire_department</span>
-              </div>
-              <div>
-                <p className="text-2xl font-black text-white">8</p>
-                <p className="text-xs text-gray-500 uppercase">Série Max</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-[#1d3d59] rounded-2xl p-6 border border-white/5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
-                <span className="material-icons text-green-400">check_circle</span>
-              </div>
-              <div>
-                <p className="text-2xl font-black text-white">47</p>
-                <p className="text-xs text-gray-500 uppercase">Questions Réussies</p>
-              </div>
-            </div>
-          </div>
-        </div>
+          )
+        })()}
       </main>
     </div>
   )
