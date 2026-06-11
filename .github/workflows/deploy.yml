@@ -31,6 +31,10 @@ jobs:
           cache-dependency-path: logi-battle/package-lock.json
       - name: Install dependencies
         run: cd logi-battle && npm ci
+      - name: Lint
+        run: cd logi-battle && npm run lint
+      - name: Tests
+        run: cd logi-battle && npm test
       - name: Build
         # L'URL et la clé publishable Supabase sont publiques par conception
         # (présentes dans le bundle JS) — la sécurité repose sur les politiques RLS.

@@ -1,0 +1,15 @@
+{
+  "name": "Geronimo Coop — Arène logistique",
+  "short_name": "Geronimo Coop",
+  "description": "Atelier pédagogique logistique : quiz compétitif par équipes (Bac Pro / BTS).",
+  "lang": "fr",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#17314a",
+  "theme_color": "#17314a",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

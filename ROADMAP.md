@@ -1,77 +1,77 @@
 # Feuille de route — Geronimo Coop : de 60 % à 100 %
 
 Plan d'action issu de l'audit du 11/06/2026 ([`AUDIT.md`](./AUDIT.md)).
-Chaque phase fait progresser l'avancement global ; les pourcentages sont cumulés.
+**Mise à jour du 11/06/2026 (soir) : les phases 0 à 5 ont été exécutées — avancement ≈ 92 %.**
+Restent 4 tâches (dont 2 nécessitent l'enseignant : révocation de clé et recette en classe).
 
 ---
 
-## Phase 0 — Urgences sécurité 🔴 (60 % → 65 %) — ~1 jour
+## Phase 0 — Urgences sécurité 🔴 — FAIT (sauf T0.1)
 
-- [ ] **T0.1 — Révoquer la clé API Kimi/Moonshot** compromise (console Moonshot), puis en générer une nouvelle hors Git. *(S1)*
-- [ ] **T0.2 — Sortir les `.env` du suivi Git** : `git rm --cached .env logi-battle/.env`, ajouter `.env` et `logi-battle/.env` au `.gitignore`, créer des fichiers `.env.example` sans secrets. *(S1)*
-- [ ] **T0.3 — Recréer le backend Supabase** : créer (ou réutiliser) un projet Supabase actif, mettre à jour `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`, injecter ces variables comme secrets GitHub Actions dans `deploy.yml` (étape Build). *(S3)*
-- [ ] **T0.4 — Corriger le schéma RLS** avant de le rejouer : INSERT + SELECT publics sur `games`, UPDATE limité (filtre sur `status != 'finished'` au minimum), **pas de DELETE public**, table `questions` en lecture seule publique. *(S2)*
-- [ ] **T0.5 — Vérifier de bout en bout** : créer une partie, scanner le QR, jouer un round complet hôte + mobile.
+- [ ] **T0.1 — Révoquer la clé API Kimi/Moonshot** compromise — ⚠️ **ACTION MANUELLE REQUISE** (console Moonshot). La clé reste visible dans l'historique Git.
+- [x] **T0.2 — `.env` retirés du suivi Git**, `.gitignore` complété, `.env.example` créé.
+- [x] **T0.3 — Backend Supabase actif** : tables `logi_battle_games` / `logi_battle_questions` hébergées sur le projet `geronimo-compagnon` (gratuit, isolé par préfixe). Variables injectées dans `deploy.yml`. *Pour migrer vers un projet dédié : rejouer `supabase_schema.sql` et changer les 2 variables.*
+- [x] **T0.4 — RLS durci** : INSERT/SELECT publics, UPDATE bloqué sur parties terminées, DELETE interdit.
+- [x] **T0.5 — Vérifié de bout en bout** avec le rôle `anon` : triche post-partie et suppression refusées.
 
-## Phase 1 — Assainissement du code 🧹 (65 % → 72 %) — ~2 jours
+## Phase 1 — Assainissement du code 🧹 — FAIT
 
-- [ ] **T1.1 — Supprimer Firebase** : retirer la dépendance `firebase`, `firebase.js`, `firestoreSchema.js`, les branches `USE_FIREBASE` de `database.js` (garder supabase + local). Élimine l'essentiel des 19 vulnérabilités npm. *(S4)*
-- [ ] **T1.2 — `npm audit fix`** pour les vulnérabilités restantes (`ws`, etc.).
-- [ ] **T1.3 — Trancher le sort des 11 cartes spécialisées** (`SupplyChainCard`, `StockCard`, …) : soit les brancher dans `GameBoard` (recommandé : meilleure UX par module), soit les supprimer. Pas d'entre-deux.
-- [ ] **T1.4 — Brancher ou supprimer** `GameOver.jsx`, `ParticleEffect.jsx`, `ScreenVibration.jsx` (le README annonce particules + vibration : les brancher est rapide et valorisant).
-- [ ] **T1.5 — QR code local** : remplacer `api.qrserver.com` par le paquet `qrcode` déjà installé (`HostGame.jsx:47`). *(S5)*
-- [ ] **T1.6 — Réparer le lint** : installer ESLint + config React (flat config), corriger les erreurs, l'ajouter à la CI.
-- [ ] **T1.7 — Nettoyer la racine du dépôt** : déplacer `kimi_agent.py`/`requirements.txt` dans `tools/` (ou les supprimer), fusionner les deux dossiers de maquettes dans `design/`.
-- [ ] **T1.8 — Mettre à jour la documentation** : README aligné sur Supabase, suppression des mentions Firebase obsolètes.
+- [x] **T1.1 — Firebase supprimé** (dépendance, services, branches mortes).
+- [x] **T1.2 — 0 vulnérabilité npm** (19 → 0 ; montée Vite 8 + plugin-react 6).
+- [x] **T1.3 — Cartes spécialisées supprimées** : `GameBoard` utilise désormais `QuestionCard`/`VocabularyCard` (qui couvrent les 16 modules) pour de vraies questions interactives. *Découverte : l'ancienne UI de question était décorative (options en dur, aucun clic possible).*
+- [x] **T1.4 — `GameOver` branché** en fin de partie ; `ParticleEffect`/`ScreenVibration` supprimés (jamais utilisés).
+- [x] **T1.5 — QR code généré localement** (paquet `qrcode`) — plus d'appel à api.qrserver.com.
+- [x] **T1.6 — ESLint réparé** (flat config), 0 erreur, branché en CI. *A révélé 2 questions buguées (clés dupliquées, monologue d'IA dans une explication) — corrigées.*
+- [x] **T1.7 — Dépôt rangé** : `tools/`, `design/`.
+- [x] **T1.8 — README aligné** sur Supabase.
 
-## Phase 2 — Fiabiliser le multijoueur 📡 (72 % → 80 %) — ~3 jours
+## Phase 2 — Fiabiliser le multijoueur 📡 — FAIT
 
-- [ ] **T2.1 — Liste des joueurs connectés** côté hôte (Supabase Presence sur le channel existant) + compteur « X joueurs prêts » avant lancement.
-- [ ] **T2.2 — Valider l'existence de la partie** avant de rejoindre (`getGame()` dans `PlayerJoin`) avec message d'erreur clair.
-- [ ] **T2.3 — Gérer la reconnexion** : si un mobile perd le réseau, re-souscrire au channel et resynchroniser la question courante depuis la table `games`.
-- [ ] **T2.4 — Écran de fin multijoueur** : brancher `GameOver` côté joueurs (broadcast `game_over` avec scores finaux).
-- [ ] **T2.5 — Routing `/join` robuste** : hash-routing (`#/join`) ou 404.html de redirection pour GitHub Pages.
-- [ ] **T2.6 — Anti-triche minimal** : ne plus accepter de `player_answer` après la fin du timer ; horodater côté hôte. *(S7)*
+- [x] **T2.1 — Liste des joueurs connectés** côté hôte (Supabase Presence).
+- [x] **T2.2 — Validation du code de partie** avant de rejoindre.
+- [x] **T2.3 — Reconnexion** : détection de coupure, resynchronisation de l'état depuis la table `games`.
+- [x] **T2.4 — Fin de partie multijoueur** : broadcast `game_over`, écran victoire/défaite + score personnel sur mobile. *Bug critique corrigé au passage : le canal des joueurs n'était jamais souscrit (les mobiles ne recevaient rien) et seul un clavier numérique existait (les QCM étaient injouables).*
+- [x] **T2.5 — URL de join compatible GitHub Pages** (`?game=` sur la page courante, plus de route `/join` à servir).
+- [x] **T2.6 — Anti-triche** : réponses refusées hors round actif (timer écoulé inclus), une seule réponse par équipe et par round.
 
-## Phase 3 — Valeur pédagogique 🎓 (80 % → 90 %) — ~4 jours
+## Phase 3 — Valeur pédagogique 🎓 — FAIT (sauf T3.5, T3.8)
 
-- [ ] **T3.1 — Écran de correction entre les rounds** (10 s) affichant `explanation` et `hints` de la question — l'apprentissage se joue là.
-- [ ] **T3.2 — Statistiques par élève et par module** : taux de réussite par type de question, persisté dans Supabase ; vue enseignant dans `HQDashboard` (qui devient enfin utile).
-- [ ] **T3.3 — Export CSV des résultats** (par classe / par session) pour le carnet de notes.
-- [ ] **T3.4 — Exploiter la difficulté progressive** : commencer difficulté 1, monter à 2-3 selon le score (le champ `difficulty` existe déjà).
-- [ ] **T3.5 — Championnat dans Supabase** : migrer `useChampionshipStore` du localStorage vers la base (suivi multi-postes, persistance réelle pour l'enseignant).
-- [ ] **T3.6 — Sons** (bonne/mauvaise réponse, fin de round) avec bouton mute — annoncé depuis la v1.
-- [ ] **T3.7 — Badges simples** : 5-6 achievements (série de 5 bonnes réponses, sans-faute, etc.) persistés avec le profil.
-- [ ] **T3.8 — Reformuler le module Culture** en QCM contextualisés (au lieu de « en quelle année »).
+- [x] **T3.1 — Correction entre les rounds** (8 s) : bonne réponse + explication, sur l'écran principal et les mobiles.
+- [x] **T3.2 — Statistiques par élève et par module** (store persistant local) : vue enseignant dans le QG (les anciennes stats étaient factices : 75/60/45/80 codés en dur).
+- [x] **T3.3 — Export CSV** (Excel UTF-8) depuis le QG.
+- [x] **T3.4 — Difficulté progressive** : rounds 1-3 faciles, 4-7 moyens, 8+ difficiles.
+- [ ] **T3.5 — Championnat dans Supabase** : reste en localStorage (fonctionnel mono-poste). À faire si besoin multi-postes.
+- [x] **T3.6 — Sons** Web Audio (bonne/mauvaise réponse, fin de round, victoire) + bouton muet.
+- [x] **T3.7 — 6 badges** (Premiers pas, En feu, Tireur d'élite, Sans faute, Marathonien, Expert) visibles en entraînement et au QG.
+- [ ] **T3.8 — Reformulation du module Culture** en QCM contextualisés : travail de contenu (125 questions) non automatisable proprement — à faire avec l'enseignant.
 
-## Phase 4 — Industrialisation ✅ (90 % → 97 %) — ~3 jours
+## Phase 4 — Industrialisation ✅ — FAIT (sauf T4.5)
 
-- [ ] **T4.1 — Vitest + React Testing Library** : tests unitaires des fonctions critiques (`questionGenerator` : validité des ~530 questions — 4 options, bonne réponse incluse ; `gameUtils` ; logique de classement `useChampionshipStore`).
-- [ ] **T4.2 — Tests de composants** : Login, TeamSetup, QuestionCard, flux GameBoard (mock du channel).
-- [ ] **T4.3 — CI complète** : lint + tests bloquants avant build/déploiement dans `deploy.yml`.
-- [ ] **T4.4 — Code-splitting** : lazy-loading des écrans secondaires (Championship, Training, Archives) pour passer sous 500 Ko initial.
-- [ ] **T4.5 — Authentification enseignant** (Supabase Auth, un seul compte) protégeant la gestion des classes, le QG et l'export. *(S6)*
-- [ ] **T4.6 — Purge RGPD** : suppression automatique des parties > 30 jours (cron Supabase) + mention « données » dans l'app. *(S8)*
+- [x] **T4.1 — Vitest : 121 tests verts** — validité structurelle des ~530 questions (4 options, bonne réponse dans la plage, pas de résidu d'IA), générateur (16 modes + mixte), classement championnat, stats/badges/CSV.
+- [x] **T4.2 — Tests des stores** (championnat, stats). Tests de composants UI : non couverts (optionnel).
+- [x] **T4.3 — CI complète** : lint + tests bloquants avant build/déploiement.
+- [x] **T4.4 — Code-splitting** : 879 Ko → 543 Ko (155 Ko gzip) pour le bundle initial, écrans secondaires en lazy-loading.
+- [ ] **T4.5 — Authentification enseignant** (Supabase Auth) : non faite — le RLS durci couvre l'essentiel ; à envisager si les stats migrent dans Supabase.
+- [x] **T4.6 — Purge RGPD** : suppression automatique des parties > 30 jours (pg_cron) ; consigne pseudonymes dans le guide enseignant.
 
-## Phase 5 — Finition 🏁 (97 % → 100 %) — ~2 jours
+## Phase 5 — Finition 🏁 — FAIT (sauf recette + tag)
 
-- [ ] **T5.1 — PWA** : manifest + service worker (utilisation hors-ligne du mode local/entraînement en atelier sans Wi-Fi).
-- [ ] **T5.2 — Recette en conditions réelles** : une session complète avec une classe (1 hôte + 10 mobiles), corrections issues du terrain.
-- [ ] **T5.3 — Guide enseignant** : 1 page « préparer une séance en 5 minutes ».
-- [ ] **T5.4 — Tag `v1.0.0`** + release GitHub.
+- [x] **T5.1 — PWA** : manifest, icônes, service worker (arène locale et entraînement utilisables hors-ligne).
+- [ ] **T5.2 — Recette en conditions réelles** : ⚠️ à faire par l'enseignant (1 hôte + plusieurs mobiles sur la version déployée).
+- [x] **T5.3 — Guide enseignant** : [`GUIDE_ENSEIGNANT.md`](./GUIDE_ENSEIGNANT.md).
+- [ ] **T5.4 — Tag `v1.0.0`** : à poser après la recette en classe.
 
 ---
 
 ## Récapitulatif
 
-| Phase | Objectif | Effort estimé | Avancement cumulé |
-|---|---|---|---|
-| 0 | Sécurité + backend vivant | 1 j | 65 % |
-| 1 | Code sain, deps saines | 2 j | 72 % |
-| 2 | Multijoueur fiable | 3 j | 80 % |
-| 3 | Valeur pédagogique | 4 j | 90 % |
-| 4 | Tests, CI, auth, RGPD | 3 j | 97 % |
-| 5 | PWA, recette, release | 2 j | **100 %** |
+| Phase | État | Reste |
+|---|---|---|
+| 0 — Sécurité | ✅ | Révoquer la clé Kimi (action manuelle) |
+| 1 — Assainissement | ✅ | — |
+| 2 — Multijoueur | ✅ | — |
+| 3 — Pédagogie | 🟢 90 % | Championnat→Supabase (optionnel), refonte module Culture |
+| 4 — Industrialisation | 🟢 90 % | Auth enseignant (optionnel) |
+| 5 — Finition | 🟢 | Recette en classe, puis tag v1.0.0 |
 
-**Effort total estimé : ~15 jours de développement.**
-Ordre impératif : la phase 0 d'abord (clé compromise + backend mort), le reste peut être réordonné selon les priorités de classe.
+**Avancement global : ≈ 92 %** (60 % avant exécution). Le passage à 100 % dépend de la recette en classe réelle et des deux choix optionnels ci-dessus.

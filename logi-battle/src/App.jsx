@@ -1,18 +1,26 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, lazy, Suspense } from 'react'
 import GameSelection from './components/GameSelection'
 import TeamSetup from './components/TeamSetup'
 import GameBoard from './components/GameBoard'
-import HostGame from './components/HostGame'
-import PlayerJoin from './components/PlayerJoin'
-import ChampionshipManager from './components/ChampionshipManager'
-import ChampionshipGameBoard from './components/ChampionshipGameBoard'
-import TrainingMode from './components/TrainingMode'
-import BattalionManager from './components/BattalionManager'
-import HQDashboard from './components/HQDashboard'
-import Archives from './components/Archives'
 import Login from './components/Login'
 import { useChampionshipStore } from './hooks/useChampionshipStore'
 import './styles/index.css'
+
+// Écrans secondaires chargés à la demande (code-splitting)
+const HostGame = lazy(() => import('./components/HostGame'))
+const PlayerJoin = lazy(() => import('./components/PlayerJoin'))
+const ChampionshipManager = lazy(() => import('./components/ChampionshipManager'))
+const ChampionshipGameBoard = lazy(() => import('./components/ChampionshipGameBoard'))
+const TrainingMode = lazy(() => import('./components/TrainingMode'))
+const BattalionManager = lazy(() => import('./components/BattalionManager'))
+const HQDashboard = lazy(() => import('./components/HQDashboard'))
+const Archives = lazy(() => import('./components/Archives'))
+
+const ScreenLoader = () => (
+  <div className="min-h-screen geronimo-screen flex items-center justify-center">
+    <div className="w-12 h-12 border-4 border-[#f4b942] border-t-transparent rounded-full animate-spin" />
+  </div>
+)
 
 function App() {
   const [userProfile, setUserProfile] = useState(() => {
@@ -61,7 +69,9 @@ function App() {
   if (currentPath === '/join' || window.location.search.includes('game=')) {
     return (
       <div className="dark">
+        <Suspense fallback={<ScreenLoader />}>
         <PlayerJoin userProfile={userProfile} />
+        </Suspense>
       </div>
     )
   }
@@ -70,6 +80,7 @@ function App() {
   if (isHostMode && gameMode) {
     return (
       <div className="dark">
+        <Suspense fallback={<ScreenLoader />}>
         <HostGame 
           gameMode={gameMode} 
           onBack={() => {
@@ -78,6 +89,7 @@ function App() {
             setShowTeamSetup(false)
           }} 
         />
+        </Suspense>
       </div>
     )
   }
@@ -86,6 +98,7 @@ function App() {
   if (isChampionshipMode && championshipMatch) {
     return (
       <div className="dark">
+        <Suspense fallback={<ScreenLoader />}>
         <ChampionshipGameBoard
           gameMode="all"
           challenger={championshipMatch.challenger}
@@ -116,6 +129,7 @@ function App() {
             setChampionshipMatch(null)
           }}
         />
+        </Suspense>
       </div>
     )
   }
@@ -124,12 +138,14 @@ function App() {
   if (isChampionshipMode) {
     return (
       <div className="dark">
+        <Suspense fallback={<ScreenLoader />}>
         <ChampionshipManager
           onBack={() => setIsChampionshipMode(false)}
           onStartGame={(challenger, champion, classId, type = 'challenge') => {
             setChampionshipMatch({ challenger, champion, classId, type })
           }}
         />
+        </Suspense>
       </div>
     )
   }
@@ -189,7 +205,9 @@ function App() {
   if (isTrainingMode) {
     return (
       <div className="dark">
+        <Suspense fallback={<ScreenLoader />}>
         <TrainingMode onBack={resetAllModes} userProfile={userProfile} />
+        </Suspense>
       </div>
     )
   }
@@ -198,7 +216,9 @@ function App() {
   if (isBattalionMode) {
     return (
       <div className="dark">
+        <Suspense fallback={<ScreenLoader />}>
         <BattalionManager onBack={resetAllModes} />
+        </Suspense>
       </div>
     )
   }
@@ -207,7 +227,9 @@ function App() {
   if (isHQMode) {
     return (
       <div className="dark">
+        <Suspense fallback={<ScreenLoader />}>
         <HQDashboard onBack={resetAllModes} />
+        </Suspense>
       </div>
     )
   }
@@ -216,7 +238,9 @@ function App() {
   if (isArchivesMode) {
     return (
       <div className="dark">
+        <Suspense fallback={<ScreenLoader />}>
         <Archives onBack={resetAllModes} />
+        </Suspense>
       </div>
     )
   }
@@ -225,10 +249,12 @@ function App() {
   if (gameMode && !showTeamSetup && !isHostMode) {
     return (
       <div className="dark">
+        <Suspense fallback={<ScreenLoader />}>
         <GameBoard 
           gameMode={gameMode} 
           onBack={handleBackToTeamSetup} 
         />
+        </Suspense>
       </div>
     )
   }
@@ -237,6 +263,7 @@ function App() {
   if (gameMode && showTeamSetup && !isHostMode) {
     return (
       <div className="dark">
+        <Suspense fallback={<ScreenLoader />}>
         <TeamSetup 
           gameMode={gameMode}
           onStart={handleTeamSetupComplete} 
@@ -245,6 +272,7 @@ function App() {
             setShowTeamSetup(false)
           }} 
         />
+        </Suspense>
       </div>
     )
   }
