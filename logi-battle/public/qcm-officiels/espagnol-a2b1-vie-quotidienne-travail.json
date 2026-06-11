@@ -1,0 +1,79 @@
+{
+  "format": "geronimo-quiz-v1",
+  "title": "Espagnol — Niveau A2/B1 : vie quotidienne et monde du travail (programme de LV de la voie professionnelle)",
+  "subject": "espagnol",
+  "questions": [
+    {
+      "question": "Completa la frase: \"Me llamo Ana y ___ diecisiete años.\"",
+      "options": ["soy", "tengo", "estoy", "hago"],
+      "correctOption": 1,
+      "explanation": "En espagnol, l'âge s'exprime avec le verbe « tener » : tengo diecisiete años."
+    },
+    {
+      "question": "Que signifie « una empresa » en français ?",
+      "options": ["Une émission", "Une impression", "Une entreprise", "Une entrevue"],
+      "correctOption": 2,
+      "explanation": "« Una empresa » signifie une entreprise."
+    },
+    {
+      "question": "Completa la pregunta: \"¿___ hora es?\"",
+      "options": ["Qué", "Cuál", "Cuándo", "Cómo"],
+      "correctOption": 0,
+      "explanation": "Pour demander l'heure, on dit « ¿Qué hora es? »."
+    },
+    {
+      "question": "Completa la frase: \"A mí me ___ los idiomas.\"",
+      "options": ["gusto", "gusta", "gustamos", "gustan"],
+      "correctOption": 3,
+      "explanation": "Avec « gustar », le verbe s'accorde avec la chose aimée : « los idiomas » est pluriel, donc « gustan »."
+    },
+    {
+      "question": "Completa la frase: \"Mañana ___ a trabajar a las ocho.\"",
+      "options": ["va", "voy", "vamos", "van"],
+      "correctOption": 1,
+      "explanation": "Le futur proche se forme avec « ir a + infinitif » ; à la première personne : voy a trabajar."
+    },
+    {
+      "question": "Que signifie « el horario » dans un contexte de travail ?",
+      "options": ["Le salaire", "Le bureau", "L'horaire de travail", "Le contrat"],
+      "correctOption": 2,
+      "explanation": "« El horario » désigne l'horaire ou l'emploi du temps."
+    },
+    {
+      "question": "¿Cuál es la forma correcta del pretérito indefinido: \"Ayer yo ___ en la tienda\"?",
+      "options": ["trabajé", "trabajo", "trabajaré", "trabajaba"],
+      "correctOption": 0,
+      "explanation": "Au passé simple (pretérito indefinido), « trabajar » à la première personne donne « trabajé »."
+    },
+    {
+      "question": "Que signifie « una entrevista de trabajo » ?",
+      "options": ["Une lettre de motivation", "Une offre d'emploi", "Une réunion d'équipe", "Un entretien d'embauche"],
+      "correctOption": 3,
+      "explanation": "« Una entrevista de trabajo » est un entretien d'embauche."
+    },
+    {
+      "question": "Completa la frase: \"La oficina ___ cerrada hoy.\"",
+      "options": ["es", "está", "hay", "son"],
+      "correctOption": 1,
+      "explanation": "On emploie « estar » pour un état ou un résultat : la oficina está cerrada."
+    },
+    {
+      "question": "Que signifie « el sueldo » en français ?",
+      "options": ["Le sol", "Le solde d'un compte", "Le salaire", "Le sommeil"],
+      "correctOption": 2,
+      "explanation": "« El sueldo » signifie le salaire."
+    },
+    {
+      "question": "¿Qué número representa la palabra « quinientos »?",
+      "options": ["500", "50", "15", "5 000"],
+      "correctOption": 0,
+      "explanation": "« Quinientos » est le nombre 500 en espagnol."
+    },
+    {
+      "question": "Que signifie l'expression « hay que » suivie d'un infinitif, comme dans « Hay que llegar puntual » ?",
+      "options": ["Il y avait", "On peut", "Il est interdit de", "Il faut"],
+      "correctOption": 3,
+      "explanation": "« Hay que + infinitif » exprime une obligation impersonnelle : il faut."
+    }
+  ]
+}

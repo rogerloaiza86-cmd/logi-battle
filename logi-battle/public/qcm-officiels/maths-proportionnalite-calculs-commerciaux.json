@@ -1,0 +1,85 @@
+{
+  "format": "geronimo-quiz-v1",
+  "title": "Mathématiques Bac Pro — Proportionnalité, pourcentages et calculs commerciaux et financiers",
+  "subject": "maths_generales",
+  "questions": [
+    {
+      "question": "Un article coûte 50 €. Quel est son prix après une remise de 20 % ?",
+      "options": ["30 €", "45 €", "40 €", "42 €"],
+      "correctOption": 2,
+      "explanation": "50 × 0,80 = 40 € : une remise de 20 % revient à multiplier le prix par 0,80."
+    },
+    {
+      "question": "Par quel coefficient multiplie-t-on un prix pour appliquer une augmentation de 15 % ?",
+      "options": ["1,15", "0,15", "1,5", "0,85"],
+      "correctOption": 0,
+      "explanation": "Augmenter de 15 % revient à multiplier par 1 + 0,15 = 1,15."
+    },
+    {
+      "question": "Un produit coûte 200 € hors taxes. Quel est son prix TTC avec une TVA de 20 % ?",
+      "options": ["220 €", "204 €", "260 €", "240 €"],
+      "correctOption": 3,
+      "explanation": "200 × 1,20 = 240 € TTC."
+    },
+    {
+      "question": "3 kg de pommes coûtent 7,50 €. Combien coûtent 5 kg au même prix au kilo ?",
+      "options": ["11,50 €", "12,50 €", "10,50 €", "15 €"],
+      "correctOption": 1,
+      "explanation": "Le prix au kilo est 7,50 ÷ 3 = 2,50 €, donc 5 kg coûtent 5 × 2,50 = 12,50 €."
+    },
+    {
+      "question": "Par quel coefficient multiplie-t-on un prix pour appliquer une baisse de 30 % ?",
+      "options": ["0,30", "1,30", "0,70", "0,97"],
+      "correctOption": 2,
+      "explanation": "Baisser de 30 % revient à multiplier par 1 − 0,30 = 0,70."
+    },
+    {
+      "question": "Un prix passe de 80 € à 92 €. Quel est le pourcentage d'augmentation ?",
+      "options": ["15 %", "12 %", "10 %", "20 %"],
+      "correctOption": 0,
+      "explanation": "(92 − 80) ÷ 80 = 12 ÷ 80 = 0,15, soit une hausse de 15 %."
+    },
+    {
+      "question": "Sur un plan à l'échelle 1/100, un mur mesure 3 cm. Quelle est sa longueur réelle ?",
+      "options": ["30 cm", "300 m", "30 m", "3 m"],
+      "correctOption": 3,
+      "explanation": "3 cm × 100 = 300 cm = 3 m dans la réalité."
+    },
+    {
+      "question": "Un capital de 1 000 € est placé à intérêt simple au taux annuel de 3 %. Quel intérêt total produit-il en 2 ans ?",
+      "options": ["30 €", "60 €", "90 €", "600 €"],
+      "correctOption": 1,
+      "explanation": "Intérêt simple : 1 000 × 0,03 × 2 = 60 €."
+    },
+    {
+      "question": "Un commerçant achète un article 60 € et le revend 90 €. Quelle est sa marge brute ?",
+      "options": ["20 €", "60 €", "30 €", "150 €"],
+      "correctOption": 2,
+      "explanation": "La marge brute est la différence entre le prix de vente et le prix d'achat : 90 − 60 = 30 €."
+    },
+    {
+      "question": "Comment reconnaît-on un tableau de proportionnalité ?",
+      "options": ["Les quotients des valeurs correspondantes sont tous égaux", "Les différences entre colonnes sont égales", "Toutes les valeurs sont entières", "La première ligne est croissante"],
+      "correctOption": 0,
+      "explanation": "Un tableau est de proportionnalité si le quotient entre les grandeurs correspondantes est constant (coefficient de proportionnalité)."
+    },
+    {
+      "question": "Un véhicule parcourt 150 km en 2 heures. Quelle est sa vitesse moyenne ?",
+      "options": ["60 km/h", "300 km/h", "85 km/h", "75 km/h"],
+      "correctOption": 3,
+      "explanation": "v = d ÷ t = 150 ÷ 2 = 75 km/h."
+    },
+    {
+      "question": "Deux baisses successives de 10 % correspondent à une baisse globale de :",
+      "options": ["20 %", "19 %", "21 %", "10 %"],
+      "correctOption": 1,
+      "explanation": "0,90 × 0,90 = 0,81, soit une baisse globale de 19 % et non de 20 %."
+    },
+    {
+      "question": "Un article coûte 121 € TTC avec une TVA de 10 %. Quel est son prix hors taxes ?",
+      "options": ["108,90 €", "111 €", "110 €", "118,80 €"],
+      "correctOption": 2,
+      "explanation": "Prix HT = 121 ÷ 1,10 = 110 €."
+    }
+  ]
+}

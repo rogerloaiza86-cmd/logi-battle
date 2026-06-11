@@ -1,0 +1,79 @@
+{
+  "format": "geronimo-quiz-v1",
+  "title": "Géographie 1re — La recomposition du territoire urbain en France : métropolisation et périurbanisation",
+  "subject": "geographie",
+  "questions": [
+    {
+      "question": "Qu'est-ce que la métropolisation ?",
+      "options": ["La concentration des populations, des activités et des fonctions de commandement dans les grandes villes", "La construction de lignes de métro", "Le déclin des grandes villes au profit des campagnes", "La fusion administrative de plusieurs communes rurales"],
+      "correctOption": 0,
+      "explanation": "La métropolisation est la concentration croissante des hommes, des activités et des fonctions de commandement dans les grandes villes."
+    },
+    {
+      "question": "Qu'est-ce que la périurbanisation ?",
+      "options": ["La rénovation des centres-villes anciens", "La construction de tours en centre-ville", "L'extension de l'urbanisation en périphérie des villes, dans des espaces peu denses", "Le retour des citadins vers les villages isolés"],
+      "correctOption": 2,
+      "explanation": "La périurbanisation est l'étalement de la ville en périphérie, sous forme d'espaces peu denses dépendant souvent de l'automobile."
+    },
+    {
+      "question": "Quelle part approximative de la population française vit dans des espaces urbains ou sous influence urbaine ?",
+      "options": ["Environ 30 %", "Environ 50 %", "Environ 60 %", "Environ 80 %"],
+      "correctOption": 3,
+      "explanation": "Environ 80 % des Français vivent dans des espaces urbains ou sous influence directe des villes."
+    },
+    {
+      "question": "Quelle est la première aire urbaine française par sa population ?",
+      "options": ["Lyon", "Paris", "Marseille-Aix", "Lille"],
+      "correctOption": 1,
+      "explanation": "L'aire urbaine de Paris, avec plus de 12 millions d'habitants, est de loin la première de France."
+    },
+    {
+      "question": "Comment appelle-t-on la transformation d'un quartier populaire par l'arrivée de ménages plus aisés ?",
+      "options": ["La gentrification", "La ségrégation", "La déprise urbaine", "La rurbanisation"],
+      "correctOption": 0,
+      "explanation": "La gentrification désigne le remplacement progressif des classes populaires par des ménages aisés dans certains quartiers anciens."
+    },
+    {
+      "question": "Quelle est une conséquence environnementale majeure de l'étalement urbain ?",
+      "options": ["La hausse du niveau des mers", "Le reboisement des périphéries", "L'artificialisation des sols agricoles et naturels", "La baisse du trafic automobile"],
+      "correctOption": 2,
+      "explanation": "L'étalement urbain entraîne l'artificialisation des sols, qui fait disparaître des terres agricoles et naturelles."
+    },
+    {
+      "question": "Que sont les mobilités pendulaires ?",
+      "options": ["Les déplacements touristiques saisonniers", "Les déménagements entre régions", "Les migrations internationales de travail", "Les trajets quotidiens entre le domicile et le lieu de travail ou d'études"],
+      "correctOption": 3,
+      "explanation": "Les mobilités pendulaires sont les allers-retours quotidiens entre le domicile et le lieu de travail ou d'études."
+    },
+    {
+      "question": "Quel programme national lancé en 2018 vise à redynamiser les centres des villes moyennes ?",
+      "options": ["Territoires d'industrie", "Action cœur de ville", "France Relance", "Grand Paris Express"],
+      "correctOption": 1,
+      "explanation": "Le programme « Action cœur de ville », lancé en 2018, soutient la revitalisation des centres-villes de plus de 200 villes moyennes."
+    },
+    {
+      "question": "Quelle métropole est la deuxième aire urbaine de France par sa population ?",
+      "options": ["Toulouse", "Bordeaux", "Lyon", "Nantes"],
+      "correctOption": 2,
+      "explanation": "L'aire urbaine de Lyon est la deuxième de France, devant celle de Marseille-Aix-en-Provence."
+    },
+    {
+      "question": "Que désigne le renouvellement urbain ?",
+      "options": ["La reconstruction de la ville sur elle-même, notamment sur d'anciennes friches", "L'élection de nouveaux conseils municipaux", "L'extension des lotissements en zone rurale", "Le changement de nom des rues"],
+      "correctOption": 0,
+      "explanation": "Le renouvellement urbain consiste à reconstruire la ville sur elle-même, par exemple en réhabilitant des friches industrielles."
+    },
+    {
+      "question": "Quel quartier lyonnais, ancienne zone industrielle et portuaire, est un exemple célèbre de reconversion urbaine ?",
+      "options": ["La Défense", "Euralille", "Le Vieux-Port", "La Confluence"],
+      "correctOption": 3,
+      "explanation": "Le quartier de la Confluence, à Lyon, est une ancienne zone industrialo-portuaire reconvertie en quartier durable."
+    },
+    {
+      "question": "Quelles fonctions dites « métropolitaines » concentrent les grandes villes ?",
+      "options": ["Les activités agricoles et minières", "Les sièges sociaux, la recherche, la finance et la culture", "Uniquement les administrations locales", "Les industries lourdes et les ports de pêche"],
+      "correctOption": 1,
+      "explanation": "Les métropoles concentrent les fonctions de commandement : sièges sociaux, recherche, finance, culture et décision politique."
+    }
+  ]
+}

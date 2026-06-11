@@ -15,6 +15,7 @@ const TrainingMode = lazy(() => import('./components/TrainingMode'))
 const BattalionManager = lazy(() => import('./components/BattalionManager'))
 const HQDashboard = lazy(() => import('./components/HQDashboard'))
 const Archives = lazy(() => import('./components/Archives'))
+const QuizBuilder = lazy(() => import('./components/QuizBuilder'))
 
 const ScreenLoader = () => (
   <div className="min-h-screen geronimo-screen flex items-center justify-center">
@@ -42,6 +43,7 @@ function App() {
   const [isBattalionMode, setIsBattalionMode] = useState(false)
   const [isHQMode, setIsHQMode] = useState(false)
   const [isArchivesMode, setIsArchivesMode] = useState(false)
+  const [isQuizBuilderMode, setIsQuizBuilderMode] = useState(false)
   
   const { recordMatch } = useChampionshipStore()
 
@@ -199,6 +201,30 @@ function App() {
     setIsBattalionMode(false)
     setIsHQMode(false)
     setIsArchivesMode(false)
+    setIsQuizBuilderMode(false)
+  }
+
+  // Éditeur de QCM du professeur
+  if (isQuizBuilderMode) {
+    return (
+      <div className="dark">
+        <Suspense fallback={<ScreenLoader />}>
+          <QuizBuilder
+            onBack={resetAllModes}
+            onPlayQuiz={(quizId) => {
+              resetAllModes()
+              setGameMode(`custom:${quizId}`)
+              setShowTeamSetup(true)
+            }}
+            onHostQuiz={(quizId) => {
+              resetAllModes()
+              setGameMode(`custom:${quizId}`)
+              setIsHostMode(true)
+            }}
+          />
+        </Suspense>
+      </div>
+    )
   }
 
   // Mode Entraînement
@@ -289,6 +315,7 @@ function App() {
         onBattalionMode={handleBattalionMode}
         onHQMode={handleHQMode}
         onArchivesMode={handleArchivesMode}
+        onQuizBuilderMode={() => setIsQuizBuilderMode(true)}
         onLogout={handleLogout}
       />
     </div>

@@ -22,6 +22,20 @@
 4. Les questions arrivent sur les téléphones ; l'écran projeté montre la question, le score et la corde.
 5. Une connexion internet est nécessaire (Supabase). En cas de coupure côté élève, l'appli se reconnecte seule.
 
+## Créer un QCM à partir de votre cours · 5 min
+
+1. Menu → **MES QCM** (barre latérale) → donnez un titre (ex : « Chapitre 3 — La Révolution ») et une matière → **Créer**.
+2. Ajoutez vos questions : énoncé, 4 réponses, cochez la bonne, ajoutez une explication (elle s'affiche à la correction).
+3. Dès la première question, le QCM est jouable en **Arène** (2 équipes sur un poste) ou en **Live** (QR code, élèves sur mobile) — il apparaît aussi dans le mode Entraînement.
+4. **Partage entre collègues** : bouton Exporter (fichier .json) → l'autre professeur l'importe en un clic.
+5. **Bibliothèque officielle** : des QCM prêts à l'emploi alignés sur les programmes Bac Pro (BO 2019) sont proposés — ajoutez-les puis modifiez-les librement.
+
+## Matières générales & Culture Générale
+
+- **6 matières** sont jouables dans tous les modes : Français, Mathématiques, Histoire, Géographie, Anglais, Espagnol (+ un mode Mixte matières).
+- **Culture Générale** : 300 questions en 3 niveaux (facile / moyen / difficile), choix du niveau au lancement.
+- **Chaque battle se joue en 10 questions** : vainqueur à la corde ou au score.
+
 ## Scénario 3 — Championnat de classe (sur plusieurs semaines)
 
 1. Menu → **Championnat** → créez votre classe puis vos **trinômes**.

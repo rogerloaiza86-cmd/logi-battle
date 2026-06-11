@@ -1,0 +1,79 @@
+{
+  "format": "geronimo-quiz-v1",
+  "title": "Français 2nde — Devenir soi : écritures autobiographiques",
+  "subject": "francais",
+  "questions": [
+    {
+      "question": "Qu'est-ce qu'une autobiographie ?",
+      "options": ["Un récit qu'une personne fait de sa propre vie", "Le récit de la vie d'une autre personne", "Un roman entièrement inventé", "Un recueil de poèmes sur l'enfance"],
+      "correctOption": 0,
+      "explanation": "L'autobiographie est le récit rétrospectif qu'une personne réelle fait de sa propre existence."
+    },
+    {
+      "question": "Dans le « pacte autobiographique », quelle identité unit les trois instances du récit ?",
+      "options": ["Auteur et éditeur", "Narrateur et lecteur", "Auteur, narrateur et personnage principal", "Personnage et illustrateur"],
+      "correctOption": 2,
+      "explanation": "Dans l'autobiographie, l'auteur, le narrateur et le personnage principal sont une seule et même personne."
+    },
+    {
+      "question": "Qui est l'auteur des « Confessions », œuvre fondatrice de l'autobiographie publiée au XVIIIe siècle ?",
+      "options": ["Voltaire", "Montaigne", "Chateaubriand", "Jean-Jacques Rousseau"],
+      "correctOption": 3,
+      "explanation": "Jean-Jacques Rousseau écrit « Les Confessions », publiées après sa mort à partir de 1782."
+    },
+    {
+      "question": "Comment appelle-t-on un récit qui mêle éléments autobiographiques et fiction assumée ?",
+      "options": ["Une biographie", "L'autofiction", "Un essai", "Une chronique"],
+      "correctOption": 1,
+      "explanation": "L'autofiction mêle des faits réels vécus par l'auteur et des éléments romanesques inventés."
+    },
+    {
+      "question": "Quelle caractéristique distingue le journal intime de l'autobiographie ?",
+      "options": ["Il est toujours publié du vivant de l'auteur", "Il est écrit à la troisième personne", "Il est écrit au jour le jour, sans recul sur les événements", "Il ne parle jamais de soi"],
+      "correctOption": 2,
+      "explanation": "Le journal intime est rédigé au fil des jours, alors que l'autobiographie est un récit rétrospectif."
+    },
+    {
+      "question": "Quel pronom personnel domine dans un texte autobiographique ?",
+      "options": ["Je", "Il", "Nous", "Vous"],
+      "correctOption": 0,
+      "explanation": "L'autobiographie s'écrit à la première personne, le « je » désignant à la fois l'auteur, le narrateur et le personnage."
+    },
+    {
+      "question": "Dans la phrase « Je suis né en 1712 à Genève », à quel temps le verbe est-il conjugué ?",
+      "options": ["L'imparfait", "Le passé simple", "Le plus-que-parfait", "Le passé composé"],
+      "correctOption": 3,
+      "explanation": "« Je suis né » est un passé composé, formé de l'auxiliaire être au présent et du participe passé."
+    },
+    {
+      "question": "Quelle adolescente juive est l'auteure d'un célèbre journal écrit dans la clandestinité entre 1942 et 1944 ?",
+      "options": ["Simone Veil", "Anne Frank", "Hélène Berr", "Charlotte Delbo"],
+      "correctOption": 1,
+      "explanation": "Anne Frank rédige son journal à Amsterdam, cachée avec sa famille de 1942 à 1944."
+    },
+    {
+      "question": "Qu'est-ce qui distingue les mémoires de l'autobiographie ?",
+      "options": ["Les mémoires sont toujours en vers", "Les mémoires sont écrits par un proche de l'auteur", "Les mémoires privilégient les événements historiques dont l'auteur a été témoin", "Les mémoires ne parlent que de l'enfance"],
+      "correctOption": 2,
+      "explanation": "Les mémoires racontent surtout les événements historiques et publics vécus par l'auteur, plus que sa vie intime."
+    },
+    {
+      "question": "Que signifie littéralement le mot « autobiographie » d'après ses racines grecques ?",
+      "options": ["Écrire la vie de soi-même", "Raconter ses voyages", "Décrire sa famille", "Parler en public de soi"],
+      "correctOption": 0,
+      "explanation": "« Autobiographie » vient du grec autos (soi-même), bios (vie) et graphein (écrire)."
+    },
+    {
+      "question": "Dans « Je me souviens des dimanches… Je me souviens des étés… », quelle figure de style repose sur la répétition en début de phrase ?",
+      "options": ["La métaphore", "La comparaison", "L'hyperbole", "L'anaphore"],
+      "correctOption": 3,
+      "explanation": "L'anaphore est la répétition d'un même mot ou groupe de mots en tête de phrases successives, comme dans « Je me souviens » de Georges Perec."
+    },
+    {
+      "question": "Quel écrivain raconte son enfance et sa relation avec sa mère dans « La Promesse de l'aube » (1960) ?",
+      "options": ["Albert Camus", "Romain Gary", "Marcel Pagnol", "Jules Vallès"],
+      "correctOption": 1,
+      "explanation": "Dans « La Promesse de l'aube », Romain Gary fait le récit autobiographique de son enfance et de l'amour de sa mère."
+    }
+  ]
+}

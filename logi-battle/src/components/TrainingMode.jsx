@@ -4,6 +4,7 @@ import QuestionCard from './QuestionCard'
 import VocabularyCard from './VocabularyCard'
 import { generateNextQuestion } from '../utils/questionGenerator'
 import { useStatsStore, BADGES } from '../hooks/useStatsStore'
+import { useCustomQuizStore } from '../hooks/useCustomQuizStore'
 import { playCorrect, playWrong } from '../utils/sounds'
 
 const ROUND_TIME = 45
@@ -26,7 +27,30 @@ export const TrainingMode = ({ onBack, userProfile }) => {
   const [questionHistory, setQuestionHistory] = useState([])
   const roundStartTime = useRef(null)
 
+  const customQuizzes = useCustomQuizStore((s) => s.quizzes)
+
   const modules = [
+    // Matières générales
+    { id: 'culture_g:1', title: 'Culture G — Facile', icon: 'psychology', color: 'green', description: '100 questions niveau facile' },
+    { id: 'culture_g:2', title: 'Culture G — Moyen', icon: 'psychology', color: 'orange', description: '100 questions niveau moyen' },
+    { id: 'culture_g:3', title: 'Culture G — Difficile', icon: 'psychology', color: 'red', description: '100 questions niveau difficile' },
+    { id: 'francais', title: 'Français', icon: 'menu_book', color: 'blue', description: 'Grammaire, orthographe, vocabulaire' },
+    { id: 'maths_generales', title: 'Mathématiques', icon: 'calculate', color: 'green', description: 'Calcul, fractions, pourcentages, géométrie' },
+    { id: 'histoire', title: 'Histoire', icon: 'history_edu', color: 'orange', description: 'Repères historiques France & monde' },
+    { id: 'geographie', title: 'Géographie', icon: 'public', color: 'blue', description: 'France, Europe, monde, mondialisation' },
+    { id: 'anglais', title: 'Anglais', icon: 'translate', color: 'red', description: 'Grammar, vocabulary & business English' },
+    { id: 'espagnol', title: 'Espagnol', icon: 'translate', color: 'red', description: 'Vocabulario, conjugación y español profesional' },
+    // QCM créés par le professeur
+    ...Object.values(customQuizzes)
+      .filter((q) => q.questions.length > 0)
+      .map((q) => ({
+        id: `custom:${q.id}`,
+        title: q.title,
+        icon: 'edit_note',
+        color: 'orange',
+        description: `QCM du professeur • ${q.questions.length} question(s)`,
+      })),
+    // Modules logistique
     { id: 'palettisation', title: 'Palettisation', icon: 'inventory_2', color: 'orange', description: 'Maîtrisez les calculs de palettisation' },
     { id: 'cout_transport', title: 'Coût de Transport', icon: 'local_shipping', color: 'blue', description: 'Optimisez vos coûts logistiques' },
     { id: 'loading_plan', title: 'Plan de Chargement', icon: 'conveyor_belt', color: 'orange', description: 'Calculez les plans de chargement' },

@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useChampionshipStore } from '../useChampionshipStore'
 import { useStatsStore, BADGES, buildStatsCSV } from '../useStatsStore'
+import { useCustomQuizStore } from '../useCustomQuizStore'
+import { generateNextQuestion } from '../../utils/questionGenerator'
 
 // Les ids sont générés via Date.now() : on rend chaque appel unique
 let tick = 1_000_000
@@ -9,6 +11,68 @@ beforeEach(() => {
   localStorage.clear()
   useChampionshipStore.setState({ classes: [], currentClass: null })
   useStatsStore.setState({ players: {} })
+  useCustomQuizStore.setState({ quizzes: {} })
+})
+
+describe('useCustomQuizStore (QCM du professeur)', () => {
+  const validQuestion = {
+    question: 'Quelle est la capitale de la France ?',
+    options: ['Lyon', 'Paris', 'Marseille', 'Lille'],
+    correctOption: 1,
+    explanation: 'Paris est la capitale de la France.',
+  }
+
+  it('crée un QCM et y ajoute des questions valides', () => {
+    const s = useCustomQuizStore.getState()
+    const id = s.createQuiz('Chapitre 1', 'histoire')
+    expect(s.addQuestion(id, validQuestion)).toBe(true)
+    const quiz = useCustomQuizStore.getState().getQuiz(id)
+    expect(quiz.questions).toHaveLength(1)
+    expect(quiz.subject).toBe('histoire')
+  })
+
+  it('rejette les questions incomplètes', () => {
+    const s = useCustomQuizStore.getState()
+    const id = s.createQuiz('Test', 'francais')
+    expect(s.addQuestion(id, { ...validQuestion, question: '' })).toBe(false)
+    expect(s.addQuestion(id, { ...validQuestion, options: ['a', 'b', 'c', ''] })).toBe(false)
+    expect(s.addQuestion(id, { ...validQuestion, correctOption: 5 })).toBe(false)
+    expect(useCustomQuizStore.getState().getQuiz(id).questions).toHaveLength(0)
+  })
+
+  it('le générateur sait jouer un QCM du professeur (custom:<id>)', () => {
+    const s = useCustomQuizStore.getState()
+    const id = s.createQuiz('Mon cours', 'geographie')
+    s.addQuestion(id, validQuestion)
+
+    const q = generateNextQuestion(`custom:${id}`)
+    expect(q.type).toBe('custom')
+    expect(q.description).toBe(validQuestion.question)
+    expect(q.data.options).toEqual(validQuestion.options)
+    expect(q.data.correctOption).toBe(1)
+  })
+
+  it('le générateur échoue proprement sur un QCM vide ou inconnu', () => {
+    expect(() => generateNextQuestion('custom:inexistant')).toThrow()
+  })
+
+  it("l'import accepte un export et ignore les questions invalides", () => {
+    const s = useCustomQuizStore.getState()
+    const result = s.importQuiz(JSON.stringify({
+      format: 'geronimo-quiz-v1',
+      title: 'QCM partagé',
+      subject: 'anglais',
+      questions: [validQuestion, { question: 'incomplète', options: ['a'], correctOption: 0 }],
+    }))
+    expect(result.ok).toBe(true)
+    expect(result.imported).toBe(1)
+    expect(result.skipped).toBe(1)
+  })
+
+  it("l'import rejette un JSON invalide", () => {
+    expect(useCustomQuizStore.getState().importQuiz('pas du json').ok).toBe(false)
+    expect(useCustomQuizStore.getState().importQuiz('{"x":1}').ok).toBe(false)
+  })
 })
 
 describe('useChampionshipStore', () => {

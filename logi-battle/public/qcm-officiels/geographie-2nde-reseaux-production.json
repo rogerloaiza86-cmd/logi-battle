@@ -1,0 +1,79 @@
+{
+  "format": "geronimo-quiz-v1",
+  "title": "Géographie 2nde — Des réseaux de production et d'échanges mondialisés",
+  "subject": "geographie",
+  "questions": [
+    {
+      "question": "Qu'est-ce qu'une firme transnationale (FTN) ?",
+      "options": ["Une entreprise publique nationale", "Une entreprise qui exerce ses activités dans plusieurs pays", "Une association internationale d'États", "Une entreprise qui ne vend que sur Internet"],
+      "correctOption": 1,
+      "explanation": "Une firme transnationale est une entreprise qui possède des filiales et exerce ses activités dans plusieurs pays."
+    },
+    {
+      "question": "Quelle invention a standardisé et révolutionné le transport maritime de marchandises ?",
+      "options": ["Le pétrolier", "Le ferry", "Le conteneur", "Le cargo frigorifique"],
+      "correctOption": 2,
+      "explanation": "Le conteneur, généralisé depuis les années 1960, a standardisé le transport et fortement réduit les coûts logistiques."
+    },
+    {
+      "question": "Quelle part approximative du commerce mondial de marchandises (en volume) transite par voie maritime ?",
+      "options": ["Environ 80 %", "Environ 25 %", "Environ 50 %", "Environ 10 %"],
+      "correctOption": 0,
+      "explanation": "Environ 80 % du commerce mondial de marchandises en volume est transporté par voie maritime."
+    },
+    {
+      "question": "Quelles mers le canal de Suez relie-t-il ?",
+      "options": ["La mer Noire et la mer Caspienne", "L'Atlantique et le Pacifique", "La mer du Nord et la Baltique", "La Méditerranée et la mer Rouge"],
+      "correctOption": 3,
+      "explanation": "Le canal de Suez, ouvert en 1869 en Égypte, relie la Méditerranée à la mer Rouge."
+    },
+    {
+      "question": "Comment appelle-t-on la répartition des étapes de fabrication d'un produit entre plusieurs pays ?",
+      "options": ["La division internationale du travail", "Le protectionnisme", "La délocalisation fiscale", "L'autarcie productive"],
+      "correctOption": 0,
+      "explanation": "La division internationale du travail désigne la spécialisation des pays dans certaines étapes des chaînes de production mondiales."
+    },
+    {
+      "question": "Quel est le premier port mondial pour le trafic de conteneurs ?",
+      "options": ["Rotterdam", "Shanghai", "Los Angeles", "Dubaï"],
+      "correctOption": 1,
+      "explanation": "Shanghai est le premier port à conteneurs du monde, devant Singapour."
+    },
+    {
+      "question": "Quelle organisation internationale fixe les règles du commerce mondial ?",
+      "options": ["Le FMI", "L'ONU", "L'OMC", "L'OCDE"],
+      "correctOption": 2,
+      "explanation": "L'Organisation mondiale du commerce (OMC) établit et arbitre les règles du commerce international."
+    },
+    {
+      "question": "Quel détroit d'Asie du Sud-Est est un passage stratégique majeur entre l'océan Indien et le Pacifique ?",
+      "options": ["Le détroit de Gibraltar", "Le détroit de Béring", "Le détroit d'Ormuz", "Le détroit de Malacca"],
+      "correctOption": 3,
+      "explanation": "Le détroit de Malacca, entre la Malaisie et l'Indonésie, voit passer une part majeure du commerce maritime mondial."
+    },
+    {
+      "question": "Un smartphone conçu en Californie et assemblé en Chine illustre quel phénomène ?",
+      "options": ["La fragmentation mondiale des chaînes de production", "Le commerce équitable", "La relocalisation industrielle", "Le circuit court"],
+      "correctOption": 0,
+      "explanation": "Conception, fabrication des composants et assemblage sont répartis entre plusieurs pays : c'est une chaîne de valeur mondialisée."
+    },
+    {
+      "question": "Qu'est-ce qu'une zone franche ?",
+      "options": ["Une zone réservée aux entreprises publiques", "Un espace bénéficiant d'avantages fiscaux et douaniers pour attirer les entreprises", "Une zone interdite au commerce international", "Un quartier d'affaires en centre-ville"],
+      "correctOption": 1,
+      "explanation": "Une zone franche offre des exonérations fiscales et douanières pour attirer les investissements et les activités productives."
+    },
+    {
+      "question": "Quels océans le canal de Panama met-il en relation ?",
+      "options": ["L'Atlantique et l'océan Indien", "Le Pacifique et l'océan Arctique", "L'Atlantique et le Pacifique", "L'océan Indien et le Pacifique"],
+      "correctOption": 2,
+      "explanation": "Le canal de Panama, ouvert en 1914 et élargi en 2016, relie l'océan Atlantique à l'océan Pacifique."
+    },
+    {
+      "question": "Par quelle infrastructure transite l'essentiel des flux de données intercontinentaux ?",
+      "options": ["Les satellites de télécommunication", "Les antennes-relais terrestres", "Les fibres optiques aériennes", "Les câbles sous-marins"],
+      "correctOption": 3,
+      "explanation": "La quasi-totalité des données numériques intercontinentales circule par des câbles sous-marins en fibre optique."
+    }
+  ]
+}

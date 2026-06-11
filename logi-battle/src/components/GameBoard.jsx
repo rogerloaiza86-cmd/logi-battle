@@ -12,6 +12,7 @@ import { playCorrect, playWrong, playRoundEnd, playVictory, isMuted, toggleMuted
 const ROUND_TIME = 30
 const VOCABULARY_TIME = 20
 const CORRECTION_TIME = 8 // secondes d'affichage de la correction entre deux rounds
+const MAX_ROUNDS = 10 // chaque battle se joue en 10 questions maximum
 
 // Difficulté progressive : rounds 1-3 faciles, 4-7 moyens, 8+ difficiles
 const difficultyForRound = (round) => (round <= 3 ? 1 : round <= 7 ? 2 : 3)
@@ -38,6 +39,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   const isRoundActiveRef = useRef(false)
   const roundStartTime = useRef(null)
   const questionRef = useRef(null)
+  const roundNumberRef = useRef(1)
   // Statuts dérivés pour l'UI
   const [teamAAnswer, setTeamAAnswer] = useState(null)
   const [teamBAnswer, setTeamBAnswer] = useState(null)
@@ -155,21 +157,33 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
     }
 
     setTimeout(() => {
-      // gameStatus est mis à jour de façon synchrone par incrementTeam*Score
-      const status = useGameStore.getState().gameStatus
+      // gameStatus est mis à jour de façon synchrone par incrementTeam*Score ;
+      // la battle s'arrête aussi après MAX_ROUNDS questions (vainqueur au score).
+      const reachedMaxRounds = roundNumberRef.current >= MAX_ROUNDS
+      if (reachedMaxRounds && useGameStore.getState().gameStatus !== 'finished') {
+        gameStore.setGameStatus('finished')
+      }
+      const status = reachedMaxRounds ? 'finished' : useGameStore.getState().gameStatus
       if (status !== 'finished') {
         setRoundNumber((prev) => {
           const next = prev + 1
+          roundNumberRef.current = next
           startNewRound(next)
           return next
         })
       } else {
         setShowCorrection(false)
         playVictory()
+        const finalState = useGameStore.getState()
         broadcast('game_over', {
-          winner: useGameStore.getState().ropePosition >= 100 ? 'A' : 'B',
-          teamAScore: useGameStore.getState().teamA.score,
-          teamBScore: useGameStore.getState().teamB.score,
+          winner:
+            finalState.ropePosition >= 100 ? 'A'
+            : finalState.ropePosition <= -100 ? 'B'
+            : finalState.teamA.score > finalState.teamB.score ? 'A'
+            : finalState.teamB.score > finalState.teamA.score ? 'B'
+            : null,
+          teamAScore: finalState.teamA.score,
+          teamBScore: finalState.teamB.score,
         })
         if (isHost && gameStore.gameId) {
           gamesService.updateGameStatus(gameStore.gameId, 'finished').catch(console.error)
@@ -234,6 +248,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   const handleRestart = () => {
     gameStore.resetGame()
     setRoundNumber(1)
+    roundNumberRef.current = 1
     onBack()
   }
 
@@ -335,7 +350,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
               </div>
             </div>
             <span className="mt-1 px-3 py-1 bg-[#f4b942] text-[#17314a] text-[10px] font-bold uppercase tracking-wider rounded-full">
-              Round {roundNumber}
+              Round {roundNumber}/{MAX_ROUNDS}
             </span>
           </div>
 

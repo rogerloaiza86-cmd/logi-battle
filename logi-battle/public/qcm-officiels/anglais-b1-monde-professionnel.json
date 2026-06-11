@@ -1,0 +1,79 @@
+{
+  "format": "geronimo-quiz-v1",
+  "title": "Anglais — Niveau B1 : communiquer en contexte professionnel (programme de LV de la voie professionnelle)",
+  "subject": "anglais",
+  "questions": [
+    {
+      "question": "Complete the sentence: \"I have been working in this company ___ 2022.\"",
+      "options": ["for", "since", "during", "ago"],
+      "correctOption": 1,
+      "explanation": "« Since » s'emploie avec un point de départ précis dans le temps (since 2022), « for » avec une durée."
+    },
+    {
+      "question": "Au téléphone, que signifie l'expression « Hold the line, please » ?",
+      "options": ["Raccrochez, s'il vous plaît", "Parlez plus fort, s'il vous plaît", "Ne quittez pas, s'il vous plaît", "Rappelez plus tard, s'il vous plaît"],
+      "correctOption": 2,
+      "explanation": "« Hold the line » signifie « ne quittez pas », c'est-à-dire rester en ligne."
+    },
+    {
+      "question": "Une lettre formelle commence par « Dear Sir or Madam ». Quelle formule de politesse convient pour la terminer ?",
+      "options": ["Yours faithfully", "See you soon", "Love", "Cheers"],
+      "correctOption": 0,
+      "explanation": "Quand le destinataire n'est pas nommé (« Dear Sir or Madam »), la formule finale d'usage est « Yours faithfully »."
+    },
+    {
+      "question": "Que signifie le mot « deadline » dans un contexte professionnel ?",
+      "options": ["Une pause déjeuner", "Une réunion d'équipe", "Une ligne téléphonique", "Une date limite"],
+      "correctOption": 3,
+      "explanation": "« Deadline » désigne la date ou l'heure limite pour terminer un travail."
+    },
+    {
+      "question": "What is the past simple of the verb \"to lead\"?",
+      "options": ["leaded", "led", "lead", "leading"],
+      "correctOption": 1,
+      "explanation": "« To lead » est un verbe irrégulier : lead, led, led."
+    },
+    {
+      "question": "Complete the sentence: \"I'm calling to ___ an appointment with Mr Smith.\"",
+      "options": ["do", "take", "make", "give"],
+      "correctOption": 2,
+      "explanation": "En anglais, on dit « to make an appointment » pour « prendre rendez-vous »."
+    },
+    {
+      "question": "Comment appelle-t-on couramment un CV en anglais américain ?",
+      "options": ["A résumé", "A cover letter", "A diploma", "A reference"],
+      "correctOption": 0,
+      "explanation": "Aux États-Unis, le CV se dit « résumé » ; « cover letter » désigne la lettre de motivation."
+    },
+    {
+      "question": "Complete the sentence: \"If we order today, the goods ___ on Friday.\"",
+      "options": ["arrived", "would arrive", "had arrived", "will arrive"],
+      "correctOption": 3,
+      "explanation": "Conditionnel de type 1 : « if » + présent simple, puis « will » + base verbale dans la principale."
+    },
+    {
+      "question": "Que signifie l'expression « to apply for a job » ?",
+      "options": ["Démissionner d'un emploi", "Poser sa candidature à un emploi", "Refuser un emploi", "Créer une entreprise"],
+      "correctOption": 1,
+      "explanation": "« To apply for a job » signifie postuler, c'est-à-dire poser sa candidature à un emploi."
+    },
+    {
+      "question": "\"The meeting has been put off.\" What does \"put off\" mean here?",
+      "options": ["cancelled forever", "started", "postponed", "shortened"],
+      "correctOption": 2,
+      "explanation": "Le verbe à particule « to put off » signifie reporter à plus tard (postpone)."
+    },
+    {
+      "question": "Complete the sentence: \"This new machine is ___ than the old one.\"",
+      "options": ["more fast", "fastest", "as fast", "faster"],
+      "correctOption": 3,
+      "explanation": "Les adjectifs courts forment leur comparatif en -er : « faster than »."
+    },
+    {
+      "question": "Dans un contexte commercial, que signifie « an invoice » ?",
+      "options": ["Une facture", "Un entrepôt", "Une commande", "Un reçu de caisse"],
+      "correctOption": 0,
+      "explanation": "« An invoice » est une facture, le document qui détaille les sommes dues par le client."
+    }
+  ]
+}

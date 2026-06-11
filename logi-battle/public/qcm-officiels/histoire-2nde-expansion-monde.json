@@ -1,0 +1,85 @@
+{
+  "format": "geronimo-quiz-v1",
+  "title": "Histoire 2nde — L'expansion du monde connu (XVe-XVIIIe siècle)",
+  "subject": "histoire",
+  "questions": [
+    {
+      "question": "Quel navigateur atteint l'Amérique en 1492 ?",
+      "options": ["Vasco de Gama", "Christophe Colomb", "Magellan", "Jacques Cartier"],
+      "correctOption": 1,
+      "explanation": "Christophe Colomb, financé par l'Espagne, atteint les Caraïbes le 12 octobre 1492."
+    },
+    {
+      "question": "En quelle année Vasco de Gama atteint-il les Indes en contournant l'Afrique ?",
+      "options": ["1488", "1492", "1498", "1519"],
+      "correctOption": 2,
+      "explanation": "Vasco de Gama arrive à Calicut, en Inde, en mai 1498 après avoir doublé le cap de Bonne-Espérance."
+    },
+    {
+      "question": "Quel traité de 1494 partage les terres à découvrir entre l'Espagne et le Portugal ?",
+      "options": ["Le traité de Tordesillas", "Le traité d'Utrecht", "Le traité de Vervins", "Le traité du Cateau-Cambrésis"],
+      "correctOption": 0,
+      "explanation": "Le traité de Tordesillas (1494) fixe une ligne de partage du monde entre les couronnes espagnole et portugaise."
+    },
+    {
+      "question": "Qui achève en 1522 le premier tour du monde, commencé sous le commandement de Magellan ?",
+      "options": ["Hernán Cortés", "Amerigo Vespucci", "Francis Drake", "Juan Sebastián Elcano"],
+      "correctOption": 3,
+      "explanation": "Après la mort de Magellan aux Philippines en 1521, Juan Sebastián Elcano ramène le dernier navire en Espagne en 1522."
+    },
+    {
+      "question": "Quels continents le commerce triangulaire relie-t-il aux XVIIe et XVIIIe siècles ?",
+      "options": ["L'Europe, l'Asie et l'Océanie", "L'Europe, l'Afrique et les Amériques", "L'Afrique, l'Asie et les Amériques", "L'Europe, l'Asie et l'Afrique"],
+      "correctOption": 1,
+      "explanation": "Le commerce triangulaire relie les ports européens aux côtes africaines (traite des esclaves) puis aux colonies américaines."
+    },
+    {
+      "question": "Quelle culture de plantation, fondée sur l'esclavage, domine aux Antilles au XVIIIe siècle ?",
+      "options": ["Le blé", "Le coton", "La canne à sucre", "La vigne"],
+      "correctOption": 2,
+      "explanation": "La canne à sucre est la principale culture des plantations antillaises, travaillée par des esclaves déportés d'Afrique."
+    },
+    {
+      "question": "Quel texte, promulgué en 1685 sous Louis XIV, réglemente l'esclavage dans les colonies françaises ?",
+      "options": ["Le Code noir", "L'édit de Nantes", "Le Code civil", "L'ordonnance de Villers-Cotterêts"],
+      "correctOption": 0,
+      "explanation": "Le Code noir, promulgué en 1685, fixe le statut juridique des esclaves dans les colonies françaises."
+    },
+    {
+      "question": "Quel religieux espagnol défend les Indiens d'Amérique lors de la controverse de Valladolid (1550-1551) ?",
+      "options": ["Ignace de Loyola", "Juan Ginés de Sepúlveda", "Francisco de Vitoria", "Bartolomé de Las Casas"],
+      "correctOption": 3,
+      "explanation": "Le dominicain Bartolomé de Las Casas plaide à Valladolid pour la défense des Indiens contre les abus des colons."
+    },
+    {
+      "question": "Quel conquistador s'empare de l'Empire aztèque en 1521 ?",
+      "options": ["Francisco Pizarro", "Hernán Cortés", "Pedro de Alvarado", "Diego de Almagro"],
+      "correctOption": 1,
+      "explanation": "Hernán Cortés prend Tenochtitlan en 1521, mettant fin à l'Empire aztèque."
+    },
+    {
+      "question": "Quel empire d'Amérique du Sud est conquis par Francisco Pizarro à partir de 1532 ?",
+      "options": ["L'Empire maya", "L'Empire aztèque", "L'Empire inca", "L'Empire olmèque"],
+      "correctOption": 2,
+      "explanation": "Francisco Pizarro capture l'empereur inca Atahualpa en 1532 et conquiert l'Empire inca."
+    },
+    {
+      "question": "Quelle motivation économique pousse les Européens à chercher une route maritime vers l'Asie au XVe siècle ?",
+      "options": ["L'accès direct aux épices et aux soieries", "La recherche de charbon", "L'exportation de produits manufacturés", "La conquête de terres agricoles"],
+      "correctOption": 0,
+      "explanation": "Les Européens veulent accéder directement aux épices et aux produits de luxe asiatiques sans passer par les intermédiaires."
+    },
+    {
+      "question": "Quelle compagnie de commerce néerlandaise, fondée en 1602, domine le commerce avec l'Asie au XVIIe siècle ?",
+      "options": ["La Compagnie française des Indes orientales", "La Compagnie de la baie d'Hudson", "L'East India Company anglaise", "La VOC (Compagnie néerlandaise des Indes orientales)"],
+      "correctOption": 3,
+      "explanation": "La VOC, fondée en 1602 à Amsterdam, est la première grande société par actions et domine le commerce asiatique au XVIIe siècle."
+    },
+    {
+      "question": "Quel port français de la façade atlantique s'enrichit au XVIIIe siècle grâce au commerce colonial et à la traite ?",
+      "options": ["Marseille", "Nantes", "Calais", "Toulon"],
+      "correctOption": 1,
+      "explanation": "Nantes est le premier port négrier français du XVIIIe siècle et s'enrichit considérablement grâce au commerce atlantique."
+    }
+  ]
+}

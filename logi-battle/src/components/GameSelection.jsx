@@ -1,6 +1,99 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import BrandMark from './BrandMark'
+import { useCustomQuizStore, QUIZ_SUBJECTS } from '../hooks/useCustomQuizStore'
+
+const generalModules = [
+  {
+    id: 'culture_g',
+    title: 'Culture Générale',
+    subtitle: '3 niveaux',
+    icon: 'psychology',
+    description: '300 questions en 3 niveaux : facile, moyen, difficile. Battles en 10 questions.',
+    level: '3 NIVEAUX',
+    progress: 0,
+    color: 'orange',
+    hasLevels: true,
+    isNew: true,
+  },
+  {
+    id: 'francais',
+    title: 'Français',
+    subtitle: 'Grammaire & vocabulaire',
+    icon: 'menu_book',
+    description: 'Orthographe, conjugaison, vocabulaire, littérature et communication.',
+    level: 'NOUVEAU',
+    progress: 0,
+    color: 'blue',
+    isNew: true,
+  },
+  {
+    id: 'maths_generales',
+    title: 'Mathématiques',
+    subtitle: 'Calcul & géométrie',
+    icon: 'calculate',
+    description: 'Pourcentages, fractions, proportionnalité, géométrie, statistiques.',
+    level: 'NOUVEAU',
+    progress: 0,
+    color: 'green',
+    isNew: true,
+  },
+  {
+    id: 'histoire',
+    title: 'Histoire',
+    subtitle: 'France & monde',
+    icon: 'history_edu',
+    description: 'De la Révolution française à la guerre froide : les repères essentiels.',
+    level: 'NOUVEAU',
+    progress: 0,
+    color: 'orange',
+    isNew: true,
+  },
+  {
+    id: 'geographie',
+    title: 'Géographie',
+    subtitle: 'France, Europe, monde',
+    icon: 'public',
+    description: 'Territoires, capitales, flux et mondialisation.',
+    level: 'NOUVEAU',
+    progress: 0,
+    color: 'blue',
+    isNew: true,
+  },
+  {
+    id: 'anglais',
+    title: 'Anglais',
+    subtitle: 'English',
+    icon: 'translate',
+    description: 'Grammaire, vocabulaire professionnel et communication.',
+    level: 'NOUVEAU',
+    progress: 0,
+    color: 'red',
+    isNew: true,
+  },
+  {
+    id: 'espagnol',
+    title: 'Espagnol',
+    subtitle: 'Español',
+    icon: 'translate',
+    description: 'Vocabulaire, conjugaison et espagnol professionnel.',
+    level: 'NOUVEAU',
+    progress: 0,
+    color: 'red',
+    isNew: true,
+  },
+  {
+    id: 'all_general',
+    title: 'Mixte Matières',
+    subtitle: 'Toutes matières générales',
+    icon: 'shuffle',
+    description: 'Un mélange aléatoire de toutes les matières générales.',
+    level: 'MIXTE',
+    progress: 0,
+    color: 'green',
+    isNew: true,
+  },
+]
 
 const modules = [
   {
@@ -169,17 +262,31 @@ const modules = [
 const sidebarItems = [
   { id: 'arena', label: 'ARÈNE', icon: 'sports_esports' },
   { id: 'training', label: 'ENTRAÎNEMENT', icon: 'fitness_center' },
+  { id: 'quizbuilder', label: 'MES QCM', icon: 'edit_note' },
   { id: 'battalion', label: 'BATAILLON', icon: 'groups' },
   { id: 'hq', label: 'QG', icon: 'dashboard' },
   { id: 'archives', label: 'ARCHIVES', icon: 'history' },
 ]
 
-export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampionshipMode, onTrainingMode, onBattalionMode, onHQMode, onArchivesMode, onLogout }) => {
+const CULTURE_LEVELS = [
+  { id: 'culture_g:1', label: 'Facile', icon: '🟢', description: '100 questions accessibles à tous' },
+  { id: 'culture_g:2', label: 'Moyen', icon: '🟡', description: '100 questions pour qui suit en cours' },
+  { id: 'culture_g:3', label: 'Difficile', icon: '🔴', description: '100 questions pour les experts' },
+]
+
+export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampionshipMode, onTrainingMode, onBattalionMode, onHQMode, onArchivesMode, onQuizBuilderMode, onLogout }) => {
   const [activeModule, setActiveModule] = useState(null)
   const [activeNav, setActiveNav] = useState('arena')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [levelPickerOpen, setLevelPickerOpen] = useState(false)
+  const customQuizzes = useCustomQuizStore((s) => s.quizzes)
+  const quizList = Object.values(customQuizzes).filter((q) => q.questions.length > 0)
 
   const handleSelectModule = (module) => {
+    if (module.hasLevels) {
+      setLevelPickerOpen(true)
+      return
+    }
     setActiveModule(module.id)
     setTimeout(() => {
       onGameSelect(module.id)
@@ -191,6 +298,9 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
     switch(navId) {
       case 'training':
         onTrainingMode?.()
+        break
+      case 'quizbuilder':
+        onQuizBuilderMode?.()
         break
       case 'battalion':
         onBattalionMode?.()
@@ -400,10 +510,106 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
             </motion.div>
           </div>
 
+          {/* QCM du professeur */}
+          <div className="mb-10">
+            <div className="mb-6 flex items-end justify-between flex-wrap gap-3">
+              <div>
+                <p className="brand-kicker mb-1">Quiz sur mesure</p>
+                <h2 className="text-3xl font-black text-white italic font-display">QCM du professeur</h2>
+              </div>
+              <button
+                onClick={onQuizBuilderMode}
+                className="px-5 py-3 bg-[#1d3d59] hover:bg-[#234a68] border border-[#f4b942]/30 rounded-xl text-[#f4b942] font-bold text-sm tracking-wider transition-colors flex items-center gap-2"
+              >
+                <span className="material-icons text-sm">add</span>
+                CRÉER UN QCM
+              </button>
+            </div>
+            {quizList.length === 0 ? (
+              <p className="text-gray-500 text-sm bg-[#1d3d59]/50 border border-white/5 rounded-2xl p-5">
+                Aucun QCM créé pour l'instant. Cliquez sur « Créer un QCM » pour transformer votre cours en battle !
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {quizList.map((qz) => (
+                  <div key={qz.id} className="bg-[#1d3d59] rounded-3xl p-5 border border-[#f4b942]/20 hover:border-[#f4b942]/50 transition-all">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-[#f4b942]/20 text-[#f4b942] flex items-center justify-center">
+                        <span className="material-icons">
+                          {QUIZ_SUBJECTS.find((s) => s.id === qz.subject)?.icon || 'school'}
+                        </span>
+                      </div>
+                      <span className="text-gray-600 text-xs font-bold tracking-wider">
+                        {qz.questions.length} Q
+                      </span>
+                    </div>
+                    <h3 className="text-white font-bold text-lg mb-1 line-clamp-1">{qz.title}</h3>
+                    <p className="text-gray-500 text-xs mb-4">
+                      {QUIZ_SUBJECTS.find((s) => s.id === qz.subject)?.label || qz.subject}
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => onGameSelect(`custom:${qz.id}`)}
+                        className="flex-1 py-2 bg-[#7fa99b] hover:bg-[#6e988a] rounded-lg text-white text-xs font-bold transition-colors"
+                      >
+                        ARÈNE
+                      </button>
+                      <button
+                        onClick={() => onHostMode(`custom:${qz.id}`)}
+                        className="flex-1 py-2 bg-[#f4b942] hover:bg-[#d99926] rounded-lg text-[#17314a] text-xs font-bold transition-colors"
+                      >
+                        LIVE
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Matières générales */}
+          <div className="mb-6">
+            <p className="brand-kicker mb-1">Pour toutes les classes</p>
+            <h2 className="text-3xl font-black text-white italic font-display">Matières Générales</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+            {generalModules.map((module, index) => (
+              <motion.button
+                key={module.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                onClick={() => handleSelectModule(module)}
+                disabled={activeModule === module.id}
+                className={`relative rounded-3xl p-5 text-left transition-all duration-300 group ${
+                  activeModule === module.id
+                    ? 'bg-[#234a68] border-2 border-[#f4b942]'
+                    : 'bg-[#1d3d59] border border-white/5 hover:border-white/10 hover:bg-[#234a68]'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    module.color === 'orange' ? 'bg-[#f4b942]/20 text-[#f4b942]' :
+                    module.color === 'blue' ? 'bg-[#7fa99b]/20 text-[#7fa99b]' :
+                    module.color === 'red' ? 'bg-red-500/20 text-red-400' :
+                    'bg-green-500/20 text-green-400'
+                  }`}>
+                    <span className="material-icons">{module.icon}</span>
+                  </div>
+                  <span className="px-2 py-1 bg-[#f4b942]/20 text-[#f4b942] text-[10px] font-bold tracking-wider rounded">
+                    {module.level}
+                  </span>
+                </div>
+                <h3 className="text-white font-bold text-lg mb-1">{module.title}</h3>
+                <p className="text-gray-500 text-xs line-clamp-2">{module.description}</p>
+              </motion.button>
+            ))}
+          </div>
+
           {/* Section Title */}
           <div className="mb-6">
             <p className="brand-kicker mb-1">Sélectionner les duels</p>
-            <h2 className="text-3xl font-black text-white italic font-display">Modules Geronimo Coop</h2>
+            <h2 className="text-3xl font-black text-white italic font-display">Logistique & Transport</h2>
           </div>
 
           {/* Modules Grid */}
@@ -472,6 +678,48 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
           </div>
         </div>
       </main>
+
+      {/* Choix du niveau Culture Générale */}
+      {levelPickerOpen && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[80] flex items-center justify-center p-4"
+          onClick={() => setLevelPickerOpen(false)}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#1d3d59] rounded-3xl p-6 border border-[#f4b942]/30 max-w-md w-full"
+          >
+            <h3 className="text-xl font-black text-white mb-1">Culture Générale</h3>
+            <p className="text-gray-400 text-sm mb-5">Choisissez le niveau — la battle se joue en 10 questions.</p>
+            <div className="space-y-3">
+              {CULTURE_LEVELS.map((level) => (
+                <button
+                  key={level.id}
+                  onClick={() => {
+                    setLevelPickerOpen(false)
+                    onGameSelect(level.id)
+                  }}
+                  className="w-full flex items-center gap-4 p-4 bg-[#0f2539] hover:bg-[#234a68] border border-white/5 hover:border-[#f4b942]/40 rounded-2xl text-left transition-all"
+                >
+                  <span className="text-2xl">{level.icon}</span>
+                  <div>
+                    <p className="text-white font-bold">{level.label}</p>
+                    <p className="text-gray-500 text-xs">{level.description}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setLevelPickerOpen(false)}
+              className="w-full mt-4 py-2 text-gray-500 hover:text-gray-300 text-sm transition-colors"
+            >
+              Annuler
+            </button>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }

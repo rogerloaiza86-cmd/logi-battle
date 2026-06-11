@@ -1,0 +1,91 @@
+{
+  "format": "geronimo-quiz-v1",
+  "title": "Histoire 1re — Guerres européennes, guerres mondiales, guerres totales (1914-1945)",
+  "subject": "histoire",
+  "questions": [
+    {
+      "question": "Quel événement du 28 juin 1914 déclenche l'engrenage menant à la Première Guerre mondiale ?",
+      "options": ["L'invasion de la Belgique", "L'assassinat de l'archiduc François-Ferdinand à Sarajevo", "La mobilisation générale en France", "Le naufrage du Lusitania"],
+      "correctOption": 1,
+      "explanation": "L'assassinat de l'archiduc François-Ferdinand à Sarajevo le 28 juin 1914 déclenche la crise qui mène à la guerre."
+    },
+    {
+      "question": "Quelle bataille de 1916 est devenue le symbole de la violence de masse pour les soldats français ?",
+      "options": ["La Marne", "La Somme", "Verdun", "Le Chemin des Dames"],
+      "correctOption": 2,
+      "explanation": "La bataille de Verdun (février-décembre 1916) fait environ 300 000 morts et symbolise la guerre d'usure."
+    },
+    {
+      "question": "À quelle date l'armistice mettant fin aux combats de la Première Guerre mondiale est-il signé ?",
+      "options": ["Le 11 novembre 1918", "Le 28 juin 1919", "Le 8 mai 1918", "Le 14 juillet 1919"],
+      "correctOption": 0,
+      "explanation": "L'armistice est signé le 11 novembre 1918 à Rethondes, dans la forêt de Compiègne."
+    },
+    {
+      "question": "Quel traité de 1919 impose à l'Allemagne des réparations et des pertes territoriales ?",
+      "options": ["Le traité de Trianon", "Le traité de Sèvres", "Le traité de Saint-Germain", "Le traité de Versailles"],
+      "correctOption": 3,
+      "explanation": "Le traité de Versailles, signé le 28 juin 1919, déclare l'Allemagne responsable de la guerre et lui impose de lourdes réparations."
+    },
+    {
+      "question": "Qu'appelle-t-on une « guerre totale » ?",
+      "options": ["Une guerre qui mobilise toutes les ressources humaines, économiques et morales d'un pays", "Une guerre menée uniquement par des armées professionnelles", "Une guerre limitée aux fronts militaires", "Une guerre sans aucune règle internationale"],
+      "correctOption": 0,
+      "explanation": "Une guerre totale mobilise l'ensemble de la société : soldats, économie, propagande et populations civiles."
+    },
+    {
+      "question": "Quel génocide est perpétré dans l'Empire ottoman à partir de 1915 ?",
+      "options": ["Le génocide des Tutsi", "Le génocide des Arméniens", "Le génocide des Héréros", "Le génocide des Juifs d'Europe"],
+      "correctOption": 1,
+      "explanation": "À partir d'avril 1915, l'Empire ottoman organise la déportation et l'extermination des Arméniens."
+    },
+    {
+      "question": "À quelle date Adolf Hitler devient-il chancelier de l'Allemagne ?",
+      "options": ["Le 9 novembre 1923", "Le 1er septembre 1939", "Le 30 janvier 1933", "Le 2 août 1934"],
+      "correctOption": 2,
+      "explanation": "Hitler est nommé chancelier par le président Hindenburg le 30 janvier 1933."
+    },
+    {
+      "question": "Quel événement marque le début de la Seconde Guerre mondiale en Europe ?",
+      "options": ["L'attaque de Pearl Harbor", "L'Anschluss de l'Autriche", "L'invasion de la France", "L'invasion de la Pologne le 1er septembre 1939"],
+      "correctOption": 3,
+      "explanation": "L'invasion de la Pologne par l'Allemagne le 1er septembre 1939 entraîne l'entrée en guerre de la France et du Royaume-Uni."
+    },
+    {
+      "question": "Qui lance depuis Londres l'appel du 18 juin 1940 à poursuivre le combat ?",
+      "options": ["Le général de Gaulle", "Jean Moulin", "Philippe Pétain", "Winston Churchill"],
+      "correctOption": 0,
+      "explanation": "Le général de Gaulle lance l'appel du 18 juin 1940 sur les ondes de la BBC, acte fondateur de la France libre."
+    },
+    {
+      "question": "Quel régime dirige la France de 1940 à 1944 sous l'autorité du maréchal Pétain ?",
+      "options": ["La IVe République", "Le régime de Vichy", "Le Front populaire", "Le Gouvernement provisoire"],
+      "correctOption": 1,
+      "explanation": "Le régime de Vichy, dirigé par Pétain, collabore avec l'Allemagne nazie de 1940 à 1944."
+    },
+    {
+      "question": "Que désigne la rafle du Vél d'Hiv des 16 et 17 juillet 1942 ?",
+      "options": ["L'arrestation de résistants communistes à Lyon", "Une grève générale des ouvriers parisiens", "L'arrestation de plus de 13 000 Juifs à Paris par la police française", "La réquisition de travailleurs pour le STO"],
+      "correctOption": 2,
+      "explanation": "Les 16 et 17 juillet 1942, la police française arrête plus de 13 000 Juifs à Paris, dont une majorité est déportée vers Auschwitz."
+    },
+    {
+      "question": "Quelle opération militaire alliée débute le 6 juin 1944 ?",
+      "options": ["Le débarquement de Provence", "Le débarquement en Sicile", "L'opération Barbarossa", "Le débarquement de Normandie"],
+      "correctOption": 3,
+      "explanation": "Le 6 juin 1944, les Alliés débarquent sur les plages de Normandie pour ouvrir un front à l'ouest (opération Overlord)."
+    },
+    {
+      "question": "Sur quelle ville japonaise la première bombe atomique est-elle larguée le 6 août 1945 ?",
+      "options": ["Hiroshima", "Nagasaki", "Tokyo", "Osaka"],
+      "correctOption": 0,
+      "explanation": "Les États-Unis larguent la première bombe atomique sur Hiroshima le 6 août 1945, puis sur Nagasaki le 9 août."
+    },
+    {
+      "question": "Combien de Juifs d'Europe ont été assassinés pendant la Shoah ?",
+      "options": ["Environ 1 million", "Environ 6 millions", "Environ 600 000", "Environ 15 millions"],
+      "correctOption": 1,
+      "explanation": "La Shoah, génocide des Juifs d'Europe perpétré par l'Allemagne nazie, fait environ 6 millions de victimes."
+    }
+  ]
+}

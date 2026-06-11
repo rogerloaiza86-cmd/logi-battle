@@ -19,6 +19,16 @@ import { getJitQuestion } from './jitQuestions'
 import { getRouteOptimizerQuestion } from './routeOptimizerQuestions'
 import { getLegalQuestion } from './legalQuestions'
 import { getMathQuestion } from './mathQuestions'
+import { getFrancaisQuestion } from './francaisQuestions'
+import { getMathsGeneralesQuestion } from './mathsGeneralesQuestions'
+import { getHistoireQuestion } from './histoireQuestions'
+import { getGeographieQuestion } from './geographieQuestions'
+import { getAnglaisQuestion } from './anglaisQuestions'
+import { getEspagnolQuestion } from './espagnolQuestions'
+import { getCultureGeneraleFacileQuestion } from './cultureGeneraleFacile'
+import { getCultureGeneraleMoyenQuestion } from './cultureGeneraleMoyen'
+import { getCultureGeneraleDifficileQuestion } from './cultureGeneraleDifficile'
+import { useCustomQuizStore } from '../hooks/useCustomQuizStore'
 
 // ===== PALETTISATION =====
 /**
@@ -558,6 +568,79 @@ export const generateMathQuestion = () => {
   }
 }
 
+// ===== MATIÈRES GÉNÉRALES =====
+// Toutes les banques de matières générales partagent le même format QCM :
+// on factorise la normalisation.
+const makeSubjectGenerator = (type, title, getQuestion) => () => {
+  const q = getQuestion()
+  return {
+    type,
+    difficulty: q.difficulty,
+    title,
+    description: q.question,
+    data: {
+      category: q.category,
+      options: q.options,
+      correctOption: q.correctOption,
+      explanation: q.explanation,
+      isMCQ: true,
+    },
+    correctAnswer: q.correctOption,
+    explanation: q.explanation,
+    hints: [`Catégorie: ${q.category}`],
+    isMCQ: true,
+  }
+}
+
+export const generateFrancaisQuestion = makeSubjectGenerator('francais', '📖 Français', getFrancaisQuestion)
+export const generateMathsGeneralesQuestion = makeSubjectGenerator('maths_generales', '➗ Mathématiques', getMathsGeneralesQuestion)
+export const generateHistoireQuestion = makeSubjectGenerator('histoire', '🏛️ Histoire', getHistoireQuestion)
+export const generateGeographieQuestion = makeSubjectGenerator('geographie', '🌍 Géographie', getGeographieQuestion)
+export const generateAnglaisQuestion = makeSubjectGenerator('anglais', '🇬🇧 Anglais', getAnglaisQuestion)
+export const generateEspagnolQuestion = makeSubjectGenerator('espagnol', '🇪🇸 Espagnol', getEspagnolQuestion)
+
+// Culture Générale à 3 niveaux (100 questions par niveau)
+const CULTURE_G_GETTERS = {
+  1: getCultureGeneraleFacileQuestion,
+  2: getCultureGeneraleMoyenQuestion,
+  3: getCultureGeneraleDifficileQuestion,
+}
+const CULTURE_G_LABELS = { 1: 'Facile', 2: 'Moyen', 3: 'Difficile' }
+
+export const generateCultureGeneraleQuestion = (level = 1) => {
+  const getter = CULTURE_G_GETTERS[level] || CULTURE_G_GETTERS[1]
+  return makeSubjectGenerator('culture_g', `🧠 Culture G — ${CULTURE_G_LABELS[level] || 'Facile'}`, getter)()
+}
+
+export const GENERAL_SUBJECT_TYPES = ['francais', 'maths_generales', 'histoire', 'geographie', 'anglais', 'espagnol']
+
+// ===== QCM CRÉÉS PAR LE PROFESSEUR =====
+// gameMode 'custom:<quizId>' → questions du QCM enregistré localement.
+export const generateCustomQuizQuestion = (quizId) => {
+  const quiz = useCustomQuizStore.getState().getQuiz(quizId)
+  if (!quiz || quiz.questions.length === 0) {
+    throw new Error(`QCM personnalisé introuvable ou vide: ${quizId}`)
+  }
+  const q = quiz.questions[Math.floor(Math.random() * quiz.questions.length)]
+  return {
+    type: 'custom',
+    difficulty: 2,
+    title: `📝 ${quiz.title}`,
+    description: q.question,
+    data: {
+      category: quiz.subject,
+      options: q.options,
+      correctOption: q.correctOption,
+      explanation: q.explanation,
+      isMCQ: true,
+    },
+    correctAnswer: q.correctOption,
+    explanation: q.explanation,
+    hints: [`QCM du professeur : ${quiz.title}`],
+    isMCQ: true,
+  }
+}
+
 // ===== QUESTION GENERATOR =====
 export const generateRandomQuestion = (type, difficulty = 1) => {
   const generators = {
@@ -577,6 +660,12 @@ export const generateRandomQuestion = (type, difficulty = 1) => {
     route: generateRouteOptimizerQuestion,
     legal: generateLegalQuestion,
     math: generateMathQuestion,
+    francais: generateFrancaisQuestion,
+    maths_generales: generateMathsGeneralesQuestion,
+    histoire: generateHistoireQuestion,
+    geographie: generateGeographieQuestion,
+    anglais: generateAnglaisQuestion,
+    espagnol: generateEspagnolQuestion,
   }
 
   const generator = generators[type]
@@ -638,8 +727,25 @@ export const getRandomQuestionType = (includeCulture = true, includeVocabulary =
 }
 
 export const generateNextQuestion = (gameMode = 'all', forcedDifficulty = null) => {
+  // QCM créé par le professeur
+  if (typeof gameMode === 'string' && gameMode.startsWith('custom:')) {
+    return generateCustomQuizQuestion(gameMode.slice('custom:'.length))
+  }
+
+  // Culture Générale à niveaux : 'culture_g:1' (facile), ':2' (moyen), ':3' (difficile)
+  if (typeof gameMode === 'string' && gameMode.startsWith('culture_g')) {
+    const level = parseInt(gameMode.split(':')[1], 10) || 1
+    return generateCultureGeneraleQuestion(level)
+  }
+
+  // Mode mixte matières générales
+  if (gameMode === 'all_general') {
+    const type = GENERAL_SUBJECT_TYPES[Math.floor(Math.random() * GENERAL_SUBJECT_TYPES.length)]
+    return generateRandomQuestion(type)
+  }
+
   let type
-  
+
   if (gameMode === 'culture') {
     type = 'culture'
   } else if (gameMode === 'vocabulaire') {
@@ -673,7 +779,7 @@ export const generateNextQuestion = (gameMode = 'all', forcedDifficulty = null) 
   }
   
   // Certains types gèrent leur propre difficulté
-  const skipDifficultyTypes = ['vocabulaire', 'supply_chain', 'reception', 'stock', 'safety', 'traceability', 'green', 'team_leader', 'jit', 'route', 'legal', 'math']
+  const skipDifficultyTypes = ['vocabulaire', 'supply_chain', 'reception', 'stock', 'safety', 'traceability', 'green', 'team_leader', 'jit', 'route', 'legal', 'math', ...GENERAL_SUBJECT_TYPES]
   const difficulty = skipDifficultyTypes.includes(type)
     ? null
     : (forcedDifficulty ?? getRandomDifficulty())

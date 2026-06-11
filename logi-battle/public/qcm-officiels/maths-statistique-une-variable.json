@@ -1,0 +1,79 @@
+{
+  "format": "geronimo-quiz-v1",
+  "title": "Mathématiques Bac Pro — Statistique à une variable",
+  "subject": "maths_generales",
+  "questions": [
+    {
+      "question": "Quelle est la moyenne de la série : 8 ; 10 ; 12 ; 14 ; 16 ?",
+      "options": ["11", "12", "12,5", "13"],
+      "correctOption": 1,
+      "explanation": "(8 + 10 + 12 + 14 + 16) ÷ 5 = 60 ÷ 5 = 12."
+    },
+    {
+      "question": "Quelle est la médiane de la série ordonnée : 3 ; 5 ; 7 ; 9 ; 11 ?",
+      "options": ["5", "9", "7", "6"],
+      "correctOption": 2,
+      "explanation": "La médiane d'une série de 5 valeurs ordonnées est la 3e valeur, soit 7."
+    },
+    {
+      "question": "Quelle est l'étendue de la série : 4 ; 7 ; 12 ; 15 ; 19 ?",
+      "options": ["15", "19", "11", "23"],
+      "correctOption": 0,
+      "explanation": "L'étendue est la différence entre la plus grande et la plus petite valeur : 19 − 4 = 15."
+    },
+    {
+      "question": "Comment définit-on la médiane d'une série statistique ?",
+      "options": ["La valeur la plus fréquente", "La moyenne des valeurs extrêmes", "La somme des valeurs divisée par l'effectif", "Une valeur qui partage la série ordonnée en deux groupes de même effectif"],
+      "correctOption": 3,
+      "explanation": "La médiane partage la série ordonnée en deux moitiés : au moins 50 % des valeurs lui sont inférieures ou égales."
+    },
+    {
+      "question": "Dans une classe de 48 élèves, 12 sont demi-pensionnaires. Quelle est la fréquence correspondante ?",
+      "options": ["12 %", "25 %", "36 %", "48 %"],
+      "correctOption": 1,
+      "explanation": "12 ÷ 48 = 0,25, soit une fréquence de 25 %."
+    },
+    {
+      "question": "Comment appelle-t-on la valeur la plus fréquente d'une série statistique ?",
+      "options": ["La médiane", "L'étendue", "Le mode", "Le quartile"],
+      "correctOption": 2,
+      "explanation": "Le mode est la valeur qui a le plus grand effectif dans la série."
+    },
+    {
+      "question": "Que représente le premier quartile Q1 d'une série ordonnée ?",
+      "options": ["La plus petite valeur telle qu'au moins 25 % des valeurs lui soient inférieures ou égales", "La valeur maximale de la série", "La moyenne du premier quart des valeurs", "La valeur qui apparaît une seule fois"],
+      "correctOption": 0,
+      "explanation": "Q1 est la plus petite valeur de la série telle qu'au moins 25 % des valeurs lui soient inférieures ou égales."
+    },
+    {
+      "question": "Un élève obtient 8 (coefficient 1) et 12 (coefficient 3). Quelle est sa moyenne pondérée ?",
+      "options": ["10", "10,5", "12", "11"],
+      "correctOption": 3,
+      "explanation": "(8 × 1 + 12 × 3) ÷ 4 = (8 + 36) ÷ 4 = 11."
+    },
+    {
+      "question": "Quel graphique est le plus adapté pour représenter des proportions d'un tout ?",
+      "options": ["Une courbe", "Un diagramme circulaire", "Un nuage de points", "Un histogramme des effectifs cumulés"],
+      "correctOption": 1,
+      "explanation": "Le diagramme circulaire (« camembert ») représente la part de chaque catégorie dans le total."
+    },
+    {
+      "question": "Comment calcule-t-on l'écart interquartile d'une série ?",
+      "options": ["Q1 − Q3", "Q3 + Q1", "Q3 − Q1", "(Q3 + Q1) ÷ 2"],
+      "correctOption": 2,
+      "explanation": "L'écart interquartile est la différence Q3 − Q1 ; il mesure la dispersion de la moitié centrale des valeurs."
+    },
+    {
+      "question": "Quel est le mode de la série : 2 ; 2 ; 3 ; 5 ; 5 ; 5 ; 8 ?",
+      "options": ["5", "2", "3", "8"],
+      "correctOption": 0,
+      "explanation": "La valeur 5 apparaît trois fois, plus que toute autre valeur : c'est le mode."
+    },
+    {
+      "question": "Quelle est la médiane de la série ordonnée : 4 ; 6 ; 8 ; 10 ?",
+      "options": ["6", "8", "10", "7"],
+      "correctOption": 3,
+      "explanation": "Avec un effectif pair, la médiane est la moyenne des deux valeurs centrales : (6 + 8) ÷ 2 = 7."
+    }
+  ]
+}

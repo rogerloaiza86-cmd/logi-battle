@@ -1,0 +1,79 @@
+{
+  "format": "geronimo-quiz-v1",
+  "title": "Français 2nde — S'informer, informer : les circuits de l'information",
+  "subject": "francais",
+  "questions": [
+    {
+      "question": "Que désigne le terme « infox » (ou fake news) ?",
+      "options": ["Une information exclusive obtenue par un journaliste", "Une fausse information diffusée volontairement pour tromper", "Un résumé d'actualité", "Une information vérifiée par plusieurs sources"],
+      "correctOption": 1,
+      "explanation": "Une infox est une information délibérément fausse ou déformée, diffusée pour tromper le public."
+    },
+    {
+      "question": "Quel réflexe permet de vérifier la fiabilité d'une information ?",
+      "options": ["La partager rapidement", "Vérifier qu'elle a beaucoup de « likes »", "Croiser plusieurs sources indépendantes", "Lire uniquement le titre"],
+      "correctOption": 2,
+      "explanation": "Croiser plusieurs sources indépendantes et identifiées est le moyen le plus sûr de vérifier une information."
+    },
+    {
+      "question": "Qu'est-ce que l'AFP ?",
+      "options": ["Une agence de presse française qui fournit des informations aux médias", "Une chaîne de télévision publique", "Un réseau social d'actualité", "Un syndicat de journalistes"],
+      "correctOption": 0,
+      "explanation": "L'Agence France-Presse est une agence de presse mondiale qui collecte et vend l'information aux médias."
+    },
+    {
+      "question": "À quelles questions de base un article d'information doit-il répondre ?",
+      "options": ["Combien, comment, pourquoi pas", "Qui paie, qui gagne, qui perd", "Vrai ou faux", "Qui, quoi, où, quand, pourquoi"],
+      "correctOption": 3,
+      "explanation": "La règle des « 5 W » (qui, quoi, où, quand, pourquoi) structure le traitement journalistique de l'information."
+    },
+    {
+      "question": "Quelle phrase exprime une opinion et non un fait ?",
+      "options": ["« Le match s'est terminé sur le score de 2 à 1. »", "« Ce film est le plus ennuyeux de l'année. »", "« La loi a été votée mardi. »", "« Le magasin ouvre à 9 heures. »"],
+      "correctOption": 1,
+      "explanation": "Un jugement de valeur comme « le plus ennuyeux » relève de l'opinion, contrairement à un fait vérifiable."
+    },
+    {
+      "question": "Qu'est-ce que la ligne éditoriale d'un média ?",
+      "options": ["La liste de ses abonnés", "Son tirage quotidien", "L'ensemble des choix qui orientent ses sujets et leur traitement", "Le design de son site Internet"],
+      "correctOption": 2,
+      "explanation": "La ligne éditoriale est l'orientation générale qui guide le choix et le traitement des sujets par une rédaction."
+    },
+    {
+      "question": "Quel raisonnement caractérise une théorie du complot ?",
+      "options": ["Tout événement serait secrètement organisé par un groupe caché", "Les faits sont vérifiés avant publication", "Les sources sont citées et identifiables", "Les experts sont interrogés de façon contradictoire"],
+      "correctOption": 0,
+      "explanation": "La théorie du complot attribue les événements à l'action secrète d'un groupe occulte, sans preuve vérifiable."
+    },
+    {
+      "question": "Quelle loi française fondamentale garantit la liberté de la presse ?",
+      "options": ["La loi de 1905", "La loi de 1958", "La loi de 2018", "La loi du 29 juillet 1881"],
+      "correctOption": 3,
+      "explanation": "La loi du 29 juillet 1881 sur la liberté de la presse est le texte fondateur du droit de la presse en France."
+    },
+    {
+      "question": "Que désigne la « une » d'un journal ?",
+      "options": ["Sa dernière page", "Sa première page, qui présente les titres principaux", "Sa rubrique sportive", "Son éditorial"],
+      "correctOption": 1,
+      "explanation": "La une est la première page d'un journal, vitrine qui hiérarchise les informations principales."
+    },
+    {
+      "question": "Qu'est-ce que le biais de confirmation ?",
+      "options": ["L'obligation de confirmer une information avant publication", "La signature d'un article par deux journalistes", "La tendance à ne retenir que les informations qui confortent nos opinions", "La répétition d'une information sur plusieurs chaînes"],
+      "correctOption": 2,
+      "explanation": "Le biais de confirmation nous pousse à privilégier les informations qui confirment ce que nous croyons déjà."
+    },
+    {
+      "question": "Dans le vocabulaire des médias, qu'est-ce qu'un « scoop » ?",
+      "options": ["Une information exclusive révélée avant les autres médias", "Une erreur de mise en page", "Un communiqué de presse officiel", "Une rubrique people"],
+      "correctOption": 0,
+      "explanation": "Un scoop est une information importante qu'un média est le premier à révéler."
+    },
+    {
+      "question": "Quel est le rôle d'un journaliste de « fact-checking » ?",
+      "options": ["Mettre en page le journal", "Rédiger les publicités", "Gérer les réseaux sociaux du média", "Vérifier l'exactitude des déclarations et des informations qui circulent"],
+      "correctOption": 3,
+      "explanation": "Le fact-checking consiste à vérifier méthodiquement l'exactitude des déclarations publiques et des informations virales."
+    }
+  ]
+}

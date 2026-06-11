@@ -1,6 +1,43 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+// Étiquette (emoji + libellé) par type de question ; les types inconnus
+// (nouvelles matières, QCM du professeur) retombent sur le titre de la question.
+const TYPE_LABELS = {
+  palettisation: ['📦', 'Palettisation'],
+  cout_transport: ['🚚', 'Coût de Transport'],
+  loading_plan: ['📊', 'Plan de Chargement'],
+  vocabulaire: ['📚', 'Vocabulaire'],
+  supply_chain: ['🧩', 'Supply Chain'],
+  reception: ['🚛', 'Réception'],
+  stock: ['📦', 'Stock'],
+  safety: ['🛡️', 'Sécurité'],
+  traceability: ['📡', 'Traçabilité'],
+  green: ['🌍', 'Green'],
+  team_leader: ['👔', 'Management'],
+  jit: ['🏭', 'JIT'],
+  route: ['🚛', 'Route'],
+  legal: ['⚖️', 'Légal'],
+  math: ['🧮', 'Calculs'],
+  francais: ['📖', 'Français'],
+  maths_generales: ['➗', 'Mathématiques'],
+  histoire: ['🏛️', 'Histoire'],
+  geographie: ['🌍', 'Géographie'],
+  anglais: ['🇬🇧', 'Anglais'],
+  espagnol: ['🇪🇸', 'Espagnol'],
+  culture_g: ['🧠', 'Culture Générale'],
+  custom: ['📝', 'QCM du professeur'],
+}
+
+const getTypeLabel = (question) => {
+  const entry = TYPE_LABELS[question?.type]
+  if (entry) {
+    const category = question?.data?.category || question?.category
+    return { icon: entry[0], label: category ? `${entry[1]} • ${category}` : entry[1] }
+  }
+  return { icon: '❓', label: question?.title || 'Question' }
+}
+
 export const VocabularyCard = ({ 
   question, 
   team = 'A', 
@@ -81,39 +118,9 @@ export const VocabularyCard = ({
       >
         {/* Type et Catégorie */}
         <div className="flex items-center justify-center gap-2 mb-3">
-          <span className="text-2xl">
-            {question?.type === 'palettisation' && '📦'}
-            {question?.type === 'cout_transport' && '🚚'}
-            {question?.type === 'loading_plan' && '📊'}
-            {question?.type === 'vocabulaire' && '📚'}
-            {question?.type === 'supply_chain' && '🧩'}
-            {question?.type === 'reception' && '🚛'}
-            {question?.type === 'stock' && '📦'}
-            {question?.type === 'safety' && '🛡️'}
-            {question?.type === 'traceability' && '📡'}
-            {question?.type === 'green' && '🌍'}
-            {question?.type === 'team_leader' && '👔'}
-            {question?.type === 'jit' && '🏭'}
-            {question?.type === 'route' && '🚛'}
-            {question?.type === 'legal' && '⚖️'}
-            {question?.type === 'math' && '🧮'}
-          </span>
+          <span className="text-2xl">{getTypeLabel(question).icon}</span>
           <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">
-            {question?.type === 'palettisation' && 'Palettisation'}
-            {question?.type === 'cout_transport' && 'Coût de Transport'}
-            {question?.type === 'loading_plan' && 'Plan de Chargement'}
-            {question?.type === 'vocabulaire' && `Vocabulaire • ${question?.data?.category || question?.category}`}
-            {question?.type === 'supply_chain' && `Supply Chain • ${question?.data?.category || question?.category}`}
-            {question?.type === 'reception' && `Réception • ${question?.data?.category || question?.category}`}
-            {question?.type === 'stock' && `Stock • ${question?.data?.category || question?.category}`}
-            {question?.type === 'safety' && `Sécurité • ${question?.data?.category || question?.category}`}
-            {question?.type === 'traceability' && `Traçabilité • ${question?.data?.category || question?.category}`}
-            {question?.type === 'green' && `Green • ${question?.data?.category || question?.category}`}
-            {question?.type === 'team_leader' && `Management • ${question?.data?.category || question?.category}`}
-            {question?.type === 'jit' && `JIT • ${question?.data?.category || question?.category}`}
-            {question?.type === 'route' && `Route • ${question?.data?.category || question?.category}`}
-            {question?.type === 'legal' && `Légal • ${question?.data?.category || question?.category}`}
-            {question?.type === 'math' && `Calculs • ${question?.data?.category || question?.category}`}
+            {getTypeLabel(question).label}
           </span>
         </div>
 
