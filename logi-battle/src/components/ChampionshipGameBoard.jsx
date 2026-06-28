@@ -52,11 +52,26 @@ export const ChampionshipGameBoard = ({
   const [roundNumber, setRoundNumber] = useState(1)
   const [totalRounds, setTotalRounds] = useState(10)
   const roundStartTime = useRef(null)
+  const roundStateRef = useRef({
+    active: false,
+    teamAStatus: 'playing',
+    teamBStatus: 'playing',
+    teamATime: null,
+    teamBTime: null,
+    question: null,
+  })
+  const gameStatusRef = useRef('active')
+  const nextRoundTimeoutRef = useRef(null)
   const [matchStartTime, setMatchStartTime] = useState(Date.now())
 
   useEffect(() => {
     startNewRound()
     setMatchStartTime(Date.now())
+    return () => {
+      if (nextRoundTimeoutRef.current) {
+        clearTimeout(nextRoundTimeoutRef.current)
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -74,6 +89,7 @@ export const ChampionshipGameBoard = ({
   // Vérifier fin de match
   useEffect(() => {
     if (ropePosition >= 100 || ropePosition <= -100 || roundNumber > totalRounds) {
+      gameStatusRef.current = 'finished'
       setGameStatus('finished')
     }
   }, [ropePosition, roundNumber])
@@ -95,19 +111,29 @@ export const ChampionshipGameBoard = ({
     setRoundWinner(null)
     setBothTeamsAnswered(false)
     roundStartTime.current = Date.now()
+    roundStateRef.current = {
+      active: true,
+      teamAStatus: 'playing',
+      teamBStatus: 'playing',
+      teamATime: null,
+      teamBTime: null,
+      question: newQuestion,
+    }
   }
 
-  const endRound = () => {
+  const endRound = (snapshot = roundStateRef.current) => {
+    if (!snapshot.active) return
+    roundStateRef.current = { ...snapshot, active: false }
     setIsRoundActive(false)
     setBothTeamsAnswered(true)
     
     let winner = null
     
-    if (teamAStatus === 'correct' && teamBStatus === 'correct') {
-      winner = teamATime < teamBTime ? 'A' : 'B'
-    } else if (teamAStatus === 'correct') {
+    if (snapshot.teamAStatus === 'correct' && snapshot.teamBStatus === 'correct') {
+      winner = snapshot.teamATime < snapshot.teamBTime ? 'A' : 'B'
+    } else if (snapshot.teamAStatus === 'correct') {
       winner = 'A'
-    } else if (teamBStatus === 'correct') {
+    } else if (snapshot.teamBStatus === 'correct') {
       winner = 'B'
     }
     
@@ -121,10 +147,10 @@ export const ChampionshipGameBoard = ({
       setRopePosition(prev => Math.max(-100, prev - 10))
     }
     
-    const delay = question?.type === 'vocabulaire' ? 4000 : 2500
+    const delay = snapshot.question?.type === 'vocabulaire' ? 4000 : 2500
     
-    setTimeout(() => {
-      if (gameStatus !== 'finished') {
+    nextRoundTimeoutRef.current = setTimeout(() => {
+      if (gameStatusRef.current !== 'finished') {
         setRoundNumber(prev => prev + 1)
         startNewRound()
       }
@@ -132,29 +158,42 @@ export const ChampionshipGameBoard = ({
   }
 
   const handleAnswer = (team, isCorrect) => {
+    if (!roundStateRef.current.active) return
     const responseTime = Date.now() - roundStartTime.current
+    const nextSnapshot = { ...roundStateRef.current }
     
     if (team === 'A') {
+      if (nextSnapshot.teamAStatus !== 'playing') return
       if (isCorrect) {
+        nextSnapshot.teamAStatus = 'correct'
+        nextSnapshot.teamATime = responseTime
         setTeamAStatus('correct')
         setTeamATime(responseTime)
       } else {
+        nextSnapshot.teamAStatus = 'wrong'
+        nextSnapshot.teamATime = responseTime
         setTeamAStatus('wrong')
         setShowIncorrect(true)
         setTimeout(() => setShowIncorrect(false), 400)
       }
     } else {
+      if (nextSnapshot.teamBStatus !== 'playing') return
       if (isCorrect) {
+        nextSnapshot.teamBStatus = 'correct'
+        nextSnapshot.teamBTime = responseTime
         setTeamBStatus('correct')
         setTeamBTime(responseTime)
       } else {
+        nextSnapshot.teamBStatus = 'wrong'
+        nextSnapshot.teamBTime = responseTime
         setTeamBStatus('wrong')
         setShowIncorrect(true)
         setTimeout(() => setShowIncorrect(false), 400)
       }
     }
     
-    const otherTeamStatus = team === 'A' ? teamBStatus : teamAStatus
+    roundStateRef.current = nextSnapshot
+    const otherTeamStatus = team === 'A' ? nextSnapshot.teamBStatus : nextSnapshot.teamAStatus
     
     if (otherTeamStatus !== 'playing') {
       setBothTeamsAnswered(true)
@@ -162,7 +201,7 @@ export const ChampionshipGameBoard = ({
     
     if (isCorrect || otherTeamStatus !== 'playing') {
       if (otherTeamStatus !== 'playing') {
-        endRound()
+        endRound(nextSnapshot)
       }
     }
   }
