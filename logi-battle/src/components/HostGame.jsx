@@ -13,19 +13,21 @@ export const HostGame = ({ onBack, gameMode }) => {
   const [gameStarted, setGameStarted] = useState(false)
   const [copied, setCopied] = useState(false)
   const [isInitializing, setIsInitializing] = useState(true)
+  const [initError, setInitError] = useState(null)
 
   // Générer un ID de jeu unique et l'enregistrer dans Supabase
   useEffect(() => {
     const initGame = async () => {
       try {
         const id = `GAME-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+        
+        // Créer la partie avant d'exposer le QR code pour éviter les parties fantômes.
+        await gamesService.createGame('ÉQUIPE ALPHA', 'ÉQUIPE OMEGA', id)
         setGameId(id)
         gameStore.setGameId(id)
-        
-        // Créer la partie dans Supabase
-        await gamesService.createGame('ÉQUIPE ALPHA', 'ÉQUIPE OMEGA', id)
       } catch (err) {
         console.error('Erreur lors de la création de la partie sur Supabase:', err)
+        setInitError('Impossible de créer la partie. Vérifiez la configuration de la base de données.')
       } finally {
         setIsInitializing(false)
       }
@@ -36,9 +38,8 @@ export const HostGame = ({ onBack, gameMode }) => {
 
   // URL pour les joueurs (à adapter selon votre déploiement)
   const getPlayerUrl = () => {
-    // En production, remplacez par votre vraie URL
-    const baseUrl = window.location.origin
-    return `${baseUrl}/join?game=${gameId}`
+    const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+    return new URL(`${basePath}/join?game=${encodeURIComponent(gameId)}`, window.location.origin).toString()
   }
 
   // URL du QR Code (utilisation d'une API gratuite)
@@ -104,6 +105,14 @@ export const HostGame = ({ onBack, gameMode }) => {
             <p className="text-gray-400 text-center mb-6">
               Scannez ce QR code avec votre téléphone
             </p>
+
+            {isInitializing && (
+              <p className="text-primary text-center text-sm mb-4">Création de la partie...</p>
+            )}
+
+            {initError && (
+              <p className="text-red-400 text-center text-sm mb-4">{initError}</p>
+            )}
 
             {/* QR Code */}
             <div className="bg-white rounded-xl p-4 w-fit mx-auto mb-6">
@@ -219,6 +228,7 @@ export const HostGame = ({ onBack, gameMode }) => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={startGame}
+              disabled={isInitializing || Boolean(initError) || !gameId}
               className="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary text-white font-bold py-4 rounded-xl text-lg uppercase tracking-wider shadow-lg shadow-primary/20 transition-all"
             >
               Lancer la partie
