@@ -21,10 +21,9 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
       channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
         setCurrentQuestion({
           question: payload.questionData.description,
-          answer: payload.questionData.correctAnswer || payload.questionData.answer,
           hint: payload.questionData.hints?.[0] || '',
           type: payload.questionData.type,
-          category: payload.questionData.category || ''
+          category: payload.questionData.category || payload.questionData.data?.category || ''
         })
         setTimeLeft(payload.time || 30)
         setGameStatus('playing')
@@ -33,12 +32,30 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
       })
 
       channel.on('broadcast', { event: 'round_end' }, ({ payload }) => {
-        setGameStatus('waiting')
+        const teamResult = payload.results?.[team]
+        const isCorrect = teamResult === 'correct'
+        setCurrentQuestion((prev) => ({
+          ...prev,
+          answer: payload.correctAnswer
+        }))
+        setResult(isCorrect ? 'correct' : 'wrong')
+        if (isCorrect) {
+          setScore((prev) => prev + 1)
+        }
+        setGameStatus('answered')
       })
 
+      channel.subscribe()
       channelRef.current = channel
     }
-  }, [gameId])
+
+    return () => {
+      if (channelRef.current) {
+        gamesService.removeGameChannel(channelRef.current)
+        channelRef.current = null
+      }
+    }
+  }, [gameId, team])
 
   // Timer
   useEffect(() => {
@@ -68,27 +85,17 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
   }
 
   const handleSubmit = () => {
-    if (!userAnswer || gameStatus !== 'playing') return
-    
-    // Pour vocabulaire ou culture (lettres A,B,C,D transformées potentiellement) ou chiffres
-    // La logique existante comparait parseInt avec number. Ajustons si qcm.
-    const isCorrect = 
-      String(userAnswer).trim().toLowerCase() === String(currentQuestion?.answer).trim().toLowerCase() ||
-      parseInt(userAnswer) === currentQuestion?.answer
-      
-    setResult(isCorrect ? 'correct' : 'wrong')
+    if (gameStatus !== 'playing') return
+
+    setResult(null)
     setGameStatus('answered')
-    
-    if (isCorrect) {
-      setScore((prev) => prev + 1)
-    }
 
     // Envoyer la réponse à l'hôte
     if (channelRef.current) {
       channelRef.current.send({
         type: 'broadcast',
         event: 'player_answer',
-        payload: { team, isCorrect, playerName }
+        payload: { team, userAnswer, playerName }
       })
     }
   }
@@ -243,14 +250,16 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
               className="text-center"
             >
               <div className={`text-6xl mb-4 ${result === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
-                {result === 'correct' ? '✓' : '✗'}
+                {result === 'correct' ? '✓' : result === 'wrong' ? '✗' : '…'}
               </div>
-              <h2 className={`text-2xl font-bold ${result === 'correct' ? 'text-green-400' : 'text-red-400'}`}>
-                {result === 'correct' ? 'Bonne réponse !' : 'Mauvaise réponse'}
+              <h2 className={`text-2xl font-bold ${result === 'correct' ? 'text-green-400' : result === 'wrong' ? 'text-red-400' : 'text-primary'}`}>
+                {result === 'correct' ? 'Bonne réponse !' : result === 'wrong' ? 'Mauvaise réponse' : 'Réponse envoyée'}
               </h2>
-              <p className="text-gray-400 mt-2">
-                La réponse était : <span className="text-white font-bold">{currentQuestion?.answer}</span>
-              </p>
+              {currentQuestion?.answer !== undefined && (
+                <p className="text-gray-400 mt-2">
+                  La réponse était : <span className="text-white font-bold">{currentQuestion.answer}</span>
+                </p>
+              )}
               <p className="text-gray-500 text-sm mt-4">Prochaine question dans quelques secondes...</p>
             </motion.div>
           )}
