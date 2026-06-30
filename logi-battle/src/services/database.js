@@ -1,5 +1,5 @@
 import db from './firebase'
-import { supabase } from './supabase'
+import { isSupabaseConfigured, supabase } from './supabase'
 import {
   collection,
   doc,
@@ -14,7 +14,11 @@ import {
 // Mode DB : 'local', 'firebase', ou 'supabase'
 const DB_MODE = import.meta.env.VITE_DB_MODE || 'local'
 const USE_FIREBASE = DB_MODE === 'firebase'
-const USE_SUPABASE = DB_MODE === 'supabase'
+const USE_SUPABASE = DB_MODE === 'supabase' && isSupabaseConfigured
+
+if (DB_MODE === 'supabase' && !isSupabaseConfigured) {
+  console.warn('Mode Supabase désactivé: configuration manquante. Bascule en stockage local.')
+}
 
 // ===== LOCAL DATABASE =====
 const localDB = {
@@ -45,7 +49,7 @@ export const gamesService = {
     }
 
     if (!USE_FIREBASE) {
-      const gameId = `game_${localDB.nextGameId++}`
+      const gameId = customGameId || `game_${localDB.nextGameId++}`
       const newGame = {
         gameId,
         teamAName,
@@ -62,7 +66,7 @@ export const gamesService = {
       return gameId
     }
 
-    const gameId = `game_${Date.now()}`
+    const gameId = customGameId || `game_${Date.now()}`
     try {
       await setDoc(doc(db, 'games', gameId), {
         gameId,
@@ -166,6 +170,10 @@ export const gamesService = {
     }
   },
 
+  isRealtimeAvailable() {
+    return USE_SUPABASE
+  },
+
   // ---- NEW: Realtime Subscription ----
   subscribeToGame(gameId, callback) {
     if (USE_SUPABASE) {
@@ -191,12 +199,6 @@ export const gamesService = {
       return () => {}
     }
 
-    if (!USE_FIREBASE) {
-      // Pas de vraie souscription en mode local par défaut
-      // On retourne une "dummy" unsubscribe function
-      return () => {}
-    }
-
     // TODO: Implémenter Firestore onSnapshot si on repasse à Firebase un jour
     return () => {}
   },
@@ -204,13 +206,16 @@ export const gamesService = {
   // ---- NEW: Realtime Broadcast Channel ----
   getGameChannel(gameId) {
     if (USE_SUPABASE) {
-      if (!localDB.channels) localDB.channels = {}
-      if (!localDB.channels[gameId]) {
-        localDB.channels[gameId] = supabase.channel(`game_${gameId}`)
-      }
-      return localDB.channels[gameId]
+      return supabase.channel(`game_${gameId}`)
     }
     return null
+  },
+
+  removeGameChannel(channel) {
+    if (USE_SUPABASE && channel) {
+      return supabase.removeChannel(channel)
+    }
+    return Promise.resolve()
   }
 }
 
