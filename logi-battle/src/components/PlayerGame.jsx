@@ -5,6 +5,7 @@ import BrandMark from './BrandMark'
 
 export const PlayerGame = ({ gameId, playerName, team }) => {
   const channelRef = useRef(null)
+  const lastSubmittedAnswerRef = useRef(null)
   const [gameStatus, setGameStatus] = useState('waiting') // waiting, playing, answered, finished
   const [currentQuestion, setCurrentQuestion] = useState(null)
   const [userAnswer, setUserAnswer] = useState('')
@@ -19,24 +20,39 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
     const channel = gamesService.getGameChannel(gameId)
     if (channel) {
       channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
+        const questionData = payload.questionData
         setCurrentQuestion({
-          question: payload.questionData.description,
-          answer: payload.questionData.correctAnswer || payload.questionData.answer,
-          hint: payload.questionData.hints?.[0] || '',
-          type: payload.questionData.type,
-          category: payload.questionData.category || ''
+          ...questionData,
+          question: questionData.description || questionData.question || questionData.term,
+          hint: questionData.hints?.[0] || questionData.data?.hint || '',
+          options: questionData.options || questionData.data?.options || null,
+          category: questionData.category || questionData.data?.category || ''
         })
         setTimeLeft(payload.time || 30)
         setGameStatus('playing')
         setUserAnswer('')
+        lastSubmittedAnswerRef.current = null
         setResult(null)
       })
 
       channel.on('broadcast', { event: 'round_end' }, ({ payload }) => {
+        if (lastSubmittedAnswerRef.current !== null) {
+          const isCorrect = String(lastSubmittedAnswerRef.current).trim().toLowerCase() === String(payload.correctAnswer).trim().toLowerCase()
+          setResult(isCorrect ? 'correct' : 'wrong')
+          if (isCorrect) {
+            setScore((prev) => prev + 1)
+          }
+        }
+        setCurrentQuestion((prev) => prev ? { ...prev, answer: payload.correctAnswer } : prev)
         setGameStatus('waiting')
       })
 
       channelRef.current = channel
+      channel.subscribe()
+    }
+
+    return () => {
+      gamesService.removeGameChannel(gameId)
     }
   }, [gameId])
 
@@ -67,28 +83,24 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
     }
   }
 
+  const handleOptionSelect = (index) => {
+    if (gameStatus !== 'playing') return
+    setUserAnswer(String(index))
+  }
+
   const handleSubmit = () => {
-    if (!userAnswer || gameStatus !== 'playing') return
-    
-    // Pour vocabulaire ou culture (lettres A,B,C,D transformées potentiellement) ou chiffres
-    // La logique existante comparait parseInt avec number. Ajustons si qcm.
-    const isCorrect = 
-      String(userAnswer).trim().toLowerCase() === String(currentQuestion?.answer).trim().toLowerCase() ||
-      parseInt(userAnswer) === currentQuestion?.answer
-      
-    setResult(isCorrect ? 'correct' : 'wrong')
+    if (userAnswer === '' || gameStatus !== 'playing') return
+
+    lastSubmittedAnswerRef.current = userAnswer
+    setResult('pending')
     setGameStatus('answered')
-    
-    if (isCorrect) {
-      setScore((prev) => prev + 1)
-    }
 
     // Envoyer la réponse à l'hôte
     if (channelRef.current) {
       channelRef.current.send({
         type: 'broadcast',
         event: 'player_answer',
-        payload: { team, isCorrect, playerName }
+        payload: { team, userAnswer, playerName }
       })
     }
   }
@@ -196,32 +208,51 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                 </span>
               </div>
 
-              {/* Keypad */}
-              <div className="grid grid-cols-3 gap-2">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'C', 0, 'backspace'].map((num) => (
-                  <motion.button
-                    key={num}
-                    onClick={() => handleNumberClick(num)}
-                    whileTap={{ scale: 0.95 }}
-                    className={`aspect-square rounded-xl font-bold text-xl transition-colors ${
-                      isTeamA
-                        ? 'bg-slate-800 active:bg-blue-500/30 text-white'
-                        : 'bg-slate-800 active:bg-primary/30 text-white'
-                    }`}
-                  >
-                    {num === 'backspace' ? (
-                      <span className="material-icons">backspace</span>
-                    ) : (
-                      num
-                    )}
-                  </motion.button>
-                ))}
-              </div>
+              {currentQuestion?.options ? (
+                <div className="grid gap-2">
+                  {currentQuestion.options.map((option, index) => (
+                    <motion.button
+                      key={index}
+                      onClick={() => handleOptionSelect(index)}
+                      whileTap={{ scale: 0.98 }}
+                      className={`p-4 rounded-xl border-2 text-left transition-colors ${
+                        userAnswer === String(index)
+                          ? isTeamA ? 'border-blue-500 bg-blue-500/20 text-blue-100' : 'border-primary bg-primary/20 text-primary'
+                          : 'border-white/10 bg-slate-800 text-white'
+                      }`}
+                    >
+                      <span className="font-bold mr-3">{String.fromCharCode(65 + index)}</span>
+                      {option}
+                    </motion.button>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'C', 0, 'backspace'].map((num) => (
+                    <motion.button
+                      key={num}
+                      onClick={() => handleNumberClick(num)}
+                      whileTap={{ scale: 0.95 }}
+                      className={`aspect-square rounded-xl font-bold text-xl transition-colors ${
+                        isTeamA
+                          ? 'bg-slate-800 active:bg-blue-500/30 text-white'
+                          : 'bg-slate-800 active:bg-primary/30 text-white'
+                      }`}
+                    >
+                      {num === 'backspace' ? (
+                        <span className="material-icons">backspace</span>
+                      ) : (
+                        num
+                      )}
+                    </motion.button>
+                  ))}
+                </div>
+              )}
 
               {/* Submit Button */}
               <motion.button
                 onClick={handleSubmit}
-                disabled={!userAnswer}
+                disabled={userAnswer === ''}
                 whileTap={{ scale: 0.98 }}
                 className={`w-full mt-3 py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all ${
                   isTeamA
@@ -243,14 +274,16 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
               className="text-center"
             >
               <div className={`text-6xl mb-4 ${result === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
-                {result === 'correct' ? '✓' : '✗'}
+                {result === 'pending' ? '…' : result === 'correct' ? '✓' : '✗'}
               </div>
-              <h2 className={`text-2xl font-bold ${result === 'correct' ? 'text-green-400' : 'text-red-400'}`}>
-                {result === 'correct' ? 'Bonne réponse !' : 'Mauvaise réponse'}
+              <h2 className={`text-2xl font-bold ${result === 'correct' ? 'text-green-400' : result === 'wrong' ? 'text-red-400' : 'text-amber-400'}`}>
+                {result === 'pending' ? 'Réponse envoyée' : result === 'correct' ? 'Bonne réponse !' : 'Mauvaise réponse'}
               </h2>
+              {currentQuestion?.answer !== undefined && (
               <p className="text-gray-400 mt-2">
                 La réponse était : <span className="text-white font-bold">{currentQuestion?.answer}</span>
               </p>
+              )}
               <p className="text-gray-500 text-sm mt-4">Prochaine question dans quelques secondes...</p>
             </motion.div>
           )}
