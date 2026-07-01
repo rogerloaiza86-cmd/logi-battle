@@ -13,32 +13,58 @@ export const HostGame = ({ onBack, gameMode }) => {
   const [gameStarted, setGameStarted] = useState(false)
   const [copied, setCopied] = useState(false)
   const [isInitializing, setIsInitializing] = useState(true)
+  const [initError, setInitError] = useState(null)
 
   // Générer un ID de jeu unique et l'enregistrer dans Supabase
   useEffect(() => {
+    let createdGameId = null
+    let cancelled = false
+
     const initGame = async () => {
       try {
         const id = `GAME-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+        const channel = gamesService.getGameChannel(id)
+        if (!channel) {
+          throw new Error('Le mode QR live nécessite une configuration Supabase Realtime valide.')
+        }
+
+        // Créer la partie dans la base avec le même ID que celui affiché aux joueurs.
+        await gamesService.createGame('ÉQUIPE ALPHA', 'ÉQUIPE OMEGA', id)
+        createdGameId = id
+        if (cancelled) return
+
         setGameId(id)
         gameStore.setGameId(id)
-        
-        // Créer la partie dans Supabase
-        await gamesService.createGame('ÉQUIPE ALPHA', 'ÉQUIPE OMEGA', id)
+        setInitError(null)
       } catch (err) {
         console.error('Erreur lors de la création de la partie sur Supabase:', err)
+        if (!cancelled) {
+          setInitError(err.message || 'Impossible de créer la partie live.')
+          setGameId(null)
+          gameStore.setGameId(null)
+        }
       } finally {
-        setIsInitializing(false)
+        if (!cancelled) setIsInitializing(false)
       }
     }
     
     initGame()
+
+    return () => {
+      cancelled = true
+      if (createdGameId) {
+        gamesService.removeGameChannel(createdGameId)
+      }
+    }
   }, [])
 
   // URL pour les joueurs (à adapter selon votre déploiement)
   const getPlayerUrl = () => {
-    // En production, remplacez par votre vraie URL
-    const baseUrl = window.location.origin
-    return `${baseUrl}/join?game=${gameId}`
+    const basePath = import.meta.env.BASE_URL || '/'
+    const joinPath = `${basePath.replace(/\/$/, '')}/join`
+    const url = new URL(joinPath, window.location.origin)
+    url.searchParams.set('game', gameId)
+    return url.toString()
   }
 
   // URL du QR Code (utilisation d'une API gratuite)
@@ -48,6 +74,7 @@ export const HostGame = ({ onBack, gameMode }) => {
   }
 
   const copyLink = () => {
+    if (!gameId) return
     navigator.clipboard.writeText(getPlayerUrl())
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
@@ -107,12 +134,22 @@ export const HostGame = ({ onBack, gameMode }) => {
 
             {/* QR Code */}
             <div className="bg-white rounded-xl p-4 w-fit mx-auto mb-6">
-              {gameId && (
+              {isInitializing && (
+                <div className="w-48 h-48 flex items-center justify-center text-slate-500 text-sm text-center">
+                  Création de la partie...
+                </div>
+              )}
+              {!isInitializing && gameId && (
                 <img
                   src={getQrCodeUrl()}
                   alt="QR Code"
                   className="w-48 h-48"
                 />
+              )}
+              {!isInitializing && initError && (
+                <div className="w-48 h-48 flex items-center justify-center text-red-600 text-sm text-center p-4">
+                  {initError}
+                </div>
               )}
             </div>
 
@@ -122,11 +159,12 @@ export const HostGame = ({ onBack, gameMode }) => {
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-slate-900 rounded-lg px-4 py-3 text-center">
                   <span className="text-2xl font-mono font-bold text-primary tracking-widest">
-                    {gameId}
+                    {gameId || 'INDISPONIBLE'}
                   </span>
                 </div>
                 <button
                   onClick={copyLink}
+                  disabled={!gameId}
                   className="p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
                   title="Copier le lien"
                 >
@@ -138,10 +176,12 @@ export const HostGame = ({ onBack, gameMode }) => {
             </div>
 
             {/* Lien URL */}
-            <div className="mt-4 p-3 bg-slate-900/50 rounded-lg">
-              <p className="text-xs text-gray-500 mb-1">URL directe :</p>
-              <p className="text-xs text-gray-400 truncate">{getPlayerUrl()}</p>
-            </div>
+            {gameId && (
+              <div className="mt-4 p-3 bg-slate-900/50 rounded-lg">
+                <p className="text-xs text-gray-500 mb-1">URL directe :</p>
+                <p className="text-xs text-gray-400 truncate">{getPlayerUrl()}</p>
+              </div>
+            )}
           </motion.div>
 
           {/* Players Status */}
