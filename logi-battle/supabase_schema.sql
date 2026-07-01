@@ -42,7 +42,13 @@ USING (true);
 CREATE POLICY "Création publique des parties"
 ON public.games FOR INSERT
 TO anon, authenticated
-WITH CHECK (true);
+WITH CHECK (
+  "gameId" IS NOT NULL
+  AND "status" IN ('waiting', 'active', 'finished')
+  AND "teamA_score" >= 0
+  AND "teamB_score" >= 0
+  AND "rope_position" BETWEEN -100 AND 100
+);
 
 CREATE POLICY "Mise à jour publique bornée des parties"
 ON public.games FOR UPDATE
