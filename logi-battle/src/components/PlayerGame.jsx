@@ -10,7 +10,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
   const [userAnswer, setUserAnswer] = useState('')
   const [timeLeft, setTimeLeft] = useState(30)
   const [score, setScore] = useState(0)
-  const [result, setResult] = useState(null) // correct, wrong, null
+  const [result, setResult] = useState(null) // sent, null
 
   const isTeamA = team === 'A'
 
@@ -21,10 +21,10 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
       channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
         setCurrentQuestion({
           question: payload.questionData.description,
-          answer: payload.questionData.correctAnswer || payload.questionData.answer,
           hint: payload.questionData.hints?.[0] || '',
           type: payload.questionData.type,
-          category: payload.questionData.category || ''
+          category: payload.questionData.category || payload.questionData.data?.category || '',
+          options: payload.questionData.data?.options || []
         })
         setTimeLeft(payload.time || 30)
         setGameStatus('playing')
@@ -34,11 +34,22 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
 
       channel.on('broadcast', { event: 'round_end' }, ({ payload }) => {
         setGameStatus('waiting')
+        if (payload.winner === team) {
+          setScore((prev) => prev + 1)
+        }
       })
 
+      channel.subscribe()
       channelRef.current = channel
     }
-  }, [gameId])
+
+    return () => {
+      if (gameId) {
+        gamesService.removeGameChannel(gameId)
+      }
+      channelRef.current = null
+    }
+  }, [gameId, team])
 
   // Timer
   useEffect(() => {
@@ -69,26 +80,16 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
 
   const handleSubmit = () => {
     if (!userAnswer || gameStatus !== 'playing') return
-    
-    // Pour vocabulaire ou culture (lettres A,B,C,D transformées potentiellement) ou chiffres
-    // La logique existante comparait parseInt avec number. Ajustons si qcm.
-    const isCorrect = 
-      String(userAnswer).trim().toLowerCase() === String(currentQuestion?.answer).trim().toLowerCase() ||
-      parseInt(userAnswer) === currentQuestion?.answer
-      
-    setResult(isCorrect ? 'correct' : 'wrong')
+
+    setResult('sent')
     setGameStatus('answered')
-    
-    if (isCorrect) {
-      setScore((prev) => prev + 1)
-    }
 
     // Envoyer la réponse à l'hôte
     if (channelRef.current) {
       channelRef.current.send({
         type: 'broadcast',
         event: 'player_answer',
-        payload: { team, isCorrect, playerName }
+        payload: { team, userAnswer, playerName }
       })
     }
   }
@@ -185,6 +186,27 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                     💡 {currentQuestion.hint}
                   </p>
                 )}
+                {currentQuestion?.options?.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {currentQuestion.options.map((option, index) => (
+                      <button
+                        key={`${option}-${index}`}
+                        type="button"
+                        onClick={() => setUserAnswer(String(index))}
+                        className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
+                          userAnswer === String(index)
+                            ? isTeamA
+                              ? 'border-blue-400 bg-blue-500/20 text-white'
+                              : 'border-primary bg-primary/20 text-white'
+                            : 'border-white/10 bg-slate-900 text-gray-300'
+                        }`}
+                      >
+                        <span className="font-bold mr-2">{index}</span>
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Answer Display */}
@@ -242,14 +264,14 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
               exit={{ opacity: 0, scale: 0.8 }}
               className="text-center"
             >
-              <div className={`text-6xl mb-4 ${result === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
-                {result === 'correct' ? '✓' : '✗'}
+              <div className="text-6xl mb-4 text-green-500">
+                ✓
               </div>
-              <h2 className={`text-2xl font-bold ${result === 'correct' ? 'text-green-400' : 'text-red-400'}`}>
-                {result === 'correct' ? 'Bonne réponse !' : 'Mauvaise réponse'}
+              <h2 className="text-2xl font-bold text-green-400">
+                Réponse envoyée !
               </h2>
               <p className="text-gray-400 mt-2">
-                La réponse était : <span className="text-white font-bold">{currentQuestion?.answer}</span>
+                Le professeur valide la réponse côté hôte.
               </p>
               <p className="text-gray-500 text-sm mt-4">Prochaine question dans quelques secondes...</p>
             </motion.div>

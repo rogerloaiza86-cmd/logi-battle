@@ -17,7 +17,15 @@ import './styles/index.css'
 function App() {
   const [userProfile, setUserProfile] = useState(() => {
     const saved = localStorage.getItem('user_profile')
-    return saved ? JSON.parse(saved) : null
+    if (!saved) return null
+
+    try {
+      return JSON.parse(saved)
+    } catch (error) {
+      console.warn('Profil local invalide, réinitialisation:', error)
+      localStorage.removeItem('user_profile')
+      return null
+    }
   })
   
   const [currentPath, setCurrentPath] = useState(window.location.pathname)
@@ -36,6 +44,14 @@ function App() {
   const [isArchivesMode, setIsArchivesMode] = useState(false)
   
   const { recordMatch } = useChampionshipStore()
+  const normalizedPath = (() => {
+    const basePath = import.meta.env.BASE_URL || '/'
+    const normalizedBase = basePath.endsWith('/') ? basePath : `${basePath}/`
+    if (normalizedBase !== '/' && currentPath.startsWith(normalizedBase)) {
+      return `/${currentPath.slice(normalizedBase.length)}`
+    }
+    return currentPath
+  })()
 
   // Écouter les changements d'URL
   useEffect(() => {
@@ -47,23 +63,23 @@ function App() {
     return () => window.removeEventListener('popstate', handleLocationChange)
   }, [])
 
-  // Écran de connexion prioritaire
-  if (!userProfile) {
-    return <Login onLogin={setUserProfile} />
-  }
-
   const handleLogout = () => {
     localStorage.removeItem('user_profile')
     setUserProfile(null)
   }
 
   // Route: /join - Page pour les joueurs qui scannent le QR
-  if (currentPath === '/join' || window.location.search.includes('game=')) {
+  if (normalizedPath === '/join' || window.location.search.includes('game=')) {
     return (
       <div className="dark">
         <PlayerJoin userProfile={userProfile} />
       </div>
     )
+  }
+
+  // Écran de connexion prioritaire
+  if (!userProfile) {
+    return <Login onLogin={setUserProfile} />
   }
 
   // Route: /host - Mode hôte avec QR code
