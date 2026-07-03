@@ -14,7 +14,7 @@ export const PlayerJoin = ({ userProfile }) => {
   
   const [gameIdFromUrl, setGameIdFromUrl] = useState(getGameIdFromUrl())
   const [step, setStep] = useState(gameIdFromUrl ? 2 : 1)
-  const [gameId, setGameId] = useState(gameIdFromUrl || '')
+  const [gameId, setGameId] = useState(gameIdFromUrl?.toUpperCase() || '')
   const [playerName, setPlayerName] = useState(userProfile?.name || '')
   const [team, setTeam] = useState(null)
   const [joined, setJoined] = useState(false)
@@ -73,10 +73,10 @@ export const PlayerJoin = ({ userProfile }) => {
               <input
                 type="text"
                 value={gameId}
-                onChange={(e) => setGameId(e.target.value.toUpperCase())}
+                onChange={(e) => setGameId(e.target.value.trim().toUpperCase())}
                 placeholder="Ex: GAME-A3B7"
                 className="w-full bg-slate-900 border-2 border-white/10 focus:border-primary rounded-xl px-4 py-4 text-white text-center text-2xl font-mono tracking-widest uppercase transition-colors"
-                maxLength={10}
+                maxLength={16}
               />
               <button
                 onClick={() => gameId && setStep(2)}
