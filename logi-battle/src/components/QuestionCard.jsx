@@ -50,7 +50,7 @@ export const QuestionCard = ({
       handleSubmit()
     } else if (e.key === 'Backspace') {
       setUserInput(userInput.slice(0, -1))
-    } else if (/\d/.test(e.key)) {
+    } else if (/^\d$/.test(e.key)) {
       if (userInput.length < 6) {
         setUserInput(userInput + e.key)
       }
