@@ -1,5 +1,5 @@
 import db from './firebase'
-import { supabase } from './supabase'
+import { supabase, isSupabaseConfigured } from './supabase'
 import {
   collection,
   doc,
@@ -14,7 +14,7 @@ import {
 // Mode DB : 'local', 'firebase', ou 'supabase'
 const DB_MODE = import.meta.env.VITE_DB_MODE || 'local'
 const USE_FIREBASE = DB_MODE === 'firebase'
-const USE_SUPABASE = DB_MODE === 'supabase'
+const USE_SUPABASE = DB_MODE === 'supabase' && isSupabaseConfigured
 
 // ===== LOCAL DATABASE =====
 const localDB = {
@@ -45,7 +45,7 @@ export const gamesService = {
     }
 
     if (!USE_FIREBASE) {
-      const gameId = `game_${localDB.nextGameId++}`
+      const gameId = customGameId || `game_${localDB.nextGameId++}`
       const newGame = {
         gameId,
         teamAName,
@@ -62,7 +62,7 @@ export const gamesService = {
       return gameId
     }
 
-    const gameId = `game_${Date.now()}`
+    const gameId = customGameId || `game_${Date.now()}`
     try {
       await setDoc(doc(db, 'games', gameId), {
         gameId,
@@ -122,9 +122,9 @@ export const gamesService = {
     }
 
     if (USE_SUPABASE) {
-      const { error } = await supabase.from('games').update(updateData).eq('gameId', gameId)
-      if (error) throw error
-      return true
+      // Les scores sont validés localement par l'hôte et diffusés par Broadcast.
+      // Ne pas exposer d'UPDATE anonyme sur Supabase évite la falsification directe.
+      return false
     }
 
     if (!USE_FIREBASE) {
@@ -145,9 +145,7 @@ export const gamesService = {
 
   async updateGameStatus(gameId, status) {
     if (USE_SUPABASE) {
-      const { error } = await supabase.from('games').update({ status }).eq('gameId', gameId)
-      if (error) throw error
-      return true
+      return false
     }
 
     if (!USE_FIREBASE) {
@@ -211,6 +209,14 @@ export const gamesService = {
       return localDB.channels[gameId]
     }
     return null
+  },
+
+  removeGameChannel(gameId) {
+    const channel = localDB.channels?.[gameId]
+    if (channel && USE_SUPABASE) {
+      supabase.removeChannel(channel)
+      delete localDB.channels[gameId]
+    }
   }
 }
 

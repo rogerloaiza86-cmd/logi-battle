@@ -20,11 +20,12 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
     if (channel) {
       channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
         setCurrentQuestion({
+          id: payload.questionData.id,
           question: payload.questionData.description,
-          answer: payload.questionData.correctAnswer || payload.questionData.answer,
           hint: payload.questionData.hints?.[0] || '',
           type: payload.questionData.type,
-          category: payload.questionData.category || ''
+          category: payload.questionData.data?.category || payload.questionData.category || '',
+          options: payload.questionData.data?.options || []
         })
         setTimeLeft(payload.time || 30)
         setGameStatus('playing')
@@ -36,7 +37,13 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
         setGameStatus('waiting')
       })
 
+      channel.subscribe()
       channelRef.current = channel
+    }
+
+    return () => {
+      gamesService.removeGameChannel(gameId)
+      channelRef.current = null
     }
   }, [gameId])
 
@@ -67,28 +74,24 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
     }
   }
 
-  const handleSubmit = () => {
-    if (!userAnswer || gameStatus !== 'playing') return
-    
-    // Pour vocabulaire ou culture (lettres A,B,C,D transformées potentiellement) ou chiffres
-    // La logique existante comparait parseInt avec number. Ajustons si qcm.
-    const isCorrect = 
-      String(userAnswer).trim().toLowerCase() === String(currentQuestion?.answer).trim().toLowerCase() ||
-      parseInt(userAnswer) === currentQuestion?.answer
-      
-    setResult(isCorrect ? 'correct' : 'wrong')
+  const handleSubmit = (answerOverride = userAnswer) => {
+    const submittedAnswer = String(answerOverride ?? '').trim()
+    if (!submittedAnswer || gameStatus !== 'playing') return
+
+    setResult('sent')
     setGameStatus('answered')
-    
-    if (isCorrect) {
-      setScore((prev) => prev + 1)
-    }
 
     // Envoyer la réponse à l'hôte
     if (channelRef.current) {
       channelRef.current.send({
         type: 'broadcast',
         event: 'player_answer',
-        payload: { team, isCorrect, playerName }
+        payload: {
+          team,
+          userAnswer: submittedAnswer,
+          questionId: currentQuestion?.id,
+          playerName
+        }
       })
     }
   }
@@ -196,27 +199,53 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                 </span>
               </div>
 
-              {/* Keypad */}
-              <div className="grid grid-cols-3 gap-2">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'C', 0, 'backspace'].map((num) => (
-                  <motion.button
-                    key={num}
-                    onClick={() => handleNumberClick(num)}
-                    whileTap={{ scale: 0.95 }}
-                    className={`aspect-square rounded-xl font-bold text-xl transition-colors ${
-                      isTeamA
-                        ? 'bg-slate-800 active:bg-blue-500/30 text-white'
-                        : 'bg-slate-800 active:bg-primary/30 text-white'
-                    }`}
-                  >
-                    {num === 'backspace' ? (
-                      <span className="material-icons">backspace</span>
-                    ) : (
-                      num
-                    )}
-                  </motion.button>
-                ))}
-              </div>
+              {/* Answer input */}
+              {currentQuestion?.options?.length > 0 ? (
+                <div className="grid grid-cols-1 gap-2">
+                  {currentQuestion.options.map((option, index) => (
+                    <motion.button
+                      key={`${option}-${index}`}
+                      onClick={() => {
+                        const value = String(index)
+                        setUserAnswer(value)
+                        handleSubmit(value)
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`rounded-xl p-4 text-left font-bold transition-colors ${
+                        isTeamA
+                          ? 'bg-slate-800 active:bg-blue-500/30 text-white'
+                          : 'bg-slate-800 active:bg-primary/30 text-white'
+                      }`}
+                    >
+                      <span className={isTeamA ? 'text-blue-400 mr-2' : 'text-primary mr-2'}>
+                        {index + 1}.
+                      </span>
+                      {option}
+                    </motion.button>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'C', 0, 'backspace'].map((num) => (
+                    <motion.button
+                      key={num}
+                      onClick={() => handleNumberClick(num)}
+                      whileTap={{ scale: 0.95 }}
+                      className={`aspect-square rounded-xl font-bold text-xl transition-colors ${
+                        isTeamA
+                          ? 'bg-slate-800 active:bg-blue-500/30 text-white'
+                          : 'bg-slate-800 active:bg-primary/30 text-white'
+                      }`}
+                    >
+                      {num === 'backspace' ? (
+                        <span className="material-icons">backspace</span>
+                      ) : (
+                        num
+                      )}
+                    </motion.button>
+                  ))}
+                </div>
+              )}
 
               {/* Submit Button */}
               <motion.button
@@ -242,14 +271,14 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
               exit={{ opacity: 0, scale: 0.8 }}
               className="text-center"
             >
-              <div className={`text-6xl mb-4 ${result === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
-                {result === 'correct' ? '✓' : '✗'}
+              <div className="text-6xl mb-4 text-green-500">
+                ✓
               </div>
-              <h2 className={`text-2xl font-bold ${result === 'correct' ? 'text-green-400' : 'text-red-400'}`}>
-                {result === 'correct' ? 'Bonne réponse !' : 'Mauvaise réponse'}
+              <h2 className="text-2xl font-bold text-green-400">
+                Réponse envoyée
               </h2>
               <p className="text-gray-400 mt-2">
-                La réponse était : <span className="text-white font-bold">{currentQuestion?.answer}</span>
+                L'hôte validera la réponse à la fin du round.
               </p>
               <p className="text-gray-500 text-sm mt-4">Prochaine question dans quelques secondes...</p>
             </motion.div>
