@@ -11,16 +11,72 @@ import { gamesService } from '../services/database'
 const ROUND_TIME = 30
 const VOCABULARY_TIME = 20
 
+const getCorrectAnswer = (question) => (
+  question?.correctAnswer ?? question?.answer ?? question?.data?.correctOption
+)
+
+const normalizeAnswer = (answer) => String(answer ?? '').trim().toLowerCase()
+
+const isCorrectAnswer = (question, userAnswer) => (
+  normalizeAnswer(userAnswer) === normalizeAnswer(getCorrectAnswer(question))
+)
+
+const getPublicQuestion = (question) => {
+  if (!question) return null
+
+  const { correctAnswer, answer, explanation, data, ...publicQuestion } = question
+  const publicData = { ...(data || {}) }
+  delete publicData.correctOption
+  delete publicData.explanation
+
+  return {
+    ...publicQuestion,
+    data: publicData,
+  }
+}
+
+const getAnswerOptions = (question) => {
+  const options = question?.data?.options
+  if (Array.isArray(options) && options.length > 0) {
+    return options.map((label, index) => ({
+      label,
+      value: String(index),
+    }))
+  }
+
+  const correctAnswer = getCorrectAnswer(question)
+  const numericAnswer = Number(correctAnswer)
+  if (Number.isFinite(numericAnswer)) {
+    const candidates = [numericAnswer, numericAnswer + 1, numericAnswer - 1, numericAnswer + 2]
+      .filter((value) => value >= 0)
+    const unique = [...new Set(candidates)].slice(0, 4)
+    return unique
+      .sort((a, b) => a - b)
+      .map((value) => ({ label: String(value), value: String(value) }))
+  }
+
+  return []
+}
+
 export const GameBoard = ({ onBack, gameMode, isHost }) => {
   const gameStore = useGameStore()
   const channelRef = useRef(null)
+  const questionRef = useRef(null)
+  const roundStateRef = useRef({
+    teamAStatus: 'playing',
+    teamBStatus: 'playing',
+    teamATime: null,
+    teamBTime: null,
+  })
+  const isRoundActiveRef = useRef(false)
+  const nextRoundTimeoutRef = useRef(null)
   
   const [question, setQuestion] = useState(null)
   const [showIncorrect, setShowIncorrect] = useState(false)
   const [particles, setParticles] = useState([])
   const [timeLeft, setTimeLeft] = useState(ROUND_TIME)
   const [roundTime, setRoundTime] = useState(ROUND_TIME)
-  const [isRoundActive, setIsRoundActive] = useState(true)
+  const [isRoundActive, setIsRoundActive] = useState(false)
   const [teamAStatus, setTeamAStatus] = useState('playing')
   const [teamBStatus, setTeamBStatus] = useState('playing')
   const [teamATime, setTeamATime] = useState(null)
@@ -48,23 +104,47 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   }, [gameStore.teamA.score, gameStore.teamB.score, gameStore.ropePosition, isHost, gameStore.gameId])
 
   useEffect(() => {
-    // Configuration du Broadcast
-    if (isHost && gameStore.gameId) {
-      const channel = gamesService.getGameChannel(gameStore.gameId)
-      if (channel) {
-        channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
-          handleAnswer(payload.team, payload.isCorrect)
-        }).subscribe()
-        channelRef.current = channel
+    let started = false
+    let isMounted = true
+
+    const beginFirstRound = () => {
+      if (!started && isMounted) {
+        started = true
+        startNewRound()
       }
     }
 
-    startNewRound()
+    if (isHost && gameStore.gameId) {
+      const channel = gamesService.getGameChannel(gameStore.gameId)
+      if (channel) {
+        channel
+          .on('broadcast', { event: 'player_answer' }, ({ payload }) => {
+            handleRemoteAnswer(payload)
+          })
+          .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              beginFirstRound()
+            }
+          })
+        channelRef.current = channel
+      } else {
+        beginFirstRound()
+      }
+    } else {
+      beginFirstRound()
+    }
     
     return () => {
-      // Nettoyage au démontage
+      isMounted = false
+      if (nextRoundTimeoutRef.current) {
+        clearTimeout(nextRoundTimeoutRef.current)
+      }
+      if (gameStore.gameId) {
+        gamesService.removeGameChannel(gameStore.gameId)
+      }
+      channelRef.current = null
     }
-  }, [])
+  }, [gameMode, gameStore.gameId, isHost])
 
   useEffect(() => {
     let interval
@@ -83,11 +163,19 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
       ...generateNextQuestion(gameMode),
       id: `q_${Date.now()}`,
     }
+    questionRef.current = newQuestion
     setQuestion(newQuestion)
     const time = newQuestion.type === 'vocabulaire' ? VOCABULARY_TIME : ROUND_TIME
     setRoundTime(time)
     setTimeLeft(time)
     setIsRoundActive(true)
+    isRoundActiveRef.current = true
+    roundStateRef.current = {
+      teamAStatus: 'playing',
+      teamBStatus: 'playing',
+      teamATime: null,
+      teamBTime: null,
+    }
     setTeamAStatus('playing')
     setTeamBStatus('playing')
     setTeamATime(null)
@@ -101,24 +189,27 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
         type: 'broadcast',
         event: 'new_question',
         payload: {
-          questionData: newQuestion,
+          questionData: getPublicQuestion(newQuestion),
           time: time
         }
       })
     }
   }
 
-  const endRound = () => {
+  const endRound = (stateSnapshot = roundStateRef.current) => {
+    if (!isRoundActiveRef.current) return
+
+    isRoundActiveRef.current = false
     setIsRoundActive(false)
     setBothTeamsAnswered(true)
     
     let winner = null
     
-    if (teamAStatus === 'correct' && teamBStatus === 'correct') {
-      winner = teamATime < teamBTime ? 'A' : 'B'
-    } else if (teamAStatus === 'correct') {
+    if (stateSnapshot.teamAStatus === 'correct' && stateSnapshot.teamBStatus === 'correct') {
+      winner = stateSnapshot.teamATime < stateSnapshot.teamBTime ? 'A' : 'B'
+    } else if (stateSnapshot.teamAStatus === 'correct') {
       winner = 'A'
-    } else if (teamBStatus === 'correct') {
+    } else if (stateSnapshot.teamBStatus === 'correct') {
       winner = 'B'
     }
     
@@ -130,7 +221,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
         event: 'round_end',
         payload: {
           winner: winner,
-          correctAnswer: question?.answer
+          correctAnswer: getCorrectAnswer(questionRef.current)
         }
       })
     }
@@ -145,9 +236,9 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
       addLog(gameStore.teamB.name, 'a répondu correctement !', 'B', '+250')
     }
     
-    const delay = question?.type === 'vocabulaire' ? 4000 : 2500
+    const delay = questionRef.current?.type === 'vocabulaire' ? 4000 : 2500
     
-    setTimeout(() => {
+    nextRoundTimeoutRef.current = setTimeout(() => {
       if (gameStore.gameStatus !== 'finished') {
         setRoundNumber((prev) => prev + 1)
         startNewRound()
@@ -161,8 +252,30 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
     setLogs(prev => [{ id: Date.now(), user, action, team, points, time }, ...prev.slice(0, 4)])
   }
 
-  const handleAnswer = (team, isCorrect) => {
+  const handleRemoteAnswer = (payload = {}) => {
+    if (payload.questionId !== questionRef.current?.id) return
+    if (!['A', 'B'].includes(payload.team)) return
+
+    handleAnswer(payload.team, payload.userAnswer)
+  }
+
+  const handleAnswer = (team, userAnswer) => {
+    if (!isRoundActiveRef.current) return
+
     const responseTime = Date.now() - roundStartTime.current
+    const currentState = roundStateRef.current
+    const statusKey = team === 'A' ? 'teamAStatus' : 'teamBStatus'
+    const timeKey = team === 'A' ? 'teamATime' : 'teamBTime'
+
+    if (currentState[statusKey] !== 'playing') return
+
+    const isCorrect = isCorrectAnswer(questionRef.current, userAnswer)
+    const nextState = {
+      ...currentState,
+      [statusKey]: isCorrect ? 'correct' : 'wrong',
+      [timeKey]: responseTime,
+    }
+    roundStateRef.current = nextState
     
     if (team === 'A') {
       if (isCorrect) {
@@ -186,11 +299,11 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
       }
     }
     
-    const otherTeamStatus = team === 'A' ? teamBStatus : teamAStatus
+    const otherTeamStatus = team === 'A' ? nextState.teamBStatus : nextState.teamAStatus
 
     if (otherTeamStatus !== 'playing') {
       setBothTeamsAnswered(true)
-      endRound()
+      endRound(nextState)
     }
   }
 
@@ -215,6 +328,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   // Calculate timer circle progress
   const timerProgress = (timeLeft / roundTime) * 283
   const timerColor = timeLeft <= 5 ? '#ef4444' : timeLeft <= 10 ? '#eab308' : '#f4b942'
+  const answerOptions = getAnswerOptions(question)
 
   return (
     <div className="min-h-screen geronimo-screen flex flex-col">
@@ -380,22 +494,39 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
                 </h2>
 
                 {/* Options */}
-                <div className="grid grid-cols-2 gap-4">
-                  {['A', 'B', 'C', 'D'].map((letter, index) => (
-                    <button
-                      key={letter}
-                      className="group relative bg-[#234a68] hover:bg-[#2d5875] rounded-2xl p-5 text-left transition-all border border-transparent hover:border-white/10"
-                    >
-                      <span className="absolute top-4 left-4 text-gray-500 text-sm font-bold">{letter}</span>
-                      <p className="text-white font-medium pl-6">
-                        {index === 0 && '1,2 Mètres'}
-                        {index === 1 && '2,4 Mètres'}
-                        {index === 2 && 'Sans Limite'}
-                        {index === 3 && 'Limité par le Poids'}
-                      </p>
-                    </button>
-                  ))}
-                </div>
+                {answerOptions.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {['A', 'B'].map((team) => {
+                      const teamStatus = team === 'A' ? teamAStatus : teamBStatus
+                      const isDisabled = !isRoundActive || teamStatus !== 'playing'
+
+                      return (
+                        <div key={team} className="space-y-3">
+                          <p className={`text-xs font-bold uppercase tracking-wider ${team === 'A' ? 'text-[#7fa99b]' : 'text-[#f4b942]'}`}>
+                            Réponse équipe {team}
+                          </p>
+                          <div className="grid grid-cols-1 gap-2">
+                            {answerOptions.map((option, index) => (
+                              <button
+                                key={`${team}-${option.value}`}
+                                onClick={() => handleAnswer(team, option.value)}
+                                disabled={isDisabled}
+                                className="group relative bg-[#234a68] hover:bg-[#2d5875] disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl p-4 text-left transition-all border border-transparent hover:border-white/10"
+                              >
+                                <span className="absolute top-4 left-4 text-gray-500 text-sm font-bold">{index + 1}</span>
+                                <p className="text-white font-medium pl-6">{option.label}</p>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400 bg-[#234a68] rounded-2xl p-4">
+                    Réponse libre depuis les appareils des joueurs.
+                  </p>
+                )}
               </div>
             )}
           </div>
