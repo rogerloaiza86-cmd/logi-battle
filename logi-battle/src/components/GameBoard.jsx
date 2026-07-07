@@ -5,6 +5,7 @@ import QuestionCard from './QuestionCard'
 import VocabularyCard from './VocabularyCard'
 import BrandMark from './BrandMark'
 import { generateNextQuestion } from '../utils/questionGenerator'
+import { getCorrectAnswer, isSubmittedAnswerCorrect, sanitizeQuestionForPlayer } from '../utils/liveGame'
 import { useGameStore } from '../hooks/useGameStore'
 import { gamesService } from '../services/database'
 
@@ -34,6 +35,33 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
     { id: 3, user: 'LogiMaster', action: 'est en série de 5 !', team: 'A', points: 'Bonus Combo Actif', time: '14:25' },
   ])
   const roundStartTime = useRef(null)
+  const questionRef = useRef(null)
+  const roundActiveRef = useRef(false)
+  const teamAStatusRef = useRef(teamAStatus)
+  const teamBStatusRef = useRef(teamBStatus)
+  const teamATimeRef = useRef(teamATime)
+  const teamBTimeRef = useRef(teamBTime)
+  const nextRoundTimerRef = useRef(null)
+
+  const setTeamAStatusValue = (status) => {
+    teamAStatusRef.current = status
+    setTeamAStatus(status)
+  }
+
+  const setTeamBStatusValue = (status) => {
+    teamBStatusRef.current = status
+    setTeamBStatus(status)
+  }
+
+  const setTeamATimeValue = (time) => {
+    teamATimeRef.current = time
+    setTeamATime(time)
+  }
+
+  const setTeamBTimeValue = (time) => {
+    teamBTimeRef.current = time
+    setTeamBTime(time)
+  }
 
   // Enregistrement des scores dans la BD en temps réel
   useEffect(() => {
@@ -49,20 +77,36 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
 
   useEffect(() => {
     // Configuration du Broadcast
+    let didStart = false
+    const launchRound = () => {
+      if (didStart) return
+      didStart = true
+      startNewRound()
+    }
+
     if (isHost && gameStore.gameId) {
       const channel = gamesService.getGameChannel(gameStore.gameId)
       if (channel) {
         channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
-          handleAnswer(payload.team, payload.isCorrect)
-        }).subscribe()
+          handleRemoteAnswer(payload.team, payload.userAnswer)
+        }).subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            launchRound()
+          }
+        })
         channelRef.current = channel
+      } else {
+        launchRound()
       }
+    } else {
+      launchRound()
     }
-
-    startNewRound()
     
     return () => {
-      // Nettoyage au démontage
+      clearTimeout(nextRoundTimerRef.current)
+      if (isHost && gameStore.gameId) {
+        gamesService.removeGameChannel(gameStore.gameId)
+      }
     }
   }, [])
 
@@ -79,19 +123,22 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   }, [isRoundActive, timeLeft])
 
   const startNewRound = () => {
+    clearTimeout(nextRoundTimerRef.current)
     const newQuestion = {
       ...generateNextQuestion(gameMode),
       id: `q_${Date.now()}`,
     }
+    questionRef.current = newQuestion
     setQuestion(newQuestion)
     const time = newQuestion.type === 'vocabulaire' ? VOCABULARY_TIME : ROUND_TIME
     setRoundTime(time)
     setTimeLeft(time)
+    roundActiveRef.current = true
     setIsRoundActive(true)
-    setTeamAStatus('playing')
-    setTeamBStatus('playing')
-    setTeamATime(null)
-    setTeamBTime(null)
+    setTeamAStatusValue('playing')
+    setTeamBStatusValue('playing')
+    setTeamATimeValue(null)
+    setTeamBTimeValue(null)
     setRoundWinner(null)
     setBothTeamsAnswered(false)
     roundStartTime.current = Date.now()
@@ -101,7 +148,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
         type: 'broadcast',
         event: 'new_question',
         payload: {
-          questionData: newQuestion,
+          questionData: sanitizeQuestionForPlayer(newQuestion),
           time: time
         }
       })
@@ -109,16 +156,23 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
   }
 
   const endRound = () => {
+    if (!roundActiveRef.current) return
+    roundActiveRef.current = false
     setIsRoundActive(false)
     setBothTeamsAnswered(true)
     
     let winner = null
+    const currentQuestion = questionRef.current
+    const currentTeamAStatus = teamAStatusRef.current
+    const currentTeamBStatus = teamBStatusRef.current
+    const currentTeamATime = teamATimeRef.current
+    const currentTeamBTime = teamBTimeRef.current
     
-    if (teamAStatus === 'correct' && teamBStatus === 'correct') {
-      winner = teamATime < teamBTime ? 'A' : 'B'
-    } else if (teamAStatus === 'correct') {
+    if (currentTeamAStatus === 'correct' && currentTeamBStatus === 'correct') {
+      winner = currentTeamATime < currentTeamBTime ? 'A' : 'B'
+    } else if (currentTeamAStatus === 'correct') {
       winner = 'A'
-    } else if (teamBStatus === 'correct') {
+    } else if (currentTeamBStatus === 'correct') {
       winner = 'B'
     }
     
@@ -130,25 +184,30 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
         event: 'round_end',
         payload: {
           winner: winner,
-          correctAnswer: question?.answer
+          correctAnswer: getCorrectAnswer(currentQuestion),
+          results: {
+            A: currentTeamAStatus,
+            B: currentTeamBStatus,
+          },
         }
       })
     }
 
+    const store = useGameStore.getState()
     if (winner === 'A') {
-      gameStore.incrementTeamAScore(1)
+      store.incrementTeamAScore(1)
       createParticles('A')
-      addLog(gameStore.teamA.name, 'a répondu correctement !', 'A', '+250')
+      addLog(store.teamA.name, 'a répondu correctement !', 'A', '+250')
     } else if (winner === 'B') {
-      gameStore.incrementTeamBScore(1)
+      store.incrementTeamBScore(1)
       createParticles('B')
-      addLog(gameStore.teamB.name, 'a répondu correctement !', 'B', '+250')
+      addLog(store.teamB.name, 'a répondu correctement !', 'B', '+250')
     }
     
-    const delay = question?.type === 'vocabulaire' ? 4000 : 2500
+    const delay = currentQuestion?.type === 'vocabulaire' ? 4000 : 2500
     
-    setTimeout(() => {
-      if (gameStore.gameStatus !== 'finished') {
+    nextRoundTimerRef.current = setTimeout(() => {
+      if (useGameStore.getState().gameStatus !== 'finished') {
         setRoundNumber((prev) => prev + 1)
         startNewRound()
       }
@@ -161,37 +220,65 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
     setLogs(prev => [{ id: Date.now(), user, action, team, points, time }, ...prev.slice(0, 4)])
   }
 
-  const handleAnswer = (team, isCorrect) => {
+  const recordAnswerResult = (team, isCorrect) => {
+    if (!roundActiveRef.current || (team !== 'A' && team !== 'B')) return
+
     const responseTime = Date.now() - roundStartTime.current
+    const currentTeamStatus = team === 'A' ? teamAStatusRef.current : teamBStatusRef.current
+    if (currentTeamStatus !== 'playing') return
     
     if (team === 'A') {
       if (isCorrect) {
-        setTeamAStatus('correct')
-        setTeamATime(responseTime)
+        setTeamAStatusValue('correct')
+        setTeamATimeValue(responseTime)
       } else {
-        setTeamAStatus('wrong')
+        setTeamAStatusValue('wrong')
         setShowIncorrect(true)
         setTimeout(() => setShowIncorrect(false), 400)
-        addLog(gameStore.teamA.name, 'a raté le timing.', 'A', '-50')
+        addLog(useGameStore.getState().teamA.name, 'a raté le timing.', 'A', '-50')
       }
     } else {
       if (isCorrect) {
-        setTeamBStatus('correct')
-        setTeamBTime(responseTime)
+        setTeamBStatusValue('correct')
+        setTeamBTimeValue(responseTime)
       } else {
-        setTeamBStatus('wrong')
+        setTeamBStatusValue('wrong')
         setShowIncorrect(true)
         setTimeout(() => setShowIncorrect(false), 400)
-        addLog(gameStore.teamB.name, 'a raté le timing.', 'B', '-50')
+        addLog(useGameStore.getState().teamB.name, 'a raté le timing.', 'B', '-50')
       }
     }
     
-    const otherTeamStatus = team === 'A' ? teamBStatus : teamAStatus
+    const otherTeamStatus = team === 'A' ? teamBStatusRef.current : teamAStatusRef.current
 
     if (otherTeamStatus !== 'playing') {
       setBothTeamsAnswered(true)
       endRound()
     }
+  }
+
+  const handleRemoteAnswer = (team, userAnswer) => {
+    recordAnswerResult(team, isSubmittedAnswerCorrect(userAnswer, questionRef.current))
+  }
+
+  const renderAnswerCard = (team) => {
+    if (!question) return null
+    const status = team === 'A' ? teamAStatus : teamBStatus
+    const responseTime = team === 'A' ? teamATime : teamBTime
+    const isDisabled = !isRoundActive || status !== 'playing'
+    const commonProps = {
+      question,
+      team,
+      onAnswer: (isCorrect) => recordAnswerResult(team, isCorrect),
+      isAnswering: isDisabled,
+      disabled: isDisabled,
+      responseTime,
+      showCorrectAnswer: bothTeamsAnswered || timeLeft === 0,
+    }
+
+    return question.isMCQ || question.type === 'vocabulaire'
+      ? <VocabularyCard {...commonProps} />
+      : <QuestionCard {...commonProps} />
   }
 
   const createParticles = (winningTeam) => {
@@ -379,22 +466,20 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
                   {question.description}
                 </h2>
 
-                {/* Options */}
-                <div className="grid grid-cols-2 gap-4">
-                  {['A', 'B', 'C', 'D'].map((letter, index) => (
-                    <button
-                      key={letter}
-                      className="group relative bg-[#234a68] hover:bg-[#2d5875] rounded-2xl p-5 text-left transition-all border border-transparent hover:border-white/10"
-                    >
-                      <span className="absolute top-4 left-4 text-gray-500 text-sm font-bold">{letter}</span>
-                      <p className="text-white font-medium pl-6">
-                        {index === 0 && '1,2 Mètres'}
-                        {index === 1 && '2,4 Mètres'}
-                        {index === 2 && 'Sans Limite'}
-                        {index === 3 && 'Limité par le Poids'}
-                      </p>
-                    </button>
-                  ))}
+                {/* Réponses locales */}
+                <div className="grid gap-6 xl:grid-cols-2">
+                  <div className="rounded-2xl border border-[#7fa99b]/30 bg-[#17314a]/60 p-4">
+                    <p className="mb-3 text-center text-xs font-bold uppercase tracking-wider text-[#7fa99b]">
+                      Réponse Équipe Étoile
+                    </p>
+                    {renderAnswerCard('A')}
+                  </div>
+                  <div className="rounded-2xl border border-[#f4b942]/30 bg-[#17314a]/60 p-4">
+                    <p className="mb-3 text-center text-xs font-bold uppercase tracking-wider text-[#f4b942]">
+                      Réponse Équipe Boussole
+                    </p>
+                    {renderAnswerCard('B')}
+                  </div>
                 </div>
               </div>
             )}
