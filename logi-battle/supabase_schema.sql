@@ -26,18 +26,30 @@ CREATE TABLE IF NOT EXISTS public.questions (
 );
 
 -- Sécurité RLS (Row Level Security)
--- Autorise la lecture, l'insertion et la modification publique
+-- Les clients anonymes peuvent uniquement créer/lire une partie.
+-- Ils ne peuvent pas supprimer de parties, ni lire/écrire la banque de questions
+-- qui contient les bonnes réponses.
 ALTER TABLE public.games ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Activer l'accès anonyme général sur games" 
-ON public.games FOR ALL 
-USING (true) 
+DROP POLICY IF EXISTS "Activer l'accès anonyme général sur games" ON public.games;
+DROP POLICY IF EXISTS "games_public_select" ON public.games;
+DROP POLICY IF EXISTS "games_public_insert" ON public.games;
+DROP POLICY IF EXISTS "games_public_update" ON public.games;
+CREATE POLICY "games_public_select"
+ON public.games FOR SELECT
+USING (true);
+CREATE POLICY "games_public_insert"
+ON public.games FOR INSERT
 WITH CHECK (true);
 
 ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Activer l'accès anonyme général sur questions" 
-ON public.questions FOR ALL 
-USING (true) 
-WITH CHECK (true);
+DROP POLICY IF EXISTS "Activer l'accès anonyme général sur questions" ON public.questions;
+DROP POLICY IF EXISTS "questions_public_read" ON public.questions;
+DROP POLICY IF EXISTS "questions_public_write" ON public.questions;
 
 -- Activer le temps réel (Realtime) sur la table games
-ALTER PUBLICATION supabase_realtime ADD TABLE public.games;
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.games;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
