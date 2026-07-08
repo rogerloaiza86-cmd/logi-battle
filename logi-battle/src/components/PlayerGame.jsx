@@ -9,6 +9,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
   const [currentQuestion, setCurrentQuestion] = useState(null)
   const [userAnswer, setUserAnswer] = useState('')
   const [timeLeft, setTimeLeft] = useState(30)
+  const [roundTime, setRoundTime] = useState(30)
   const [score, setScore] = useState(0)
   const [result, setResult] = useState(null) // correct, wrong, null
 
@@ -21,22 +22,38 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
       channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
         setCurrentQuestion({
           question: payload.questionData.description,
-          answer: payload.questionData.correctAnswer || payload.questionData.answer,
           hint: payload.questionData.hints?.[0] || '',
           type: payload.questionData.type,
-          category: payload.questionData.category || ''
+          category: payload.questionData.data?.category || payload.questionData.category || '',
+          options: payload.questionData.data?.options || payload.questionData.options || [],
+          answer: null,
         })
-        setTimeLeft(payload.time || 30)
+        const time = payload.time || 30
+        setTimeLeft(time)
+        setRoundTime(time)
         setGameStatus('playing')
         setUserAnswer('')
         setResult(null)
       })
 
       channel.on('broadcast', { event: 'round_end' }, ({ payload }) => {
-        setGameStatus('waiting')
-      })
+        const teamResult = payload.teamResults?.[team]
+        if (teamResult === 'correct') {
+          setScore((prev) => prev + 1)
+        }
+        setResult(teamResult === 'correct' ? 'correct' : 'wrong')
+        setCurrentQuestion((prev) => prev ? {
+          ...prev,
+          answer: payload.correctAnswer,
+        } : prev)
+        setGameStatus('answered')
+      }).subscribe()
 
       channelRef.current = channel
+      return () => {
+        gamesService.removeGameChannel(gameId)
+        channelRef.current = null
+      }
     }
   }, [gameId])
 
@@ -48,7 +65,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
         setTimeLeft((prev) => prev - 1)
       }, 1000)
     } else if (timeLeft === 0 && gameStatus === 'playing') {
-      handleSubmit()
+      handleSubmit('')
     }
     return () => clearInterval(interval)
   }, [gameStatus, timeLeft])
@@ -67,28 +84,21 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
     }
   }
 
-  const handleSubmit = () => {
-    if (!userAnswer || gameStatus !== 'playing') return
-    
-    // Pour vocabulaire ou culture (lettres A,B,C,D transformées potentiellement) ou chiffres
-    // La logique existante comparait parseInt avec number. Ajustons si qcm.
-    const isCorrect = 
-      String(userAnswer).trim().toLowerCase() === String(currentQuestion?.answer).trim().toLowerCase() ||
-      parseInt(userAnswer) === currentQuestion?.answer
-      
-    setResult(isCorrect ? 'correct' : 'wrong')
+  const handleSubmit = (answerOverride = userAnswer) => {
+    if (gameStatus !== 'playing' || !currentQuestion) return
+
+    const submittedAnswer = String(answerOverride ?? '').trim()
+    if (!submittedAnswer && answerOverride !== '') return
+
+    setResult('pending')
     setGameStatus('answered')
-    
-    if (isCorrect) {
-      setScore((prev) => prev + 1)
-    }
 
     // Envoyer la réponse à l'hôte
     if (channelRef.current) {
       channelRef.current.send({
         type: 'broadcast',
         event: 'player_answer',
-        payload: { team, isCorrect, playerName }
+        payload: { team, userAnswer: submittedAnswer, playerName }
       })
     }
   }
@@ -150,7 +160,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
             <motion.div
               className={`h-full ${timeLeft <= 5 ? 'bg-red-500' : timeLeft <= 10 ? 'bg-amber-500' : isTeamA ? 'bg-blue-500' : 'bg-primary'}`}
               initial={{ width: '100%' }}
-              animate={{ width: `${(timeLeft / 30) * 100}%` }}
+              animate={{ width: `${(timeLeft / roundTime) * 100}%` }}
               transition={{ duration: 1, ease: 'linear' }}
             />
           </div>
@@ -186,6 +196,28 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                   </p>
                 )}
               </div>
+
+              {currentQuestion?.options?.length > 0 && (
+                <div className="grid gap-2 mb-4">
+                  {currentQuestion.options.map((option, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => setUserAnswer(String(index))}
+                      className={`p-3 rounded-xl border text-left transition-colors ${
+                        userAnswer === String(index)
+                          ? isTeamA
+                            ? 'border-blue-500 bg-blue-500/20 text-blue-200'
+                            : 'border-primary bg-primary/20 text-primary'
+                          : 'border-white/10 bg-slate-800 text-gray-300'
+                      }`}
+                    >
+                      <span className="font-bold mr-2">{String.fromCharCode(65 + index)}.</span>
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Answer Display */}
               <div className={`bg-slate-900 rounded-xl p-4 mb-4 border-2 text-center ${
@@ -242,15 +274,17 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
               exit={{ opacity: 0, scale: 0.8 }}
               className="text-center"
             >
-              <div className={`text-6xl mb-4 ${result === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
-                {result === 'correct' ? '✓' : '✗'}
+              <div className={`text-6xl mb-4 ${result === 'correct' ? 'text-green-500' : result === 'wrong' ? 'text-red-500' : 'text-primary'}`}>
+                {result === 'pending' ? '…' : result === 'correct' ? '✓' : '✗'}
               </div>
-              <h2 className={`text-2xl font-bold ${result === 'correct' ? 'text-green-400' : 'text-red-400'}`}>
-                {result === 'correct' ? 'Bonne réponse !' : 'Mauvaise réponse'}
+              <h2 className={`text-2xl font-bold ${result === 'correct' ? 'text-green-400' : result === 'wrong' ? 'text-red-400' : 'text-primary'}`}>
+                {result === 'pending' ? 'Réponse envoyée' : result === 'correct' ? 'Bonne réponse !' : 'Mauvaise réponse'}
               </h2>
-              <p className="text-gray-400 mt-2">
-                La réponse était : <span className="text-white font-bold">{currentQuestion?.answer}</span>
-              </p>
+              {currentQuestion?.answer !== null && (
+                <p className="text-gray-400 mt-2">
+                  La réponse était : <span className="text-white font-bold">{currentQuestion?.answer}</span>
+                </p>
+              )}
               <p className="text-gray-500 text-sm mt-4">Prochaine question dans quelques secondes...</p>
             </motion.div>
           )}

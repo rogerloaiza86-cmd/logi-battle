@@ -16,6 +16,13 @@ const DB_MODE = import.meta.env.VITE_DB_MODE || 'local'
 const USE_FIREBASE = DB_MODE === 'firebase'
 const USE_SUPABASE = DB_MODE === 'supabase'
 
+const getSupabaseClient = () => {
+  if (!supabase) {
+    throw new Error('Mode Supabase activé mais VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY est manquant.')
+  }
+  return supabase
+}
+
 // ===== LOCAL DATABASE =====
 const localDB = {
   games: {},
@@ -28,6 +35,7 @@ const localDB = {
 export const gamesService = {
   async createGame(teamAName, teamBName, customGameId) {
     if (USE_SUPABASE) {
+      const client = getSupabaseClient()
       const gameId = customGameId || `game_${Date.now()}`
       const newGame = {
         gameId,
@@ -39,13 +47,13 @@ export const gamesService = {
         rope_position: 0,
         current_question_id: null,
       }
-      const { error } = await supabase.from('games').insert([newGame])
+      const { error } = await client.from('games').insert([newGame])
       if (error) throw error
       return gameId
     }
 
     if (!USE_FIREBASE) {
-      const gameId = `game_${localDB.nextGameId++}`
+      const gameId = customGameId || `game_${localDB.nextGameId++}`
       const newGame = {
         gameId,
         teamAName,
@@ -62,7 +70,7 @@ export const gamesService = {
       return gameId
     }
 
-    const gameId = `game_${Date.now()}`
+    const gameId = customGameId || `game_${Date.now()}`
     try {
       await setDoc(doc(db, 'games', gameId), {
         gameId,
@@ -85,7 +93,8 @@ export const gamesService = {
 
   async getGame(gameId) {
     if (USE_SUPABASE) {
-      const { data, error } = await supabase.from('games').select('*').eq('gameId', gameId).single()
+      const client = getSupabaseClient()
+      const { data, error } = await client.from('games').select('*').eq('gameId', gameId).single()
       if (error) {
         if (error.code === 'PGRST116') return null; // Not found
         throw error
@@ -122,7 +131,8 @@ export const gamesService = {
     }
 
     if (USE_SUPABASE) {
-      const { error } = await supabase.from('games').update(updateData).eq('gameId', gameId)
+      const client = getSupabaseClient()
+      const { error } = await client.from('games').update(updateData).eq('gameId', gameId)
       if (error) throw error
       return true
     }
@@ -145,7 +155,8 @@ export const gamesService = {
 
   async updateGameStatus(gameId, status) {
     if (USE_SUPABASE) {
-      const { error } = await supabase.from('games').update({ status }).eq('gameId', gameId)
+      const client = getSupabaseClient()
+      const { error } = await client.from('games').update({ status }).eq('gameId', gameId)
       if (error) throw error
       return true
     }
@@ -169,7 +180,8 @@ export const gamesService = {
   // ---- NEW: Realtime Subscription ----
   subscribeToGame(gameId, callback) {
     if (USE_SUPABASE) {
-      const channel = supabase
+      const client = getSupabaseClient()
+      const channel = client
         .channel(`public:games:gameId=eq.${gameId}`)
         .on(
           'postgres_changes',
@@ -181,7 +193,7 @@ export const gamesService = {
         .subscribe()
 
       return () => {
-        supabase.removeChannel(channel)
+        client.removeChannel(channel)
       }
     }
 
@@ -203,7 +215,7 @@ export const gamesService = {
 
   // ---- NEW: Realtime Broadcast Channel ----
   getGameChannel(gameId) {
-    if (USE_SUPABASE) {
+    if (USE_SUPABASE && supabase) {
       if (!localDB.channels) localDB.channels = {}
       if (!localDB.channels[gameId]) {
         localDB.channels[gameId] = supabase.channel(`game_${gameId}`)
@@ -211,6 +223,16 @@ export const gamesService = {
       return localDB.channels[gameId]
     }
     return null
+  },
+
+  removeGameChannel(gameId) {
+    if (!localDB.channels?.[gameId] || !supabase) return
+    supabase.removeChannel(localDB.channels[gameId])
+    delete localDB.channels[gameId]
+  },
+
+  supportsRealtime() {
+    return USE_SUPABASE && Boolean(supabase)
   }
 }
 
@@ -218,6 +240,7 @@ export const gamesService = {
 export const questionsService = {
   async createQuestion(type, difficulty, data, correctAnswer) {
     if (USE_SUPABASE) {
+      const client = getSupabaseClient()
       const questionId = `q_${Date.now()}`
       const newQuestion = {
         id: questionId,
@@ -226,7 +249,7 @@ export const questionsService = {
         data,
         correctAnswer,
       }
-      const { error } = await supabase.from('questions').insert([newQuestion])
+      const { error } = await client.from('questions').insert([newQuestion])
       if (error) throw error
       return questionId
     }
@@ -264,7 +287,8 @@ export const questionsService = {
 
   async getQuestion(questionId) {
     if (USE_SUPABASE) {
-      const { data, error } = await supabase.from('questions').select('*').eq('id', questionId).single()
+      const client = getSupabaseClient()
+      const { data, error } = await client.from('questions').select('*').eq('id', questionId).single()
       if (error) {
         if (error.code === 'PGRST116') return null;
         throw error
@@ -287,7 +311,8 @@ export const questionsService = {
 
   async getRandomQuestion(type, difficulty) {
     if (USE_SUPABASE) {
-      const { data, error } = await supabase
+      const client = getSupabaseClient()
+      const { data, error } = await client
         .from('questions')
         .select('*')
         .eq('type', type)
