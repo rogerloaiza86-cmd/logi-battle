@@ -13,19 +13,25 @@ export const HostGame = ({ onBack, gameMode }) => {
   const [gameStarted, setGameStarted] = useState(false)
   const [copied, setCopied] = useState(false)
   const [isInitializing, setIsInitializing] = useState(true)
+  const [initError, setInitError] = useState(null)
 
   // Générer un ID de jeu unique et l'enregistrer dans Supabase
   useEffect(() => {
     const initGame = async () => {
       try {
+        if (!gamesService.supportsRealtime()) {
+          throw new Error('Le mode QR nécessite Supabase Realtime configuré.')
+        }
+
         const id = `GAME-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-        setGameId(id)
-        gameStore.setGameId(id)
-        
+
         // Créer la partie dans Supabase
         await gamesService.createGame('ÉQUIPE ALPHA', 'ÉQUIPE OMEGA', id)
+        setGameId(id)
+        gameStore.setGameId(id)
       } catch (err) {
         console.error('Erreur lors de la création de la partie sur Supabase:', err)
+        setInitError(err.message || 'Impossible de créer la partie en direct.')
       } finally {
         setIsInitializing(false)
       }
@@ -36,9 +42,11 @@ export const HostGame = ({ onBack, gameMode }) => {
 
   // URL pour les joueurs (à adapter selon votre déploiement)
   const getPlayerUrl = () => {
-    // En production, remplacez par votre vraie URL
-    const baseUrl = window.location.origin
-    return `${baseUrl}/join?game=${gameId}`
+    const basePath = import.meta.env.BASE_URL || '/'
+    const joinPath = `${basePath.replace(/\/$/, '')}/join`
+    const url = new URL(joinPath, window.location.origin)
+    url.searchParams.set('game', gameId)
+    return url.toString()
   }
 
   // URL du QR Code (utilisation d'une API gratuite)
@@ -105,16 +113,37 @@ export const HostGame = ({ onBack, gameMode }) => {
               Scannez ce QR code avec votre téléphone
             </p>
 
+            {isInitializing && (
+              <div className="bg-slate-900/70 rounded-xl p-8 text-center mb-6">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+                  className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"
+                />
+                <p className="text-gray-300">Création de la partie en direct...</p>
+              </div>
+            )}
+
+            {initError && (
+              <div className="bg-red-500/10 border border-red-500/40 rounded-xl p-4 text-center mb-6">
+                <span className="material-icons text-red-400 mb-2">error</span>
+                <p className="text-red-200 text-sm">{initError}</p>
+                <p className="text-gray-400 text-xs mt-2">
+                  Vérifiez VITE_DB_MODE=supabase et les variables Supabase avant d'afficher un QR code.
+                </p>
+              </div>
+            )}
+
             {/* QR Code */}
-            <div className="bg-white rounded-xl p-4 w-fit mx-auto mb-6">
-              {gameId && (
+            {!isInitializing && !initError && gameId && (
+              <div className="bg-white rounded-xl p-4 w-fit mx-auto mb-6">
                 <img
                   src={getQrCodeUrl()}
                   alt="QR Code"
                   className="w-48 h-48"
                 />
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Ou lien manuel */}
             <div className="space-y-3">
@@ -122,11 +151,12 @@ export const HostGame = ({ onBack, gameMode }) => {
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-slate-900 rounded-lg px-4 py-3 text-center">
                   <span className="text-2xl font-mono font-bold text-primary tracking-widest">
-                    {gameId}
+                    {gameId || '---'}
                   </span>
                 </div>
                 <button
                   onClick={copyLink}
+                  disabled={!gameId || Boolean(initError)}
                   className="p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
                   title="Copier le lien"
                 >
@@ -138,10 +168,12 @@ export const HostGame = ({ onBack, gameMode }) => {
             </div>
 
             {/* Lien URL */}
-            <div className="mt-4 p-3 bg-slate-900/50 rounded-lg">
-              <p className="text-xs text-gray-500 mb-1">URL directe :</p>
-              <p className="text-xs text-gray-400 truncate">{getPlayerUrl()}</p>
-            </div>
+            {gameId && !initError && (
+              <div className="mt-4 p-3 bg-slate-900/50 rounded-lg">
+                <p className="text-xs text-gray-500 mb-1">URL directe :</p>
+                <p className="text-xs text-gray-400 truncate">{getPlayerUrl()}</p>
+              </div>
+            )}
           </motion.div>
 
           {/* Players Status */}
@@ -219,7 +251,8 @@ export const HostGame = ({ onBack, gameMode }) => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={startGame}
-              className="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary text-white font-bold py-4 rounded-xl text-lg uppercase tracking-wider shadow-lg shadow-primary/20 transition-all"
+              disabled={!gameId || Boolean(initError)}
+              className="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl text-lg uppercase tracking-wider shadow-lg shadow-primary/20 transition-all"
             >
               Lancer la partie
             </motion.button>
