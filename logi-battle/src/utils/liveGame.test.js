@@ -48,4 +48,4 @@ test('sanitizeQuestionForPlayer removes answer-bearing fields recursively', () =
       options: ['A', 'B'],
     },
   })
-}
+})
