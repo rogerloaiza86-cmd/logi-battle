@@ -26,18 +26,42 @@ CREATE TABLE IF NOT EXISTS public.questions (
 );
 
 -- Sécurité RLS (Row Level Security)
--- Autorise la lecture, l'insertion et la modification publique
+-- Autorise uniquement le minimum nécessaire au mode live public.
 ALTER TABLE public.games ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Activer l'accès anonyme général sur games" 
-ON public.games FOR ALL 
-USING (true) 
+DROP POLICY IF EXISTS "Activer l'accès anonyme général sur games" ON public.games;
+DROP POLICY IF EXISTS "games_public_select" ON public.games;
+DROP POLICY IF EXISTS "games_public_insert" ON public.games;
+DROP POLICY IF EXISTS "games_public_update" ON public.games;
+
+CREATE POLICY "games_public_select"
+ON public.games FOR SELECT
+USING (true);
+
+CREATE POLICY "games_public_insert"
+ON public.games FOR INSERT
+WITH CHECK ("gameId" IS NOT NULL AND length("gameId") <= 32);
+
+CREATE POLICY "games_public_update"
+ON public.games FOR UPDATE
+USING (true)
 WITH CHECK (true);
 
 ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Activer l'accès anonyme général sur questions" 
-ON public.questions FOR ALL 
-USING (true) 
-WITH CHECK (true);
+DROP POLICY IF EXISTS "Activer l'accès anonyme général sur questions" ON public.questions;
+DROP POLICY IF EXISTS "questions_public_select" ON public.questions;
+DROP POLICY IF EXISTS "questions_public_insert" ON public.questions;
+DROP POLICY IF EXISTS "questions_public_update" ON public.questions;
 
 -- Activer le temps réel (Realtime) sur la table games
-ALTER PUBLICATION supabase_realtime ADD TABLE public.games;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'games'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.games;
+  END IF;
+END $$;

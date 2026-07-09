@@ -47,6 +47,15 @@ function App() {
     return () => window.removeEventListener('popstate', handleLocationChange)
   }, [])
 
+  // Route: /join - Page pour les joueurs qui scannent le QR
+  if (currentPath.endsWith('/join') || window.location.search.includes('game=')) {
+    return (
+      <div className="dark">
+        <PlayerJoin userProfile={userProfile} />
+      </div>
+    )
+  }
+
   // Écran de connexion prioritaire
   if (!userProfile) {
     return <Login onLogin={setUserProfile} />
@@ -55,15 +64,6 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('user_profile')
     setUserProfile(null)
-  }
-
-  // Route: /join - Page pour les joueurs qui scannent le QR
-  if (currentPath === '/join' || window.location.search.includes('game=')) {
-    return (
-      <div className="dark">
-        <PlayerJoin userProfile={userProfile} />
-      </div>
-    )
   }
 
   // Route: /host - Mode hôte avec QR code
