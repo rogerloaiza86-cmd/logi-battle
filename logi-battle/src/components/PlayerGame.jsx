@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { gamesService } from '../services/database'
+import { isAnswerCorrect } from '../utils/liveGame'
 import BrandMark from './BrandMark'
 
 export const PlayerGame = ({ gameId, playerName, team }) => {
   const channelRef = useRef(null)
+  const userAnswerRef = useRef('')
   const [gameStatus, setGameStatus] = useState('waiting') // waiting, playing, answered, finished
   const [currentQuestion, setCurrentQuestion] = useState(null)
   const [userAnswer, setUserAnswer] = useState('')
@@ -14,18 +16,16 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
 
   const isTeamA = team === 'A'
 
+  useEffect(() => {
+    userAnswerRef.current = userAnswer
+  }, [userAnswer])
+
   // Écoute en temps réel Supabase
   useEffect(() => {
     const channel = gamesService.getGameChannel(gameId)
     if (channel) {
       channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
-        setCurrentQuestion({
-          question: payload.questionData.description,
-          answer: payload.questionData.correctAnswer || payload.questionData.answer,
-          hint: payload.questionData.hints?.[0] || '',
-          type: payload.questionData.type,
-          category: payload.questionData.category || ''
-        })
+        setCurrentQuestion(payload.questionData)
         setTimeLeft(payload.time || 30)
         setGameStatus('playing')
         setUserAnswer('')
@@ -33,10 +33,18 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
       })
 
       channel.on('broadcast', { event: 'round_end' }, ({ payload }) => {
-        setGameStatus('waiting')
+        setCurrentQuestion((prev) => prev ? { ...prev, correctAnswer: payload.correctAnswer } : prev)
+        setResult((prev) => prev ?? (payload.correctAnswer !== undefined && isAnswerCorrect({ correctAnswer: payload.correctAnswer }, userAnswerRef.current) ? 'correct' : 'wrong'))
+        setGameStatus('answered')
       })
 
       channelRef.current = channel
+      channel.subscribe()
+    }
+
+    return () => {
+      gamesService.removeGameChannel(gameId)
+      channelRef.current = null
     }
   }, [gameId])
 
@@ -68,30 +76,23 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
   }
 
   const handleSubmit = () => {
-    if (!userAnswer || gameStatus !== 'playing') return
-    
-    // Pour vocabulaire ou culture (lettres A,B,C,D transformées potentiellement) ou chiffres
-    // La logique existante comparait parseInt avec number. Ajustons si qcm.
-    const isCorrect = 
-      String(userAnswer).trim().toLowerCase() === String(currentQuestion?.answer).trim().toLowerCase() ||
-      parseInt(userAnswer) === currentQuestion?.answer
-      
-    setResult(isCorrect ? 'correct' : 'wrong')
+    if (userAnswer === '' || gameStatus !== 'playing') return
+
+    setResult(null)
     setGameStatus('answered')
-    
-    if (isCorrect) {
-      setScore((prev) => prev + 1)
-    }
 
     // Envoyer la réponse à l'hôte
     if (channelRef.current) {
       channelRef.current.send({
         type: 'broadcast',
         event: 'player_answer',
-        payload: { team, isCorrect, playerName }
+        payload: { team, userAnswer, playerName }
       })
     }
   }
+
+  const options = currentQuestion?.data?.options || currentQuestion?.options || []
+  const hasOptions = options.length > 0
 
   const getTimerColor = () => {
     if (timeLeft <= 5) return 'text-red-500'
@@ -174,11 +175,11 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
               {/* Question Card */}
               <div className="bg-slate-800 rounded-2xl p-5 mb-4 border border-white/10">
                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  {currentQuestion?.type === 'vocabulaire' ? '📚 Vocabulaire' : '🧠 Culture Générale'}
-                  {currentQuestion?.category && ` • ${currentQuestion.category}`}
+                  {currentQuestion?.type === 'vocabulaire' ? '📚 Vocabulaire' : '🧠 Question'}
+                  {(currentQuestion?.data?.category || currentQuestion?.category) && ` • ${currentQuestion?.data?.category || currentQuestion?.category}`}
                 </span>
                 <h2 className="text-lg font-bold text-white mt-2 leading-snug">
-                  {currentQuestion?.question}
+                  {currentQuestion?.description || currentQuestion?.question}
                 </h2>
                 {currentQuestion?.hint && (
                   <p className="text-xs text-gray-500 mt-3 italic">
@@ -196,9 +197,28 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                 </span>
               </div>
 
-              {/* Keypad */}
-              <div className="grid grid-cols-3 gap-2">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'C', 0, 'backspace'].map((num) => (
+              {hasOptions ? (
+                <div className="grid gap-2">
+                  {options.map((option, index) => (
+                    <motion.button
+                      key={index}
+                      onClick={() => setUserAnswer(String(index))}
+                      whileTap={{ scale: 0.95 }}
+                      className={`rounded-xl border-2 p-4 text-left font-bold transition-colors ${
+                        userAnswer === String(index)
+                          ? isTeamA
+                            ? 'border-blue-500 bg-blue-500/20 text-blue-100'
+                            : 'border-primary bg-primary/20 text-amber-100'
+                          : 'border-white/10 bg-slate-800 text-white'
+                      }`}
+                    >
+                      {String.fromCharCode(65 + index)}. {option}
+                    </motion.button>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'C', 0, 'backspace'].map((num) => (
                   <motion.button
                     key={num}
                     onClick={() => handleNumberClick(num)}
@@ -215,13 +235,14 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                       num
                     )}
                   </motion.button>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               {/* Submit Button */}
               <motion.button
                 onClick={handleSubmit}
-                disabled={!userAnswer}
+                disabled={userAnswer === ''}
                 whileTap={{ scale: 0.98 }}
                 className={`w-full mt-3 py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all ${
                   isTeamA
@@ -243,14 +264,16 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
               className="text-center"
             >
               <div className={`text-6xl mb-4 ${result === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
-                {result === 'correct' ? '✓' : '✗'}
+                {result === 'correct' ? '✓' : result === 'wrong' ? '✗' : '…'}
               </div>
               <h2 className={`text-2xl font-bold ${result === 'correct' ? 'text-green-400' : 'text-red-400'}`}>
-                {result === 'correct' ? 'Bonne réponse !' : 'Mauvaise réponse'}
+                {result === 'correct' ? 'Bonne réponse !' : result === 'wrong' ? 'Mauvaise réponse' : 'Réponse envoyée'}
               </h2>
-              <p className="text-gray-400 mt-2">
-                La réponse était : <span className="text-white font-bold">{currentQuestion?.answer}</span>
-              </p>
+              {currentQuestion?.correctAnswer !== undefined && (
+                <p className="text-gray-400 mt-2">
+                  La réponse était : <span className="text-white font-bold">{currentQuestion.correctAnswer}</span>
+                </p>
+              )}
               <p className="text-gray-500 text-sm mt-4">Prochaine question dans quelques secondes...</p>
             </motion.div>
           )}
