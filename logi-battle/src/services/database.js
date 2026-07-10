@@ -16,6 +16,12 @@ const DB_MODE = import.meta.env.VITE_DB_MODE || 'local'
 const USE_FIREBASE = DB_MODE === 'firebase'
 const USE_SUPABASE = DB_MODE === 'supabase'
 
+const ensureSupabase = () => {
+  if (!supabase) {
+    throw new Error('Supabase est configuré comme base active, mais les variables VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY sont manquantes.')
+  }
+}
+
 // ===== LOCAL DATABASE =====
 const localDB = {
   games: {},
@@ -28,6 +34,7 @@ const localDB = {
 export const gamesService = {
   async createGame(teamAName, teamBName, customGameId) {
     if (USE_SUPABASE) {
+      ensureSupabase()
       const gameId = customGameId || `game_${Date.now()}`
       const newGame = {
         gameId,
@@ -45,7 +52,7 @@ export const gamesService = {
     }
 
     if (!USE_FIREBASE) {
-      const gameId = `game_${localDB.nextGameId++}`
+      const gameId = customGameId || `game_${localDB.nextGameId++}`
       const newGame = {
         gameId,
         teamAName,
@@ -62,7 +69,7 @@ export const gamesService = {
       return gameId
     }
 
-    const gameId = `game_${Date.now()}`
+    const gameId = customGameId || `game_${Date.now()}`
     try {
       await setDoc(doc(db, 'games', gameId), {
         gameId,
@@ -85,6 +92,7 @@ export const gamesService = {
 
   async getGame(gameId) {
     if (USE_SUPABASE) {
+      ensureSupabase()
       const { data, error } = await supabase.from('games').select('*').eq('gameId', gameId).single()
       if (error) {
         if (error.code === 'PGRST116') return null; // Not found
@@ -122,6 +130,7 @@ export const gamesService = {
     }
 
     if (USE_SUPABASE) {
+      ensureSupabase()
       const { error } = await supabase.from('games').update(updateData).eq('gameId', gameId)
       if (error) throw error
       return true
@@ -145,6 +154,7 @@ export const gamesService = {
 
   async updateGameStatus(gameId, status) {
     if (USE_SUPABASE) {
+      ensureSupabase()
       const { error } = await supabase.from('games').update({ status }).eq('gameId', gameId)
       if (error) throw error
       return true
@@ -169,6 +179,7 @@ export const gamesService = {
   // ---- NEW: Realtime Subscription ----
   subscribeToGame(gameId, callback) {
     if (USE_SUPABASE) {
+      ensureSupabase()
       const channel = supabase
         .channel(`public:games:gameId=eq.${gameId}`)
         .on(
@@ -203,7 +214,7 @@ export const gamesService = {
 
   // ---- NEW: Realtime Broadcast Channel ----
   getGameChannel(gameId) {
-    if (USE_SUPABASE) {
+    if (USE_SUPABASE && supabase) {
       if (!localDB.channels) localDB.channels = {}
       if (!localDB.channels[gameId]) {
         localDB.channels[gameId] = supabase.channel(`game_${gameId}`)
@@ -211,6 +222,16 @@ export const gamesService = {
       return localDB.channels[gameId]
     }
     return null
+  },
+
+  removeGameChannel(gameId) {
+    if (!localDB.channels?.[gameId] || !supabase) return
+    supabase.removeChannel(localDB.channels[gameId])
+    delete localDB.channels[gameId]
+  },
+
+  canUseRealtime() {
+    return USE_SUPABASE && Boolean(supabase)
   }
 }
 
@@ -218,6 +239,7 @@ export const gamesService = {
 export const questionsService = {
   async createQuestion(type, difficulty, data, correctAnswer) {
     if (USE_SUPABASE) {
+      ensureSupabase()
       const questionId = `q_${Date.now()}`
       const newQuestion = {
         id: questionId,
@@ -264,6 +286,7 @@ export const questionsService = {
 
   async getQuestion(questionId) {
     if (USE_SUPABASE) {
+      ensureSupabase()
       const { data, error } = await supabase.from('questions').select('*').eq('id', questionId).single()
       if (error) {
         if (error.code === 'PGRST116') return null;
@@ -287,6 +310,7 @@ export const questionsService = {
 
   async getRandomQuestion(type, difficulty) {
     if (USE_SUPABASE) {
+      ensureSupabase()
       const { data, error } = await supabase
         .from('questions')
         .select('*')
