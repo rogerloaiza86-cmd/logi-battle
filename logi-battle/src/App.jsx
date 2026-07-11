@@ -14,13 +14,32 @@ import Login from './components/Login'
 import { useChampionshipStore } from './hooks/useChampionshipStore'
 import './styles/index.css'
 
+const getRoutePath = () => {
+  const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+  const pathname = window.location.pathname
+
+  if (basePath && basePath !== '/' && pathname.startsWith(basePath)) {
+    return pathname.slice(basePath.length) || '/'
+  }
+
+  return pathname
+}
+
 function App() {
   const [userProfile, setUserProfile] = useState(() => {
     const saved = localStorage.getItem('user_profile')
-    return saved ? JSON.parse(saved) : null
+    if (!saved) return null
+
+    try {
+      return JSON.parse(saved)
+    } catch (error) {
+      console.warn('Profil local corrompu, réinitialisation.', error)
+      localStorage.removeItem('user_profile')
+      return null
+    }
   })
   
-  const [currentPath, setCurrentPath] = useState(window.location.pathname)
+  const [currentPath, setCurrentPath] = useState(getRoutePath)
   const [gameMode, setGameMode] = useState(null)
   const [showTeamSetup, setShowTeamSetup] = useState(false)
   const [isHostMode, setIsHostMode] = useState(false)
@@ -40,12 +59,21 @@ function App() {
   // Écouter les changements d'URL
   useEffect(() => {
     const handleLocationChange = () => {
-      setCurrentPath(window.location.pathname)
+      setCurrentPath(getRoutePath())
     }
 
     window.addEventListener('popstate', handleLocationChange)
     return () => window.removeEventListener('popstate', handleLocationChange)
   }, [])
+
+  // Route: /join - Page pour les joueurs qui scannent le QR
+  if (currentPath === '/join' || window.location.search.includes('game=')) {
+    return (
+      <div className="dark">
+        <PlayerJoin userProfile={userProfile} />
+      </div>
+    )
+  }
 
   // Écran de connexion prioritaire
   if (!userProfile) {
@@ -55,15 +83,6 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('user_profile')
     setUserProfile(null)
-  }
-
-  // Route: /join - Page pour les joueurs qui scannent le QR
-  if (currentPath === '/join' || window.location.search.includes('game=')) {
-    return (
-      <div className="dark">
-        <PlayerJoin userProfile={userProfile} />
-      </div>
-    )
   }
 
   // Route: /host - Mode hôte avec QR code
