@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useGameStore } from '../hooks/useGameStore'
 import GameBoard from './GameBoard'
@@ -8,24 +8,30 @@ import { gamesService } from '../services/database'
 
 export const HostGame = ({ onBack, gameMode }) => {
   const gameStore = useGameStore()
+  const initStartedRef = useRef(false)
   const [gameId, setGameId] = useState(null)
   const [players, setPlayers] = useState({ teamA: [], teamB: [] })
   const [gameStarted, setGameStarted] = useState(false)
   const [copied, setCopied] = useState(false)
   const [isInitializing, setIsInitializing] = useState(true)
+  const [initError, setInitError] = useState(null)
 
   // Générer un ID de jeu unique et l'enregistrer dans Supabase
   useEffect(() => {
+    if (initStartedRef.current) return
+    initStartedRef.current = true
+
     const initGame = async () => {
       try {
         const id = `GAME-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-        setGameId(id)
-        gameStore.setGameId(id)
         
         // Créer la partie dans Supabase
         await gamesService.createGame('ÉQUIPE ALPHA', 'ÉQUIPE OMEGA', id)
+        setGameId(id)
+        gameStore.setGameId(id)
       } catch (err) {
         console.error('Erreur lors de la création de la partie sur Supabase:', err)
+        setInitError("Impossible de créer la partie. Vérifiez la configuration Supabase avant de partager le QR code.")
       } finally {
         setIsInitializing(false)
       }
@@ -34,11 +40,12 @@ export const HostGame = ({ onBack, gameMode }) => {
     initGame()
   }, [])
 
-  // URL pour les joueurs (à adapter selon votre déploiement)
+  // URL pour les joueurs, compatible avec les déploiements sous BASE_URL.
   const getPlayerUrl = () => {
-    // En production, remplacez par votre vraie URL
-    const baseUrl = window.location.origin
-    return `${baseUrl}/join?game=${gameId}`
+    const baseUrl = new URL(import.meta.env.BASE_URL || '/', window.location.origin)
+    const joinUrl = new URL('join', baseUrl)
+    joinUrl.searchParams.set('game', gameId)
+    return joinUrl.toString()
   }
 
   // URL du QR Code (utilisation d'une API gratuite)
@@ -53,9 +60,13 @@ export const HostGame = ({ onBack, gameMode }) => {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const startGame = () => {
+  const startGame = async () => {
+    if (!gameId || initError) return
     setGameStarted(true)
     gameStore.setGameStatus('active')
+    gamesService.updateGameStatus(gameId, 'active').catch((error) => {
+      console.warn('Impossible de marquer la partie active:', error)
+    })
   }
 
   const handlePlayerJoin = (playerData) => {
@@ -105,9 +116,21 @@ export const HostGame = ({ onBack, gameMode }) => {
               Scannez ce QR code avec votre téléphone
             </p>
 
+            {isInitializing && (
+              <div className="bg-slate-900 rounded-xl p-4 text-center text-gray-400 mb-6">
+                Création de la partie...
+              </div>
+            )}
+
+            {initError && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-300 text-sm mb-6">
+                {initError}
+              </div>
+            )}
+
             {/* QR Code */}
             <div className="bg-white rounded-xl p-4 w-fit mx-auto mb-6">
-              {gameId && (
+              {gameId && !initError && (
                 <img
                   src={getQrCodeUrl()}
                   alt="QR Code"
@@ -127,6 +150,7 @@ export const HostGame = ({ onBack, gameMode }) => {
                 </div>
                 <button
                   onClick={copyLink}
+                  disabled={!gameId || Boolean(initError)}
                   className="p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
                   title="Copier le lien"
                 >
@@ -138,10 +162,12 @@ export const HostGame = ({ onBack, gameMode }) => {
             </div>
 
             {/* Lien URL */}
-            <div className="mt-4 p-3 bg-slate-900/50 rounded-lg">
-              <p className="text-xs text-gray-500 mb-1">URL directe :</p>
-              <p className="text-xs text-gray-400 truncate">{getPlayerUrl()}</p>
-            </div>
+            {gameId && !initError && (
+              <div className="mt-4 p-3 bg-slate-900/50 rounded-lg">
+                <p className="text-xs text-gray-500 mb-1">URL directe :</p>
+                <p className="text-xs text-gray-400 truncate">{getPlayerUrl()}</p>
+              </div>
+            )}
           </motion.div>
 
           {/* Players Status */}
@@ -219,6 +245,7 @@ export const HostGame = ({ onBack, gameMode }) => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={startGame}
+              disabled={!gameId || isInitializing || Boolean(initError)}
               className="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary text-white font-bold py-4 rounded-xl text-lg uppercase tracking-wider shadow-lg shadow-primary/20 transition-all"
             >
               Lancer la partie

@@ -1,6 +1,10 @@
 # Script PowerShell pour telecharger les assets Stitch
-$API_KEY = "AQ.Ab8RN6LHlLbVy4yG3W_OJq3I1wiYUFmtbMyTq-RZ-vL_A2gbXw"
+$API_KEY = $env:STITCH_API_KEY
 $PROJECT_ID = "15376714455160995880"
+
+if (-not $API_KEY) {
+    throw "STITCH_API_KEY doit etre defini dans l'environnement."
+}
 
 $screens = @(
     @{ ID = "16b170a7248f404b920585b5a2050843"; Name = "01-Logi-Battle-PRD" },
