@@ -42,8 +42,7 @@ export const HostGame = ({ onBack, gameMode }) => {
 
   // URL pour les joueurs, compatible avec les déploiements sous BASE_URL.
   const getPlayerUrl = () => {
-    const baseUrl = new URL(import.meta.env.BASE_URL || '/', window.location.origin)
-    const joinUrl = new URL('join', baseUrl)
+    const joinUrl = new URL(import.meta.env.BASE_URL || '/', window.location.origin)
     joinUrl.searchParams.set('game', gameId)
     return joinUrl.toString()
   }
