@@ -35,7 +35,7 @@ Dans Stitch, vous pouvez aussi :
 
 ### Informations de connexion
 
-- **Clé API** : `AQ.Ab8RN6LHlLbVy4yG3W_OJq3I1wiYUFmtbMyTq-RZ-vL_A2gbXw`
+- **Clé API** : définissez `STITCH_API_KEY` dans votre environnement local
 - **Project ID** : `15376714455160995880`
 
 ---
