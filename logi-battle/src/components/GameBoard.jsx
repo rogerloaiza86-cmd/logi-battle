@@ -280,7 +280,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
       ...timeRef.current,
       [team]: responseTime,
     }
-    
+
     const otherTeamStatus = team === 'A' ? statusRef.current.B : statusRef.current.A
 
     if (otherTeamStatus !== 'playing') {
