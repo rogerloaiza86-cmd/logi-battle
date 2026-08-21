@@ -12,6 +12,7 @@ import HQDashboard from './components/HQDashboard'
 import Archives from './components/Archives'
 import Login from './components/Login'
 import { useChampionshipStore } from './hooks/useChampionshipStore'
+import { mapBoardWinnerToChampionship } from './utils/championshipScoring'
 import './styles/index.css'
 
 function App() {
@@ -99,7 +100,7 @@ function App() {
           onMatchEnd={(result) => {
             // Enregistrer le résultat du match
             if (championshipMatch.type !== 'free') {
-              const winner = result.winner === 'A' ? 'challenger' : 'champion'
+              const winner = mapBoardWinnerToChampionship(result.winner)
               recordMatch(
                 championshipMatch.classId,
                 championshipMatch.challenger.id,

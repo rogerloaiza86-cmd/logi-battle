@@ -298,6 +298,11 @@ export const ChampionshipBoard = ({ classData, onBack, onStartChallenge }) => {
                             DÉFENSE RÉUSSIE
                           </span>
                         )}
+                        {match.winner === 'draw' && (
+                          <span className="px-2 py-1 bg-gray-500/20 text-gray-300 text-xs rounded font-bold">
+                            MATCH NUL
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-3">
                         <span className={`font-bold ${match.winner === 'challenger' ? 'text-green-400' : 'text-gray-400'}`}>
