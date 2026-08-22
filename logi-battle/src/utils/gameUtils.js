@@ -44,6 +44,17 @@ export const isAnswerCorrect = (userAnswer, correctAnswer, tolerance = 0) => {
 }
 
 /**
+ * QCM / vocabulaire questions carry selectable options.
+ * Calculation and culture questions expect a numeric keypad instead.
+ */
+export const isChoiceQuestion = (question) => {
+  if (!question) return false
+  if (question.isMCQ || question.isVocabulary) return true
+  const options = question.data?.options || question.options
+  return Array.isArray(options) && options.length > 0
+}
+
+/**
  * Generate unique game ID
  */
 export const generateGameId = () => {

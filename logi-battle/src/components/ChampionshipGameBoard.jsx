@@ -4,6 +4,7 @@ import RopeAnimation from './RopeAnimation'
 import QuestionCard from './QuestionCard'
 import VocabularyCard from './VocabularyCard'
 import { generateNextQuestion } from '../utils/questionGenerator'
+import { isChoiceQuestion } from '../utils/gameUtils'
 import { useChampionshipStore } from '../hooks/useChampionshipStore'
 
 const ROUND_TIME = 30
@@ -291,7 +292,7 @@ export const ChampionshipGameBoard = ({
           {/* Question Card */}
           <div className="flex-1 flex items-center justify-center p-4 min-h-0">
             {question && (
-              question.isMCQ || question.type === 'vocabulaire' ? (
+              isChoiceQuestion(question) ? (
                 <VocabularyCard
                   question={question}
                   team="A"
@@ -356,7 +357,7 @@ export const ChampionshipGameBoard = ({
           {/* Question Card */}
           <div className="flex-1 flex items-center justify-center p-4 min-h-0">
             {question && (
-              question.isMCQ || question.type === 'vocabulaire' ? (
+              isChoiceQuestion(question) ? (
                 <VocabularyCard
                   question={question}
                   team="B"
