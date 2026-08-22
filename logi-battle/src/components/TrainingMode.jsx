@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import QuestionCard from './QuestionCard'
 import VocabularyCard from './VocabularyCard'
 import { generateNextQuestion } from '../utils/questionGenerator'
+import { isChoiceQuestion } from '../utils/gameUtils'
 
 const ROUND_TIME = 45
 
@@ -212,7 +213,7 @@ export const TrainingMode = ({ onBack }) => {
         <main className="flex-1 flex items-center justify-center p-6">
           <div className="w-full max-w-xl">
             {question && (
-              question.isMCQ || question.type === 'vocabulaire' ? (
+              isChoiceQuestion(question) ? (
                 <VocabularyCard
                   question={question}
                   team="A"
