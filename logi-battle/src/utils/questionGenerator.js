@@ -19,6 +19,7 @@ import { getJitQuestion } from './jitQuestions'
 import { getRouteOptimizerQuestion } from './routeOptimizerQuestions'
 import { getLegalQuestion } from './legalQuestions'
 import { getMathQuestion } from './mathQuestions'
+import { buildPalletizationQuestion } from './palletizationQuestion'
 
 // ===== PALETTISATION =====
 /**
@@ -51,8 +52,8 @@ export const generatePalletizationQuestion = (difficulty = 1, forceCalculation =
   }
   
   // Question de calcul originale
-  let boxLength, boxWidth, boxHeight, boxWeight, maxHeight
-  let answer, explanation
+  let boxLength, boxWidth, boxHeight, maxHeight
+  let explanation
 
   // Palette standard: 120cm x 80cm
   const paletteLength = 120
@@ -64,71 +65,44 @@ export const generatePalletizationQuestion = (difficulty = 1, forceCalculation =
     boxWidth = [40, 35, 30][Math.floor(Math.random() * 3)]
     boxHeight = [20, 25, 30][Math.floor(Math.random() * 3)]
     maxHeight = 150
-
-    // Calculer Ti (nombre de colis par couche)
-    const tiLengthwise = Math.floor(paletteLength / boxLength)
-    const tiWidthwise = Math.floor(paletteWidth / boxWidth)
-    const ti = tiLengthwise * tiWidthwise
-
-    // Calculer Hi (nombre de couches)
-    const hi = Math.floor(maxHeight / boxHeight)
-
-    // Total
-    answer = ti * hi
-
-    explanation = `Ti = ${tiLengthwise} × ${tiWidthwise} = ${ti} colis/couche\nHi = ${maxHeight} ÷ ${boxHeight} = ${hi} couches\nTotal = ${ti} × ${hi} = ${answer} colis`
   } else if (difficulty === 2) {
     // Moyen
     boxLength = [45, 55, 65, 75][Math.floor(Math.random() * 4)]
     boxWidth = [38, 42, 48, 52][Math.floor(Math.random() * 4)]
     boxHeight = [25, 30, 35, 40][Math.floor(Math.random() * 4)]
     maxHeight = [150, 160, 170][Math.floor(Math.random() * 3)]
-
-    const tiLengthwise = Math.floor(paletteLength / boxLength)
-    const tiWidthwise = Math.floor(paletteWidth / boxWidth)
-    const ti = tiLengthwise * tiWidthwise
-
-    const hi = Math.floor(maxHeight / boxHeight)
-    answer = ti * hi
-
-    explanation = `Palette: ${paletteLength}×${paletteWidth} cm\nColis: ${boxLength}×${boxWidth}×${boxHeight} cm\nTi = ${ti} colis/couche | Hi = ${hi} couches\nTotal = ${answer} colis`
   } else {
     // Difficile: avec arrondis et cas limites
     boxLength = [48, 58, 68, 72][Math.floor(Math.random() * 4)]
     boxWidth = [37, 42, 47, 53][Math.floor(Math.random() * 4)]
     boxHeight = [28, 33, 38, 43][Math.floor(Math.random() * 4)]
     maxHeight = [155, 165, 175][Math.floor(Math.random() * 3)]
+  }
 
-    const tiLengthwise = Math.floor(paletteLength / boxLength)
-    const tiWidthwise = Math.floor(paletteWidth / boxWidth)
-    const ti = tiLengthwise * tiWidthwise
-    const hi = Math.floor(maxHeight / boxHeight)
-    answer = ti * hi
+  const tiLengthwise = Math.floor(paletteLength / boxLength)
+  const tiWidthwise = Math.floor(paletteWidth / boxWidth)
+  const ti = tiLengthwise * tiWidthwise
+  const hi = Math.floor(maxHeight / boxHeight)
+  const answer = ti * hi
 
+  if (difficulty === 1) {
+    explanation = `Ti = ${tiLengthwise} × ${tiWidthwise} = ${ti} colis/couche\nHi = ${maxHeight} ÷ ${boxHeight} = ${hi} couches\nTotal = ${ti} × ${hi} = ${answer} colis`
+  } else if (difficulty === 2) {
+    explanation = `Palette: ${paletteLength}×${paletteWidth} cm\nColis: ${boxLength}×${boxWidth}×${boxHeight} cm\nTi = ${ti} colis/couche | Hi = ${hi} couches\nTotal = ${answer} colis`
+  } else {
     explanation = `Configuration complexe avec contraintes d'optimisation.\n${answer} colis maximum`
   }
 
-  return {
-    type: 'palettisation',
+  return buildPalletizationQuestion({
     difficulty,
-    title: '📦 Palettisation',
-    description: `Combien de colis de dimensions ${boxLength}×${boxWidth}×${boxHeight} cm pouvez-vous mettre sur une palette ${paletteLength}×${paletteWidth} cm (hauteur max: 150 cm)?`,
-    data: {
-      boxLength,
-      boxWidth,
-      boxHeight,
-      paletteLength,
-      paletteWidth,
-      maxHeight: 150,
-    },
-    correctAnswer: answer,
+    boxLength,
+    boxWidth,
+    boxHeight,
+    paletteLength,
+    paletteWidth,
+    maxHeight,
     explanation,
-    hints: [
-      'Calculez le nombre de colis par couche (Ti)',
-      'Calculez le nombre de couches (Hi)',
-      'Multipliez Ti × Hi',
-    ],
-  }
+  })
 }
 
 // ===== COÛT DE TRANSPORT =====
