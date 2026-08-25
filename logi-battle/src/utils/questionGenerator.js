@@ -19,6 +19,8 @@ import { getJitQuestion } from './jitQuestions'
 import { getRouteOptimizerQuestion } from './routeOptimizerQuestions'
 import { getLegalQuestion } from './legalQuestions'
 import { getMathQuestion } from './mathQuestions'
+import { buildTransportCostQuestion } from './transportCostQuestion'
+import { buildLoadingPlanQuestion } from './loadingPlanQuestion'
 
 // ===== PALETTISATION =====
 /**
@@ -157,52 +159,51 @@ export const generateTransportCostQuestion = (difficulty = 1, forceCalculation =
   
   // Question de calcul originale
   let distance, weight, costPerKm, costPerTon
-  let answer, explanation
+  let discount = 0
+  let fuel = 0
+  let toll = 0
+  let explanation
 
   if (difficulty === 1) {
     distance = [100, 150, 200][Math.floor(Math.random() * 3)]
     weight = [5, 10, 15][Math.floor(Math.random() * 3)]
     costPerKm = 2
     costPerTon = 100
-
-    answer = distance * costPerKm + weight * costPerTon
-    explanation = `Coût = (${distance} km × ${costPerKm}€/km) + (${weight} tonnes × ${costPerTon}€/tonne)\n= ${distance * costPerKm}€ + ${weight * costPerTon}€ = ${answer}€`
+    explanation = `Coût = (${distance} km × ${costPerKm}€/km) + (${weight} tonnes × ${costPerTon}€/tonne)\n= ${distance * costPerKm}€ + ${weight * costPerTon}€ = ${distance * costPerKm + weight * costPerTon}€`
   } else if (difficulty === 2) {
     distance = [250, 350, 450][Math.floor(Math.random() * 3)]
     weight = [20, 25, 30][Math.floor(Math.random() * 3)]
-    const discount = [5, 10, 15][Math.floor(Math.random() * 3)]
+    discount = [5, 10, 15][Math.floor(Math.random() * 3)]
     costPerKm = 1.8
     costPerTon = 90
 
-    let baseCost = distance * costPerKm + weight * costPerTon
-    let discountAmount = (baseCost * discount) / 100
-    answer = baseCost - discountAmount
-
+    const baseCost = distance * costPerKm + weight * costPerTon
+    const discountAmount = (baseCost * discount) / 100
+    const answer = baseCost - discountAmount
     explanation = `Coût initial: ${baseCost.toFixed(2)}€\nRemise ${discount}%: -${discountAmount.toFixed(2)}€\nCoût final: ${answer.toFixed(2)}€`
   } else {
     distance = [500, 600, 750][Math.floor(Math.random() * 3)]
     weight = [40, 50, 60][Math.floor(Math.random() * 3)]
-    const fuel = 1.5
-    const toll = 50
+    fuel = 1.5
+    toll = 50
     costPerKm = 1.5
     costPerTon = 80
 
-    let baseCost = distance * costPerKm + weight * costPerTon + distance * fuel + toll
-    answer = baseCost
-
+    const answer = distance * costPerKm + weight * costPerTon + distance * fuel + toll
     explanation = `Calcul complexe avec carburant et péages:\nCoût = ${answer.toFixed(2)}€`
   }
 
-  return {
-    type: 'cout_transport',
+  return buildTransportCostQuestion({
     difficulty,
-    title: '🚚 Coût de Transport',
-    description: `Pour un trajet de ${distance} km avec ${weight} tonnes, quel est le coût total?`,
-    data: { distance, weight, costPerKm, costPerTon },
-    correctAnswer: Math.round(answer),
+    distance,
+    weight,
+    costPerKm,
+    costPerTon,
+    discount,
+    fuel,
+    toll,
     explanation,
-    hints: ['Considérez la distance', 'Considérez le poids'],
-  }
+  })
 }
 
 // ===== PLAN DE CHARGEMENT =====
@@ -230,46 +231,35 @@ export const generateLoadingPlanQuestion = (difficulty = 1, forceCalculation = f
   }
   
   // Question de calcul originale
-  let containerCapacity, packageSize, numberOfPackages
-  let answer, explanation
+  let containerCapacity, packageSize, usableRatio
+  let explanation
 
   if (difficulty === 1) {
     containerCapacity = [20, 24, 30][Math.floor(Math.random() * 3)]
     packageSize = [1, 2, 3][Math.floor(Math.random() * 3)]
-    numberOfPackages = containerCapacity / packageSize
-
-    answer = numberOfPackages
-    explanation = `${containerCapacity} unités ÷ ${packageSize} par colis = ${answer} colis`
+    usableRatio = 1
+    explanation = `${containerCapacity} unités ÷ ${packageSize} par colis = ${containerCapacity / packageSize} colis`
   } else if (difficulty === 2) {
     containerCapacity = [40, 45, 50][Math.floor(Math.random() * 3)]
-    const usableSpace = Math.floor(containerCapacity * 0.9)
+    usableRatio = 0.9
     packageSize = Math.floor(Math.random() * 2) + 2
-    answer = Math.floor(usableSpace / packageSize)
-
-    explanation = `Espace utilisable: ${usableSpace} unités\n${usableSpace} ÷ ${packageSize} = ${answer} colis`
+    const usableSpace = Math.floor(containerCapacity * usableRatio)
+    explanation = `Espace utilisable: ${usableSpace} unités\n${usableSpace} ÷ ${packageSize} = ${Math.floor(usableSpace / packageSize)} colis`
   } else {
     containerCapacity = 60
-    const efficiency = [0.85, 0.90, 0.95][Math.floor(Math.random() * 3)]
-    const usableSpace = Math.floor(containerCapacity * efficiency)
+    usableRatio = [0.85, 0.90, 0.95][Math.floor(Math.random() * 3)]
     packageSize = Math.floor(Math.random() * 3) + 2
-    answer = Math.floor(usableSpace / packageSize)
-
-    explanation = `Optimisation avancée avec efficacité ${(efficiency * 100).toFixed(0)}%\nRésultat: ${answer} colis`
+    const usableSpace = Math.floor(containerCapacity * usableRatio)
+    explanation = `Optimisation avancée avec efficacité ${(usableRatio * 100).toFixed(0)}%\nRésultat: ${Math.floor(usableSpace / packageSize)} colis`
   }
 
-  return {
-    type: 'loading_plan',
+  return buildLoadingPlanQuestion({
     difficulty,
-    title: '📊 Plan de Chargement',
-    description: `Conteneur capacité ${containerCapacity} unités. Combien de colis de ${packageSize} unités pouvez-vous charger?`,
-    data: { containerCapacity, packageSize, numberOfPackages },
-    correctAnswer: answer,
+    containerCapacity,
+    packageSize,
+    usableRatio,
     explanation,
-    hints: [
-      'Divisez la capacité par la taille du colis',
-      'Considérez les contraintes spatiales',
-    ],
-  }
+  })
 }
 
 // ===== CULTURE GÉNÉRALE =====
