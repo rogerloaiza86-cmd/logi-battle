@@ -19,6 +19,7 @@ import { getJitQuestion } from './jitQuestions'
 import { getRouteOptimizerQuestion } from './routeOptimizerQuestions'
 import { getLegalQuestion } from './legalQuestions'
 import { getMathQuestion } from './mathQuestions'
+import { formatQuestionDescription } from './questionPrompt'
 
 // ===== PALETTISATION =====
 /**
@@ -345,13 +346,15 @@ export const generateReceptionQuestion = () => {
     type: 'reception',
     difficulty: receptionQ.difficulty,
     title: '🚛 Réception & Contrôle',
-    description: receptionQ.question,
+    description: formatQuestionDescription(receptionQ.question, receptionQ.scenario),
+    scenario: receptionQ.scenario,
     data: {
       category: receptionQ.category,
       options: receptionQ.options,
       correctOption: receptionQ.correctOption,
       explanation: receptionQ.explanation,
-      questionType: receptionQ.type
+      questionType: receptionQ.type,
+      scenario: receptionQ.scenario,
     },
     correctAnswer: receptionQ.correctOption,
     explanation: receptionQ.explanation,
@@ -367,13 +370,15 @@ export const generateStockQuestion = () => {
     type: 'stock',
     difficulty: stockQ.difficulty,
     title: '📦 Stock Master 3D',
-    description: stockQ.question,
+    description: formatQuestionDescription(stockQ.question, stockQ.scenario),
+    scenario: stockQ.scenario,
     data: {
       category: stockQ.category,
       options: stockQ.options,
       correctOption: stockQ.correctOption,
       explanation: stockQ.explanation,
-      questionType: stockQ.type
+      questionType: stockQ.type,
+      scenario: stockQ.scenario,
     },
     correctAnswer: stockQ.correctOption,
     explanation: stockQ.explanation,
@@ -389,13 +394,15 @@ export const generateSafetyQuestion = () => {
     type: 'safety',
     difficulty: safetyQ.difficulty,
     title: '🛡️ Safety First',
-    description: safetyQ.question,
+    description: formatQuestionDescription(safetyQ.question, safetyQ.scenario),
+    scenario: safetyQ.scenario,
     data: {
       category: safetyQ.category,
       options: safetyQ.options,
       correctOption: safetyQ.correctOption,
       explanation: safetyQ.explanation,
-      questionType: safetyQ.type
+      questionType: safetyQ.type,
+      scenario: safetyQ.scenario,
     },
     correctAnswer: safetyQ.correctOption,
     explanation: safetyQ.explanation,
@@ -411,13 +418,15 @@ export const generateTraceabilityQuestion = () => {
     type: 'traceability',
     difficulty: traceQ.difficulty,
     title: '📡 Traçabilité Track',
-    description: traceQ.question,
+    description: formatQuestionDescription(traceQ.question, traceQ.scenario),
+    scenario: traceQ.scenario,
     data: {
       category: traceQ.category,
       options: traceQ.options,
       correctOption: traceQ.correctOption,
       explanation: traceQ.explanation,
-      questionType: traceQ.type
+      questionType: traceQ.type,
+      scenario: traceQ.scenario,
     },
     correctAnswer: traceQ.correctOption,
     explanation: traceQ.explanation,
@@ -433,13 +442,15 @@ export const generateGreenLogisticsQuestion = () => {
     type: 'green',
     difficulty: greenQ.difficulty,
     title: '🌍 Green Logistique',
-    description: greenQ.question,
+    description: formatQuestionDescription(greenQ.question, greenQ.scenario),
+    scenario: greenQ.scenario,
     data: {
       category: greenQ.category,
       options: greenQ.options,
       correctOption: greenQ.correctOption,
       explanation: greenQ.explanation,
-      questionType: greenQ.type
+      questionType: greenQ.type,
+      scenario: greenQ.scenario,
     },
     correctAnswer: greenQ.correctOption,
     explanation: greenQ.explanation,
@@ -455,7 +466,8 @@ export const generateTeamLeaderQuestion = () => {
     type: 'team_leader',
     difficulty: leaderQ.difficulty,
     title: '👔 Team Leader',
-    description: leaderQ.question,
+    description: formatQuestionDescription(leaderQ.question, leaderQ.scenario),
+    scenario: leaderQ.scenario,
     data: {
       category: leaderQ.category,
       scenario: leaderQ.scenario,
