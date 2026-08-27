@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { applyKeypadInput } from '../utils/keypadInput'
 
 export const QuestionCard = ({ 
   question, 
@@ -7,24 +8,22 @@ export const QuestionCard = ({
   onAnswer, 
   isAnswering = false, 
   disabled = false, 
-  responseTime = null 
+  responseTime = null,
+  captureKeyboard = true,
 }) => {
   const [userInput, setUserInput] = useState('')
   const [isWrong, setIsWrong] = useState(false)
 
   const isTeamA = team === 'A'
 
+  useEffect(() => {
+    setUserInput('')
+    setIsWrong(false)
+  }, [question?.id])
+
   const handleNumberClick = (num) => {
     if (disabled) return
-    if (num === 'C') {
-      setUserInput('')
-    } else if (num === 'backspace') {
-      setUserInput(userInput.slice(0, -1))
-    } else {
-      if (userInput.length < 6) {
-        setUserInput(userInput + num)
-      }
-    }
+    setUserInput((current) => applyKeypadInput(current, num))
   }
 
   const handleSubmit = () => {
@@ -48,19 +47,19 @@ export const QuestionCard = ({
     if (disabled) return
     if (e.key === 'Enter') {
       handleSubmit()
-    } else if (e.key === 'Backspace') {
-      setUserInput(userInput.slice(0, -1))
-    } else if (/\d/.test(e.key)) {
-      if (userInput.length < 6) {
-        setUserInput(userInput + e.key)
-      }
+      return
+    }
+    if (e.key === 'Backspace' || /^\d$/.test(e.key)) {
+      e.preventDefault()
+      setUserInput((current) => applyKeypadInput(current, e.key))
     }
   }
 
   useEffect(() => {
+    if (!captureKeyboard) return undefined
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [userInput, disabled])
+  }, [userInput, disabled, captureKeyboard])
 
   return (
     <motion.div
