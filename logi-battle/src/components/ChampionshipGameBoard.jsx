@@ -5,6 +5,7 @@ import QuestionCard from './QuestionCard'
 import VocabularyCard from './VocabularyCard'
 import { generateNextQuestion } from '../utils/questionGenerator'
 import { useChampionshipStore } from '../hooks/useChampionshipStore'
+import { shouldCaptureGlobalKeyboard } from '../utils/keypadInput'
 
 const ROUND_TIME = 30
 const VOCABULARY_TIME = 20
@@ -310,6 +311,7 @@ export const ChampionshipGameBoard = ({
                   disabled={!isRoundActive || teamAStatus !== 'playing'}
                   responseTime={teamATime}
                   showCorrectAnswer={bothTeamsAnswered || timeLeft === 0}
+                  captureKeyboard={shouldCaptureGlobalKeyboard({ competingCards: true })}
                 />
               )
             )}
@@ -375,6 +377,7 @@ export const ChampionshipGameBoard = ({
                   disabled={!isRoundActive || teamBStatus !== 'playing'}
                   responseTime={teamBTime}
                   showCorrectAnswer={bothTeamsAnswered || timeLeft === 0}
+                  captureKeyboard={shouldCaptureGlobalKeyboard({ competingCards: true })}
                 />
               )
             )}
