@@ -5,6 +5,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { CHAMPIONSHIP_STORAGE_KEY } from '../utils/championshipStorage'
 
 export const useChampionshipStore = create(
   persist(
@@ -284,7 +285,7 @@ export const useChampionshipStore = create(
       },
     }),
     {
-      name: 'championship-storage', // Clé localStorage
+      name: CHAMPIONSHIP_STORAGE_KEY,
       version: 1,
     }
   )
