@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import {
+  CHAMPIONSHIP_STORAGE_KEY,
+  championshipDateMs,
+  championshipKeysToClear,
+  parseChampionshipPersisted,
+} from '../utils/championshipStorage'
 
 const STORAGE_KEYS = {
   players: 'logi-battle-players',
-  championship: 'logi-battle-championship',
+  championship: CHAMPIONSHIP_STORAGE_KEY,
   history: 'logi-battle-game-history',
   settings: 'logi-battle-settings',
 }
@@ -32,7 +38,9 @@ export const HQDashboard = ({ onBack }) => {
   const loadStats = () => {
     // Load from all storage keys
     const players = JSON.parse(localStorage.getItem(STORAGE_KEYS.players) || '[]')
-    const championship = JSON.parse(localStorage.getItem(STORAGE_KEYS.championship) || '{}')
+    const championship = parseChampionshipPersisted(
+      localStorage.getItem(STORAGE_KEYS.championship)
+    )
     const history = JSON.parse(localStorage.getItem(STORAGE_KEYS.history) || '[]')
 
     const classes = championship.classes || []
@@ -74,7 +82,7 @@ export const HQDashboard = ({ onBack }) => {
     })
 
     // Sort by date and take last 10
-    activities.sort((a, b) => b.date - a.date)
+    activities.sort((a, b) => championshipDateMs(b.date) - championshipDateMs(a.date))
     setRecentActivity(activities.slice(0, 10))
   }
 
@@ -92,7 +100,8 @@ export const HQDashboard = ({ onBack }) => {
 
   const handleClearData = () => {
     if (confirm('⚠️ ATTENTION: Cette action supprimera TOUTES les données (joueurs, championnats, historique). Cette action est irréversible.\n\nÊtes-vous sûr ?')) {
-      Object.values(STORAGE_KEYS).forEach(key => {
+      const keys = new Set([...Object.values(STORAGE_KEYS), ...championshipKeysToClear()])
+      keys.forEach((key) => {
         localStorage.removeItem(key)
       })
       alert('Toutes les données ont été supprimées.')

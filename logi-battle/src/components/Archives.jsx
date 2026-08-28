@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import {
+  CHAMPIONSHIP_STORAGE_KEY,
+  parseChampionshipPersisted,
+  collectChampionshipMatches,
+} from '../utils/championshipStorage'
 
 const STORAGE_KEYS = {
-  championship: 'logi-battle-championship',
+  championship: CHAMPIONSHIP_STORAGE_KEY,
   players: 'logi-battle-players',
   history: 'logi-battle-game-history',
 }
@@ -19,31 +24,11 @@ export const Archives = ({ onBack }) => {
   }, [])
 
   const loadData = () => {
-    // Load championship data
-    const championship = JSON.parse(localStorage.getItem(STORAGE_KEYS.championship) || '{}')
+    const championship = parseChampionshipPersisted(
+      localStorage.getItem(STORAGE_KEYS.championship)
+    )
     const players = JSON.parse(localStorage.getItem(STORAGE_KEYS.players) || '[]')
-    
-    // Extract all matches
-    const allMatches = []
-    const classes = championship.classes || []
-    
-    classes.forEach(cls => {
-      cls.matches?.forEach(match => {
-        const challenger = cls.groups?.find(g => g.id === match.challengerId)
-        const champion = cls.groups?.find(g => g.id === match.championId)
-        
-        allMatches.push({
-          ...match,
-          className: cls.name,
-          challengerName: challenger?.name || 'Inconnu',
-          championName: champion?.name || 'Inconnu',
-        })
-      })
-    })
-    
-    // Sort by date (newest first)
-    allMatches.sort((a, b) => b.date - a.date)
-    setMatches(allMatches)
+    setMatches(collectChampionshipMatches(championship))
 
     // Build leaderboard from players
     const playerStats = players.map(player => ({
