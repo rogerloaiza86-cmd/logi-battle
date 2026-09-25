@@ -8,6 +8,7 @@ import {
   generateTransportCostQuestion,
 } from '../src/utils/questionGenerator.js'
 import { gradePlayerAnswer, questionUsesKeypad, resolveRoundWinner } from '../src/utils/roundRules.js'
+import { createRoomCode, normalizeRoomCode, ROOM_ALPHABET } from '../src/services/roomCode.js'
 
 const types = [
   'palettisation', 'cout_transport', 'loading_plan', 'vocabulaire', 'supply_chain',
@@ -61,5 +62,12 @@ const math004 = mathQuestions.find((question) => question.id === 'math_004')
 assert(math004.options[math004.correctOption] === '33', 'math_004')
 const safety024 = safetyQuestions.find((question) => question.id === 'safety_024')
 assert(safety024.correctOption === 1, 'safety_024')
+
+assert(normalizeRoomCode(' ab-cde ') === 'ABCDE', 'code avec espaces')
+assert(normalizeRoomCode('GAME-K7MNP') === 'K7MNP', 'préfixe GAME')
+assert(normalizeRoomCode('GAMEABCDE') === 'ABCDE', 'préfixe collé')
+const roomCode = createRoomCode()
+assert(roomCode.length === 5, 'code de salle sur 5 caractères')
+assert([...roomCode].every((char) => ROOM_ALPHABET.includes(char)), 'alphabet sans ambiguïté')
 
 console.log(`Référentiel OK — ${types.length} modules, ${cultureQuestions.length} questions de diplôme.`)

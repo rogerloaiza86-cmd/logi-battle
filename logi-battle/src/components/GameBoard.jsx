@@ -5,12 +5,16 @@ import QuestionView from './QuestionView'
 import { useGameStore } from '../hooks/useGameStore'
 import { useSplitRound } from '../hooks/useSplitRound'
 import { gamesService } from '../services/database'
-import { gradePlayerAnswer, toPublicQuestion } from '../utils/roundRules'
+import { gradePlayerAnswer, questionUsesKeypad, toPublicQuestion } from '../utils/roundRules'
 
-export const GameBoard = ({ onBack, gameMode, isHost }) => {
+export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room = null, roomCode = '' }) => {
   const gameStore = useGameStore()
   const channelRef = useRef(null)
+  const liveRef = useRef({ question: null, active: false, time: 30 })
+  const seenRef = useRef(new Set())
   const [logs, setLogs] = useState([])
+  const [replies, setReplies] = useState([])
+  const classMode = audience === 'class' && isHost
 
   const round = useSplitRound(gameMode, {
     onRoundResolved: ({ winner }) => {
@@ -41,8 +45,62 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
     return undefined
   }, [gameStore.teamA.score, gameStore.teamB.score, gameStore.ropePosition, isHost, gameStore.gameId])
 
+  liveRef.current = {
+    question: round.question,
+    active: round.isRoundActive,
+    time: round.roundTime,
+  }
+
+  const questionId = round.question?.id
+  if (seenRef.current.questionId !== questionId) {
+    seenRef.current = new Set()
+    seenRef.current.questionId = questionId
+  }
+
+  const publishQuestion = () => {
+    const live = liveRef.current
+    if (!room || !live.question || !live.active) return
+    room.send('new_question', {
+      questionData: toPublicQuestion(live.question),
+      time: live.time,
+    })
+  }
+
   useEffect(() => {
-    if (!(isHost && gameStore.gameId)) return undefined
+    if (!classMode || !room) return undefined
+    const onAnswer = ({ payload }) => {
+      const current = round.questionRef.current
+      if (!current || payload?.answer == null || (payload.team !== 'A' && payload.team !== 'B')) return
+      const name = String(payload.playerName || 'Élève').slice(0, 18)
+      const key = `${payload.team}:${name}`
+      if (seenRef.current.has(key)) return
+      seenRef.current.add(key)
+      const correct = gradePlayerAnswer(current, payload.answer)
+      round.handleAnswer(payload.team, correct)
+      setReplies((prev) => [...prev, { team: payload.team, name, correct }])
+      addLog(name, 'a envoyé sa réponse.', payload.team, '')
+    }
+    const offAnswer = room.on('player_answer', onAnswer)
+    const offHello = room.on('hello', publishQuestion)
+    return () => {
+      offAnswer()
+      offHello()
+    }
+  }, [classMode, room, round.handleAnswer, round.questionRef])
+
+  useEffect(() => {
+    setReplies([])
+  }, [questionId])
+
+  useEffect(() => {
+    if (!classMode || !room || !round.question || !round.isRoundActive) return undefined
+    publishQuestion()
+    const timer = setInterval(publishQuestion, 3000)
+    return () => clearInterval(timer)
+  }, [classMode, room, round.question, round.isRoundActive, round.roundTime])
+
+  useEffect(() => {
+    if (!(isHost && gameStore.gameId) || room) return undefined
     const channel = gamesService.getGameChannel(gameStore.gameId)
     if (!channel) return undefined
     channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
@@ -55,10 +113,10 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
     return () => {
       channelRef.current = null
     }
-  }, [isHost, gameStore.gameId, round.handleAnswer, round.questionRef])
+  }, [isHost, room, gameStore.gameId, round.handleAnswer, round.questionRef])
 
   useEffect(() => {
-    if (!isHost || !channelRef.current || !round.question || !round.isRoundActive) return undefined
+    if (!isHost || room || !channelRef.current || !round.question || !round.isRoundActive) return undefined
     const send = () => {
       channelRef.current?.send({
         type: 'broadcast',
@@ -72,7 +130,7 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
     send()
     const timer = setInterval(send, 4000)
     return () => clearInterval(timer)
-  }, [isHost, round.question, round.isRoundActive, round.roundTime])
+  }, [isHost, room, round.question, round.isRoundActive, round.roundTime])
 
   const winner = gameStore.ropePosition >= 100
     ? 'A'
@@ -120,6 +178,9 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
         <div className="flex items-center justify-between gap-4">
           <BrandMark nameClassName="text-[1.35rem]" />
           <div className="flex items-center gap-3">
+            {classMode && roomCode && (
+              <span className="hidden sm:inline text-2xl font-black font-mono tracking-[0.2em] text-[#f4b942]">{roomCode}</span>
+            )}
             <span className="text-sm font-bold text-white">
               Manche {round.roundNumber}/{round.totalRounds}
             </span>
@@ -165,10 +226,22 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
       </div>
 
       <main className="flex-1 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_18rem] gap-4 p-4 md:p-6">
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {teamCard('A')}
-          {teamCard('B')}
-        </section>
+        {classMode ? (
+          <ClassArena
+            question={round.question}
+            revealed={round.bothTeamsAnswered || round.timeLeft === 0}
+            teamAName={gameStore.teamA.name}
+            teamBName={gameStore.teamB.name}
+            teamAStatus={round.teamAStatus}
+            teamBStatus={round.teamBStatus}
+            replies={replies}
+          />
+        ) : (
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {teamCard('A')}
+            {teamCard('B')}
+          </section>
+        )}
         <aside className="bg-[#1d3d59] rounded-3xl p-5 border border-white/5">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Journal de manche</p>
           {logs.length === 0 && <p className="text-sm text-gray-500">Les résultats apparaîtront ici.</p>}
@@ -207,13 +280,80 @@ export const GameBoard = ({ onBack, gameMode, isHost }) => {
                 }}
                 className="w-full py-4 rounded-xl bg-[#f4b942] text-[#17314a] font-bold"
               >
-                Retour aux équipes
+                {classMode ? 'Retour au menu' : 'Retour aux équipes'}
               </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
+  )
+}
+
+function ClassArena({ question, revealed, teamAName, teamBName, teamAStatus, teamBStatus, replies }) {
+  const options = question?.data?.options
+  const numeric = questionUsesKeypad(question)
+  const correctIndex = question?.data?.correctOption
+
+  const column = (team, name, status) => {
+    const people = replies.filter((reply) => reply.team === team)
+    const waiting = status === 'playing'
+    return (
+      <div className={`rounded-3xl border p-4 ${team === 'A' ? 'border-[#7fa99b]/40' : 'border-[#f4b942]/40'} bg-[#0f2539]/50`}>
+        <p className={`font-bold ${team === 'A' ? 'text-[#7fa99b]' : 'text-[#f4b942]'}`}>{name}</p>
+        <p className="text-sm text-gray-300 mt-1">
+          {waiting ? 'En attente' : revealed && status === 'correct' ? 'Bonne réponse' : revealed ? 'Mauvaise réponse' : 'Réponse reçue'}
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {people.length === 0 && <span className="text-sm text-gray-500">Aucun poste</span>}
+          {people.map((person) => (
+            <span key={person.name} className="min-h-10 px-3 rounded-full bg-white/10 text-white text-sm inline-flex items-center">
+              {person.name}
+            </span>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <section className="space-y-4">
+      <div className="rounded-3xl border border-white/10 bg-[#1d3d59] p-6 md:p-8">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#f4b942] text-center">
+          {question?.referentiel ? `${question.referentiel.unite} · ${question.referentiel.competence}` : 'Question de la classe'}
+        </p>
+        <h2 className="mt-4 text-2xl md:text-4xl font-black text-white text-center leading-snug">
+          {question?.description || 'Préparation de la manche…'}
+        </h2>
+        {options && (
+          <div className="mt-6 grid gap-3">
+            {options.map((option, index) => {
+              const marked = revealed && index === correctIndex
+              return (
+                <div
+                  key={`${question?.id}-${index}`}
+                  className={`min-h-14 rounded-2xl px-4 py-3 flex items-center gap-3 text-lg ${
+                    marked ? 'bg-green-500/20 border border-green-400 text-green-100' : 'bg-[#0f2539] text-white'
+                  }`}
+                >
+                  <span className="font-black">{String.fromCharCode(65 + index)}</span>
+                  <span>{option}</span>
+                </div>
+              )
+            })}
+          </div>
+        )}
+        {numeric && (
+          <p className="mt-6 text-center text-lg text-gray-300">
+            {revealed ? `Réponse : ${question.correctAnswer}` : 'Les postes saisissent le nombre.'}
+          </p>
+        )}
+      </div>
+      <div className="grid sm:grid-cols-2 gap-4">
+        {column('A', teamAName, teamAStatus)}
+        {column('B', teamBName, teamBStatus)}
+      </div>
+    </section>
   )
 }
 

@@ -1,94 +1,131 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import QRCode from 'qrcode'
 import { useGameStore } from '../hooks/useGameStore'
 import GameBoard from './GameBoard'
 import BrandMark from './BrandMark'
-
 import { gamesService } from '../services/database'
+import { openRoom } from '../services/roomChannel'
+import {
+  createRoomCode,
+  isRealtimeReady,
+  roomEntryLabel,
+  roomJoinUrl,
+} from '../services/roomCode'
 
 export const HostGame = ({ onBack, gameMode }) => {
   const gameStore = useGameStore()
-  const [gameId, setGameId] = useState(null)
-  const [players, setPlayers] = useState({ teamA: [], teamB: [] })
+  const [code] = useState(createRoomCode)
+  const [room, setRoom] = useState(null)
+  const [roster, setRoster] = useState({ hostOnline: false, teamA: [], teamB: [] })
+  const [linkState, setLinkState] = useState(isRealtimeReady() ? 'connexion' : 'hors-ligne')
   const [gameStarted, setGameStarted] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [isInitializing, setIsInitializing] = useState(true)
   const [qrDataUrl, setQrDataUrl] = useState('')
-
-  // Générer un ID de jeu unique et l'enregistrer dans Supabase
-  useEffect(() => {
-    const initGame = async () => {
-      try {
-        const id = `GAME-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-        setGameId(id)
-        gameStore.setGameId(id)
-        
-        // Créer la partie dans Supabase
-        await gamesService.createGame('ÉQUIPE ALPHA', 'ÉQUIPE OMEGA', id)
-      } catch (err) {
-        console.error('Erreur lors de la création de la partie sur Supabase:', err)
-      } finally {
-        setIsInitializing(false)
-      }
-    }
-    
-    initGame()
-  }, [])
-
-  // URL pour les joueurs (à adapter selon votre déploiement)
-  const getPlayerUrl = () => {
-    const base = import.meta.env.BASE_URL || '/'
-    const prefix = base.endsWith('/') ? base.slice(0, -1) : base
-    return `${window.location.origin}${prefix}/join?game=${gameId}`
-  }
+  const [teamAName, setTeamAName] = useState(gameStore.teamA.name)
+  const [teamBName, setTeamBName] = useState(gameStore.teamB.name)
 
   useEffect(() => {
-    if (!gameId) return undefined
+    gameStore.resetGame()
+    gameStore.setGameId(code)
+    gameStore.setTeamNames(teamAName, teamBName)
+    gamesService.createGame(teamAName, teamBName, code).catch(() => {})
+
+    const session = openRoom(code)
+    if (!session) return undefined
     let cancelled = false
-    QRCode.toDataURL(getPlayerUrl(), { width: 280, margin: 1 }).then((url) => {
+    setRoom(session)
+    const unsubscribe = session.on('presence', (next) => {
+      if (!cancelled) setRoster(next)
+    })
+    session.subscribe(async (status) => {
+      if (cancelled) return
+      if (status === 'SUBSCRIBED') {
+        await session.track({ role: 'host' })
+        if (!cancelled) setLinkState('en-ligne')
+      }
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') setLinkState('erreur')
+    })
+    return () => {
+      cancelled = true
+      unsubscribe()
+      session.close()
+      setRoom(null)
+    }
+  }, [code])
+
+  useEffect(() => {
+    let cancelled = false
+    QRCode.toDataURL(roomJoinUrl(code), { width: 240, margin: 1 }).then((url) => {
       if (!cancelled) setQrDataUrl(url)
-    }).catch(console.error)
+    }).catch(() => {})
     return () => {
       cancelled = true
     }
-  }, [gameId])
+  }, [code])
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(getPlayerUrl())
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const copyCode = () => {
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }).catch(() => {})
   }
 
   const startGame = () => {
-    setGameStarted(true)
+    gameStore.setTeamNames(teamAName.trim() || 'ÉQUIPE A', teamBName.trim() || 'ÉQUIPE B')
     gameStore.setGameStatus('active')
-  }
-
-  const handlePlayerJoin = (playerData) => {
-    // Simuler l'arrivée d'un joueur
-    // En vrai, ça viendrait de Firebase
+    setGameStarted(true)
   }
 
   if (gameStarted) {
-    return <GameBoard onBack={onBack} gameMode={gameMode} isHost={true} />
+    return (
+      <GameBoard
+        onBack={onBack}
+        gameMode={gameMode}
+        isHost
+        audience="class"
+        room={room}
+        roomCode={code}
+      />
+    )
   }
+
+  const linkLabel = {
+    'en-ligne': 'Ordinateurs reliés',
+    connexion: 'Connexion de la salle…',
+    erreur: 'Liaison indisponible',
+    'hors-ligne': 'Supabase absent',
+  }[linkState]
+
+  const rosterList = (people) => (
+    people.length === 0
+      ? <p className="text-sm text-gray-500">En attente d’un poste</p>
+      : (
+        <ul className="space-y-2">
+          {people.map((person) => (
+            <li key={`${person.name}-${person.team}`} className="flex items-center gap-2 text-white">
+              <span className="material-icons text-base">computer</span>
+              <span className="font-semibold">{person.name}</span>
+            </li>
+          ))}
+        </ul>
+      )
+  )
 
   return (
     <div className="min-h-screen geronimo-screen flex flex-col">
-      {/* Header */}
       <nav className="bg-[#0f2539]/86 backdrop-blur-md border-b border-white/10 px-6 py-4 relative z-10">
-        <div className="flex items-center justify-between max-w-6xl mx-auto">
+        <div className="flex items-center justify-between max-w-6xl mx-auto gap-4">
           <div className="flex items-center gap-3">
             <BrandMark compact />
             <div>
-              <h1 className="text-xl font-bold text-white">Geronimo Coop Live</h1>
-              <p className="text-xs text-gray-400">Scannez le QR code pour rejoindre</p>
+              <h1 className="text-xl font-bold text-white">Arène de la classe</h1>
+              <p className="text-xs text-gray-400">Un écran pour la question, un poste par élève</p>
             </div>
           </div>
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            className="min-h-12 flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
           >
             <span className="material-icons">arrow_back</span>
             Retour
@@ -96,145 +133,84 @@ export const HostGame = ({ onBack, gameMode }) => {
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center p-6">
-        <div className="max-w-4xl w-full grid md:grid-cols-2 gap-8">
-          {/* QR Code Section */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-slate-800/50 rounded-2xl p-8 border border-white/10"
-          >
-            <h2 className="text-2xl font-bold text-white mb-2 text-center">
-              Rejoindre la partie
-            </h2>
-            <p className="text-gray-400 text-center mb-6">
-              Scannez ce QR code avec votre téléphone
+      <main className="flex-1 p-4 md:p-8">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] gap-6">
+          <section className="bg-[#1d3d59] rounded-3xl p-6 md:p-10 border border-white/10 text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f4b942]">Code de la salle</p>
+            <p className="mt-4 text-6xl sm:text-7xl md:text-8xl font-black font-mono tracking-[0.18em] text-white">
+              {code}
             </p>
+            <button
+              type="button"
+              onClick={copyCode}
+              className="mt-6 min-h-12 px-5 rounded-xl bg-white/10 text-white font-semibold"
+            >
+              {copied ? 'Code copié' : 'Copier le code'}
+            </button>
+            <p className={`mt-4 text-sm font-semibold ${linkState === 'en-ligne' ? 'text-[#7fa99b]' : 'text-amber-300'}`}>
+              {linkLabel}
+            </p>
+            {linkState !== 'en-ligne' && (
+              <p className="mt-3 text-sm text-amber-100/80">
+                Les autres ordinateurs rejoignent cette arène seulement si la liaison Supabase répond.
+              </p>
+            )}
 
-            {/* QR Code */}
-            <div className="bg-white rounded-xl p-4 w-fit mx-auto mb-6">
-              {qrDataUrl && (
-                <img
-                  src={qrDataUrl}
-                  alt="QR Code pour rejoindre la partie"
-                  className="w-48 h-48"
+            <ol className="mt-8 text-left space-y-3 text-gray-200">
+              <li>1. Sur chaque ordinateur ou écran tactile, ouvrez <span className="font-mono text-white">{roomEntryLabel()}</span></li>
+              <li>2. Choisissez « Rejoindre avec un code »</li>
+              <li>3. Entrez <span className="font-mono text-[#f4b942]">{code}</span>, le prénom et l’équipe</li>
+              <li>4. La première réponse de chaque équipe compte pour la manche</li>
+            </ol>
+
+            {qrDataUrl && (
+              <div className="mt-8 flex flex-col items-center">
+                <img src={qrDataUrl} alt="QR du code de salle" className="w-28 h-28 bg-white rounded-lg p-2" />
+                <p className="text-xs text-gray-500 mt-2">Le QR reprend le même code, en secours</p>
+              </div>
+            )}
+          </section>
+
+          <section className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="block">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#7fa99b]">Équipe A</span>
+                <input
+                  value={teamAName}
+                  onChange={(event) => setTeamAName(event.target.value)}
+                  className="mt-2 w-full min-h-12 rounded-xl bg-[#0f2539] border border-white/10 px-3 text-white"
                 />
-              )}
+              </label>
+              <label className="block">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#f4b942]">Équipe B</span>
+                <input
+                  value={teamBName}
+                  onChange={(event) => setTeamBName(event.target.value)}
+                  className="mt-2 w-full min-h-12 rounded-xl bg-[#0f2539] border border-white/10 px-3 text-white"
+                />
+              </label>
             </div>
 
-            {/* Ou lien manuel */}
-            <div className="space-y-3">
-              <p className="text-gray-400 text-sm text-center">Ou entrez ce code :</p>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 bg-slate-900 rounded-lg px-4 py-3 text-center">
-                  <span className="text-2xl font-mono font-bold text-primary tracking-widest">
-                    {gameId}
-                  </span>
-                </div>
-                <button
-                  onClick={copyLink}
-                  className="p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
-                  title="Copier le lien"
-                >
-                  <span className="material-icons text-white">
-                    {copied ? 'check' : 'content_copy'}
-                  </span>
-                </button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="rounded-2xl border-2 border-[#7fa99b]/40 bg-[#0f2539]/50 p-4">
+                <p className="font-bold text-[#7fa99b] mb-3">Équipe A · {roster.teamA.length}</p>
+                {rosterList(roster.teamA)}
+              </div>
+              <div className="rounded-2xl border-2 border-[#f4b942]/40 bg-[#0f2539]/50 p-4">
+                <p className="font-bold text-[#f4b942] mb-3">Équipe B · {roster.teamB.length}</p>
+                {rosterList(roster.teamB)}
               </div>
             </div>
 
-            {/* Lien URL */}
-            <div className="mt-4 p-3 bg-slate-900/50 rounded-lg">
-              <p className="text-xs text-gray-500 mb-1">URL directe :</p>
-              <p className="text-xs text-gray-400 truncate">{getPlayerUrl()}</p>
-            </div>
-          </motion.div>
-
-          {/* Players Status */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="space-y-4"
-          >
-            {/* Instructions */}
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-6">
-              <h3 className="text-lg font-bold text-blue-400 mb-3 flex items-center gap-2">
-                <span className="material-icons">info</span>
-                Comment ça marche ?
-              </h3>
-              <ol className="space-y-2 text-gray-300 text-sm">
-                <li className="flex items-start gap-2">
-                  <span className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs flex-shrink-0">1</span>
-                  <span>Les élèves scannent le QR code avec leur téléphone</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs flex-shrink-0">2</span>
-                  <span>Ils choisissent leur équipe (A ou B)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs flex-shrink-0">3</span>
-                  <span>Ils répondent aux questions depuis leur téléphone</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs flex-shrink-0">4</span>
-                  <span>L'écran affiche le score en temps réel</span>
-                </li>
-              </ol>
-            </div>
-
-            {/* Teams Status */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Team A */}
-              <div className="bg-slate-800/50 rounded-xl p-4 border-2 border-blue-500/30">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                  <h3 className="font-bold text-blue-400">Équipe A</h3>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-400 text-sm">
-                    <span className="material-icons text-sm">person</span>
-                    <span>En attente de joueurs...</span>
-                  </div>
-                  {/* Liste des joueurs connectés */}
-                  {players.teamA.length === 0 && (
-                    <p className="text-xs text-gray-500 italic">Aucun joueur</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Team B */}
-              <div className="bg-slate-800/50 rounded-xl p-4 border-2 border-primary/30">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-3 h-3 rounded-full bg-primary"></div>
-                  <h3 className="font-bold text-primary">Équipe B</h3>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-400 text-sm">
-                    <span className="material-icons text-sm">person</span>
-                    <span>En attente de joueurs...</span>
-                  </div>
-                  {players.teamB.length === 0 && (
-                    <p className="text-xs text-gray-500 italic">Aucun joueur</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Start Button */}
             <motion.button
-              whileHover={{ scale: 1.02 }}
+              type="button"
               whileTap={{ scale: 0.98 }}
               onClick={startGame}
-              className="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary text-white font-bold py-4 rounded-xl text-lg uppercase tracking-wider shadow-lg shadow-primary/20 transition-all"
+              className="w-full min-h-16 rounded-2xl bg-[#f4b942] text-[#17314a] font-black text-lg uppercase tracking-wider"
             >
-              Lancer la partie
+              Lancer la manche
             </motion.button>
-
-            <p className="text-xs text-gray-500 text-center">
-              Vous pouvez aussi démarrer sans joueurs pour une démo
-            </p>
-          </motion.div>
+          </section>
         </div>
       </main>
     </div>

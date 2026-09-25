@@ -1,26 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { gamesService } from '../services/database'
 import BrandMark from './BrandMark'
 
-export const PlayerGame = ({ gameId, playerName, team }) => {
-  const channelRef = useRef(null)
-  const [gameStatus, setGameStatus] = useState('waiting') // waiting, playing, answered, finished
+export const PlayerGame = ({ room, gameId, playerName, team }) => {
+  const roomRef = useRef(room)
+  const questionIdRef = useRef(null)
+  const [gameStatus, setGameStatus] = useState('waiting')
   const [currentQuestion, setCurrentQuestion] = useState(null)
   const [userAnswer, setUserAnswer] = useState('')
   const [timeLeft, setTimeLeft] = useState(30)
   const [score, setScore] = useState(0)
-  const [result, setResult] = useState(null) // correct, wrong, null
+  const [result, setResult] = useState(null)
 
   const isTeamA = team === 'A'
+  roomRef.current = room
 
-  // Écoute en temps réel Supabase. La bonne réponse reste sur l'écran hôte.
   useEffect(() => {
-    const channel = gamesService.getGameChannel(gameId)
-    if (!channel) return undefined
-    channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
+    if (!room) return undefined
+    const off = room.on('new_question', ({ payload }) => {
       const data = payload.questionData
-      if (!data) return
+      if (!data?.id || data.id === questionIdRef.current) return
+      questionIdRef.current = data.id
       setCurrentQuestion({
         id: data.id,
         question: data.description,
@@ -36,10 +36,9 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
       setUserAnswer('')
       setResult(null)
     })
-    channel.subscribe()
-    channelRef.current = channel
-    return undefined
-  }, [gameId])
+    room.send('hello', { name: playerName, team })
+    return off
+  }, [room, playerName, team])
 
   // Timer
   useEffect(() => {
@@ -49,8 +48,8 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
         setTimeLeft((prev) => prev - 1)
       }, 1000)
     } else if (timeLeft === 0 && gameStatus === 'playing') {
-      setGameStatus('waiting')
-      setResult('wrong')
+      setGameStatus('answered')
+      setResult('timeout')
     }
     return () => clearInterval(interval)
   }, [gameStatus, timeLeft])
@@ -73,13 +72,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
     if (gameStatus !== 'playing' || answer == null || answer === '') return
     setGameStatus('answered')
     setResult('sent')
-    if (channelRef.current) {
-      channelRef.current.send({
-        type: 'broadcast',
-        event: 'player_answer',
-        payload: { team, answer, playerName },
-      })
-    }
+    roomRef.current?.send('player_answer', { team, answer, playerName })
   }
 
   const handleSubmit = () => {
@@ -181,15 +174,15 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
               </div>
 
               {currentQuestion?.isMCQ ? (
-                <div className="grid gap-2 mb-4">
+                <div className="grid gap-3 mb-4">
                   {currentQuestion.options.map((option, index) => (
                     <button
-                      key={option}
+                      key={`${currentQuestion.id}-${index}`}
                       type="button"
                       onClick={() => sendAnswer(index)}
-                      className="w-full text-left p-4 rounded-xl bg-slate-800 border border-white/10 text-white"
+                      className="w-full min-h-14 text-left px-4 py-4 rounded-2xl bg-slate-800 border border-white/10 text-white text-lg"
                     >
-                      <span className="font-bold mr-2">{String.fromCharCode(65 + index)}</span>
+                      <span className="font-black mr-3">{String.fromCharCode(65 + index)}</span>
                       {option}
                     </button>
                   ))}
@@ -210,7 +203,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                     key={num}
                     onClick={() => handleNumberClick(num)}
                     whileTap={{ scale: 0.95 }}
-                    className={`aspect-square rounded-xl font-bold text-xl transition-colors ${
+                    className={`min-h-16 aspect-square rounded-2xl font-bold text-2xl transition-colors ${
                       isTeamA
                         ? 'bg-slate-800 active:bg-blue-500/30 text-white'
                         : 'bg-slate-800 active:bg-primary/30 text-white'
@@ -230,7 +223,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                 onClick={handleSubmit}
                 disabled={!userAnswer}
                 whileTap={{ scale: 0.98 }}
-                className={`w-full mt-3 py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all ${
+                className={`w-full mt-3 min-h-14 py-4 rounded-2xl font-bold text-lg uppercase tracking-wider transition-all ${
                   isTeamA
                     ? 'bg-blue-500 disabled:bg-slate-800 text-white'
                     : 'bg-primary disabled:bg-slate-800 text-white'
@@ -251,8 +244,8 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
               exit={{ opacity: 0, scale: 0.8 }}
               className="text-center"
             >
-              <div className={`text-6xl mb-4 ${result === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
-                {result === 'correct' ? '✓' : '✗'}
+              <div className={`text-6xl mb-4 ${result === 'timeout' ? 'text-amber-400' : 'text-[#7fa99b]'}`}>
+                {result === 'timeout' ? '…' : '✓'}
               </div>
               <h2 className="text-2xl font-bold text-white">
                 {result === 'sent' ? 'Réponse envoyée' : 'Temps écoulé'}
@@ -266,7 +259,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
 
       {/* Footer */}
       <footer className="p-4 text-center text-xs text-gray-500 border-t border-white/5">
-        <p>Geronimo Coop Mobile • Partie {gameId}</p>
+        <p>Poste élève · code {gameId}</p>
       </footer>
     </div>
   )

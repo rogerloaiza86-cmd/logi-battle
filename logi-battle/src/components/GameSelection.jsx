@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useGameStore } from '../hooks/useGameStore'
 import BrandMark from './BrandMark'
+import { goToJoin } from '../services/roomCode'
 
 const modules = [
   {
@@ -184,7 +185,7 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
   const handleSelectModule = (module) => {
     setActiveModule(module.id)
     setTimeout(() => {
-      onGameSelect(module.id)
+      onHostMode(module.id)
     }, 300)
   }
 
@@ -269,10 +270,10 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
         {/* Start Battle Button */}
         <div className="p-4 border-t border-white/5">
           <button
-            onClick={() => onGameSelect('all')}
-            className="w-full py-4 bg-gradient-to-r from-[#f4b942] to-[#d99926] rounded-xl text-[#17314a] font-bold text-sm tracking-wider shadow-lg shadow-orange-500/25 hover:scale-105 transition-transform"
+            onClick={() => onHostMode('all')}
+            className="w-full min-h-14 py-4 bg-gradient-to-r from-[#f4b942] to-[#d99926] rounded-xl text-[#17314a] font-bold text-sm tracking-wider shadow-lg shadow-orange-500/25 hover:scale-105 transition-transform"
           >
-            COMMENCER LE COMBAT
+            OUVRIR LA SALLE
           </button>
         </div>
 
@@ -330,6 +331,13 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
             </nav>
 
             <div className="flex items-center gap-2 md:gap-4">
+              <button
+                type="button"
+                onClick={goToJoin}
+                className="min-h-12 px-3 md:px-4 rounded-xl bg-[#f4b942] text-[#17314a] text-xs md:text-sm font-bold tracking-wide"
+              >
+                REJOINDRE AVEC UN CODE
+              </button>
               <button 
                 onClick={() => handleNavClick('hq')}
                 title="Tableau de bord (QG)"
@@ -388,24 +396,33 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
               onClick={() => onHostMode('all')}
             >
               <div className="relative z-10">
-                <h3 className="text-2xl font-black text-white mb-2 italic">SCANNER QR</h3>
+                <h3 className="text-2xl font-black text-white mb-2 italic">CODE DE SALLE</h3>
                 <p className="text-gray-400 text-sm mb-4 max-w-md">
-                  Rejoignez rapidement des affrontements locaux ou scannez des IDs de palettes pour débloquer des défis ciblés.
+                  L’écran de la classe montre la question et la corde. Chaque élève répond sur son ordinateur ou sur l’écran tactile, avec le code affiché.
                 </p>
-                <button className="px-6 py-3 bg-[#7fa99b] rounded-xl text-white font-bold text-sm tracking-wider hover:scale-105 transition-transform">
-                  INITIALISER LE SCAN
+                <button className="min-h-12 px-6 py-3 bg-[#7fa99b] rounded-xl text-white font-bold text-sm tracking-wider hover:scale-105 transition-transform">
+                  OUVRIR L’ARÈNE
                 </button>
               </div>
               <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-20">
-                <span className="material-icons text-8xl text-[#7fa99b]">qr_code_scanner</span>
+                <span className="material-icons text-8xl text-[#7fa99b]">dialpad</span>
               </div>
             </motion.div>
           </div>
 
           {/* Section Title */}
           <div className="mb-6">
-            <p className="brand-kicker mb-1">Sélectionner les duels</p>
-            <h2 className="text-3xl font-black text-white italic font-display">Modules Geronimo Coop</h2>
+            <p className="brand-kicker mb-1">Un module ouvre le code de la salle</p>
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <h2 className="text-3xl font-black text-white italic font-display">Modules Geronimo Coop</h2>
+              <button
+                type="button"
+                onClick={() => onGameSelect('all')}
+                className="min-h-12 px-4 rounded-xl border border-white/15 text-gray-200 text-sm font-semibold"
+              >
+                Deux équipes sur cet écran
+              </button>
+            </div>
           </div>
 
           {/* Modules Grid */}
