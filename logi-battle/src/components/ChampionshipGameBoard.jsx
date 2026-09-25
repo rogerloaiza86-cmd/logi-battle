@@ -1,13 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import RopeAnimation from './RopeAnimation'
-import QuestionCard from './QuestionCard'
-import VocabularyCard from './VocabularyCard'
-import { generateNextQuestion } from '../utils/questionGenerator'
-import { useChampionshipStore } from '../hooks/useChampionshipStore'
-
-const ROUND_TIME = 30
-const VOCABULARY_TIME = 20
+import QuestionView from './QuestionView'
+import { useSplitRound } from '../hooks/useSplitRound'
 
 export const ChampionshipGameBoard = ({ 
   gameMode, 
@@ -18,9 +13,7 @@ export const ChampionshipGameBoard = ({
   onBack, 
   onMatchEnd 
 }) => {
-  const { getGroup } = useChampionshipStore()
-  
-  // Le challenger est Team A (Bleu), le Champion est Team B (Orange)
+  const ropeRef = useRef(0)
   const [teamA, setTeamA] = useState({
     name: challenger.name,
     score: 0,
@@ -36,136 +29,25 @@ export const ChampionshipGameBoard = ({
   })
   
   const [ropePosition, setRopePosition] = useState(0)
-  const [gameStatus, setGameStatus] = useState('active') // waiting, active, finished
-  
-  const [question, setQuestion] = useState(null)
-  const [showIncorrect, setShowIncorrect] = useState(false)
-  const [timeLeft, setTimeLeft] = useState(ROUND_TIME)
-  const [roundTime, setRoundTime] = useState(ROUND_TIME)
-  const [isRoundActive, setIsRoundActive] = useState(true)
-  const [teamAStatus, setTeamAStatus] = useState('playing')
-  const [teamBStatus, setTeamBStatus] = useState('playing')
-  const [teamATime, setTeamATime] = useState(null)
-  const [teamBTime, setTeamBTime] = useState(null)
-  const [roundWinner, setRoundWinner] = useState(null)
-  const [bothTeamsAnswered, setBothTeamsAnswered] = useState(false)
-  const [roundNumber, setRoundNumber] = useState(1)
-  const [totalRounds, setTotalRounds] = useState(10)
-  const roundStartTime = useRef(null)
-  const [matchStartTime, setMatchStartTime] = useState(Date.now())
-
-  useEffect(() => {
-    startNewRound()
-    setMatchStartTime(Date.now())
-  }, [])
-
-  useEffect(() => {
-    let interval
-    if (isRoundActive && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => prev - 1)
-      }, 1000)
-    } else if (timeLeft === 0 && isRoundActive) {
-      endRound()
-    }
-    return () => clearInterval(interval)
-  }, [isRoundActive, timeLeft])
-  
-  // Vérifier fin de match
-  useEffect(() => {
-    if (ropePosition >= 100 || ropePosition <= -100 || roundNumber > totalRounds) {
-      setGameStatus('finished')
-    }
-  }, [ropePosition, roundNumber])
-
-  const startNewRound = () => {
-    const newQuestion = {
-      ...generateNextQuestion(gameMode),
-      id: `q_${Date.now()}`,
-    }
-    setQuestion(newQuestion)
-    const time = newQuestion.type === 'vocabulaire' ? VOCABULARY_TIME : ROUND_TIME
-    setRoundTime(time)
-    setTimeLeft(time)
-    setIsRoundActive(true)
-    setTeamAStatus('playing')
-    setTeamBStatus('playing')
-    setTeamATime(null)
-    setTeamBTime(null)
-    setRoundWinner(null)
-    setBothTeamsAnswered(false)
-    roundStartTime.current = Date.now()
-  }
-
-  const endRound = () => {
-    setIsRoundActive(false)
-    setBothTeamsAnswered(true)
-    
-    let winner = null
-    
-    if (teamAStatus === 'correct' && teamBStatus === 'correct') {
-      winner = teamATime < teamBTime ? 'A' : 'B'
-    } else if (teamAStatus === 'correct') {
-      winner = 'A'
-    } else if (teamBStatus === 'correct') {
-      winner = 'B'
-    }
-    
-    setRoundWinner(winner)
-    
-    if (winner === 'A') {
-      setTeamA(prev => ({ ...prev, score: prev.score + 1 }))
-      setRopePosition(prev => Math.min(100, prev + 10))
-    } else if (winner === 'B') {
-      setTeamB(prev => ({ ...prev, score: prev.score + 1 }))
-      setRopePosition(prev => Math.max(-100, prev - 10))
-    }
-    
-    const delay = question?.type === 'vocabulaire' ? 4000 : 2500
-    
-    setTimeout(() => {
-      if (gameStatus !== 'finished') {
-        setRoundNumber(prev => prev + 1)
-        startNewRound()
+  const [matchStartTime] = useState(Date.now())
+  const round = useSplitRound(gameMode || 'all', {
+    onRoundResolved: ({ winner }) => {
+      if (winner === 'A') {
+        setTeamA((prev) => ({ ...prev, score: prev.score + 1 }))
+        ropeRef.current = Math.min(100, ropeRef.current + 10)
+      } else if (winner === 'B') {
+        setTeamB((prev) => ({ ...prev, score: prev.score + 1 }))
+        ropeRef.current = Math.max(-100, ropeRef.current - 10)
       }
-    }, delay)
-  }
-
-  const handleAnswer = (team, isCorrect) => {
-    const responseTime = Date.now() - roundStartTime.current
-    
-    if (team === 'A') {
-      if (isCorrect) {
-        setTeamAStatus('correct')
-        setTeamATime(responseTime)
-      } else {
-        setTeamAStatus('wrong')
-        setShowIncorrect(true)
-        setTimeout(() => setShowIncorrect(false), 400)
-      }
-    } else {
-      if (isCorrect) {
-        setTeamBStatus('correct')
-        setTeamBTime(responseTime)
-      } else {
-        setTeamBStatus('wrong')
-        setShowIncorrect(true)
-        setTimeout(() => setShowIncorrect(false), 400)
-      }
-    }
-    
-    const otherTeamStatus = team === 'A' ? teamBStatus : teamAStatus
-    
-    if (otherTeamStatus !== 'playing') {
-      setBothTeamsAnswered(true)
-    }
-    
-    if (isCorrect || otherTeamStatus !== 'playing') {
-      if (otherTeamStatus !== 'playing') {
-        endRound()
-      }
-    }
-  }
+      setRopePosition(ropeRef.current)
+      return ropeRef.current >= 100 || ropeRef.current <= -100
+    },
+  })
+  const {
+    question, timeLeft, isRoundActive, teamAStatus, teamBStatus, teamATime, teamBTime,
+    roundWinner, bothTeamsAnswered, roundNumber, totalRounds, finished, handleAnswer,
+  } = round
+  const gameStatus = finished ? 'finished' : 'active'
 
   const getWinner = () => {
     if (ropePosition >= 100) return 'A'
@@ -187,14 +69,12 @@ export const ChampionshipGameBoard = ({
     })
   }
 
-  const timerProgress = (timeLeft / ROUND_TIME) * 100
+  const timerProgress = round.roundTime ? (timeLeft / round.roundTime) * 100 : 0
   const winner = getWinner()
 
   return (
     <motion.div
       className="h-screen flex flex-col bg-background-dark overflow-hidden"
-      animate={showIncorrect ? { scale: [1, 1.005, 0.995, 1.005, 1] } : {}}
-      transition={{ duration: 0.3 }}
     >
       {/* Rope Progress Bar */}
       <RopeAnimation position={ropePosition} />
@@ -291,27 +171,15 @@ export const ChampionshipGameBoard = ({
           {/* Question Card */}
           <div className="flex-1 flex items-center justify-center p-4 min-h-0">
             {question && (
-              question.isMCQ || question.type === 'vocabulaire' ? (
-                <VocabularyCard
-                  question={question}
-                  team="A"
-                  onAnswer={(isCorrect) => handleAnswer('A', isCorrect)}
-                  isAnswering={!isRoundActive || teamAStatus !== 'playing'}
-                  disabled={!isRoundActive || teamAStatus !== 'playing'}
-                  responseTime={teamATime}
-                  showCorrectAnswer={bothTeamsAnswered || timeLeft === 0}
-                />
-              ) : (
-                <QuestionCard
-                  question={question}
-                  team="A"
-                  onAnswer={(isCorrect) => handleAnswer('A', isCorrect)}
-                  isAnswering={!isRoundActive || teamAStatus !== 'playing'}
-                  disabled={!isRoundActive || teamAStatus !== 'playing'}
-                  responseTime={teamATime}
-                  showCorrectAnswer={bothTeamsAnswered || timeLeft === 0}
-                />
-              )
+              <QuestionView
+                question={question}
+                team="A"
+                onAnswer={(isCorrect) => handleAnswer('A', isCorrect)}
+                isAnswering={!isRoundActive || teamAStatus !== 'playing'}
+                disabled={!isRoundActive || teamAStatus !== 'playing'}
+                responseTime={teamATime}
+                showCorrectAnswer={bothTeamsAnswered || timeLeft === 0}
+              />
             )}
           </div>
         </section>
@@ -356,27 +224,15 @@ export const ChampionshipGameBoard = ({
           {/* Question Card */}
           <div className="flex-1 flex items-center justify-center p-4 min-h-0">
             {question && (
-              question.isMCQ || question.type === 'vocabulaire' ? (
-                <VocabularyCard
-                  question={question}
-                  team="B"
-                  onAnswer={(isCorrect) => handleAnswer('B', isCorrect)}
-                  isAnswering={!isRoundActive || teamBStatus !== 'playing'}
-                  disabled={!isRoundActive || teamBStatus !== 'playing'}
-                  responseTime={teamBTime}
-                  showCorrectAnswer={bothTeamsAnswered || timeLeft === 0}
-                />
-              ) : (
-                <QuestionCard
-                  question={question}
-                  team="B"
-                  onAnswer={(isCorrect) => handleAnswer('B', isCorrect)}
-                  isAnswering={!isRoundActive || teamBStatus !== 'playing'}
-                  disabled={!isRoundActive || teamBStatus !== 'playing'}
-                  responseTime={teamBTime}
-                  showCorrectAnswer={bothTeamsAnswered || timeLeft === 0}
-                />
-              )
+              <QuestionView
+                question={question}
+                team="B"
+                onAnswer={(isCorrect) => handleAnswer('B', isCorrect)}
+                isAnswering={!isRoundActive || teamBStatus !== 'playing'}
+                disabled={!isRoundActive || teamBStatus !== 'playing'}
+                responseTime={teamBTime}
+                showCorrectAnswer={bothTeamsAnswered || timeLeft === 0}
+              />
             )}
           </div>
         </section>

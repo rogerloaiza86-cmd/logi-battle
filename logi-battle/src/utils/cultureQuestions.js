@@ -1,912 +1,319 @@
 /**
- * Base de données Culture Générale (2015-2025)
- * Questions variées : actualités, sport, cinéma, technologie, sciences, etc.
+ * Questions du bac pro « métiers de la logistique » (arrêté du 8 janvier 2025).
+ * Remplace l'ancienne culture générale hors référentiel.
  */
 
 export const cultureQuestions = [
-  // 2025
   {
-    question: "Quelle ville a accueilli les Jeux Olympiques d'été 2024 ?",
-    answer: 2024,
-    type: "annee",
-    category: "Sport",
-    hint: "Ville française"
-  },
-  {
-    question: "En quelle année Leonardo DiCaprio a-t-il enfin remporté l'Oscar du meilleur acteur ?",
-    answer: 2016,
-    type: "annee",
-    category: "Cinéma",
-    hint: "Pour le film The Revenant"
-  },
-  {
-    question: "Quelle année marque le début de la pandémie de COVID-19 ?",
-    answer: 2020,
-    type: "annee",
-    category: "Actualité",
-    hint: "Année du confinement mondial"
-  },
-  {
-    question: "En quelle année le Royaume-Uni a-t-il voté pour le Brexit ?",
-    answer: 2016,
-    type: "annee",
-    category: "Politique",
-    hint: "Référendum du 23 juin"
-  },
-  {
-    question: "Quelle année voit l'élection d'Emmanuel Macron comme Président de la République française ?",
-    answer: 2017,
-    type: "annee",
-    category: "Politique",
-    hint: "Premier mandat"
-  },
-  {
-    question: "En quelle année Notre-Dame de Paris a-t-elle été ravagée par un incendie ?",
-    answer: 2019,
-    type: "annee",
-    category: "Actualité",
-    hint: "15 avril"
-  },
-  {
-    question: "Quelle année marque la mort de la reine Elizabeth II ?",
-    answer: 2022,
-    type: "annee",
-    category: "Actualité",
-    hint: "8 septembre"
-  },
-  {
-    question: "En quelle année la Coupe du Monde de football 2022 a-t-elle eu lieu au Qatar ?",
-    answer: 2022,
-    type: "annee",
-    category: "Sport",
-    hint: "Victoire de l'Argentine"
-  },
-  {
-    question: "Quelle année voit le lancement du premier iPhone sans bouton physique (iPhone X) ?",
-    answer: 2017,
-    type: "annee",
-    category: "Technologie",
-    hint: "10 ans de l'iPhone"
-  },
-  {
-    question: "En quelle année SpaceX a-t-elle envoyé ses premiers astronautes dans l'espace ?",
-    answer: 2020,
-    type: "annee",
-    category: "Espace",
-    hint: "Mission Crew Dragon"
-  },
-  // Plus de questions 2020-2025
-  {
-    question: "Quelle année marque l'invasion de l'Ukraine par la Russie ?",
-    answer: 2022,
-    type: "annee",
-    category: "Actualité",
-    hint: "24 février"
-  },
-  {
-    question: "En quelle année le film 'Avengers: Endgame' est-il sorti ?",
-    answer: 2019,
-    type: "annee",
-    category: "Cinéma",
-    hint: "Film le plus rentable de l'histoire"
-  },
-  {
-    question: "Quelle année voit l'attentat contre Charlie Hebdo ?",
-    answer: 2015,
-    type: "annee",
-    category: "Actualité",
-    hint: "7 janvier"
-  },
-  {
-    question: "En quelle année les accords de Paris sur le climat ont-ils été signés ?",
-    answer: 2015,
-    type: "annee",
-    category: "Environnement",
-    hint: "COP21"
-  },
-  {
-    question: "Quelle année marque la victoire de la France à la Coupe du Monde de football ?",
-    answer: 2018,
-    type: "annee",
-    category: "Sport",
-    hint: "En Russie"
-  },
-  {
-    question: "En quelle année le premier trailer de GTA VI a été publié ?",
-    answer: 2023,
-    type: "annee",
-    category: "Jeux Vidéo",
-    hint: "Décembre"
-  },
-  {
-    question: "Quelle année voit la sortie du film 'Barbie' de Greta Gerwig ?",
-    answer: 2023,
-    type: "annee",
-    category: "Cinéma",
-    hint: "Phenomène rose"
-  },
-  {
-    question: "En quelle année Taylor Swift a-t-elle sorti l'album '1989 (Taylor's Version)' ?",
-    answer: 2023,
-    type: "annee",
-    category: "Musique",
-    hint: "Octobre"
-  },
-  {
-    question: "Quelle année marque le décès de Kobe Bryant ?",
-    answer: 2020,
-    type: "annee",
-    category: "Sport",
-    hint: "Crash d'hélicoptère"
-  },
-  {
-    question: "En quelle année le sauvetage des enfants thaïlandais de la grotte de Tham Luang a eu lieu ?",
-    answer: 2018,
-    type: "annee",
-    category: "Actualité",
-    hint: "Juillet"
-  },
-  // Questions chiffres/données
-  {
-    question: "Combien de saisons compte la série 'Game of Thrones' ?",
-    answer: 8,
-    type: "nombre",
-    category: "Séries",
-    hint: "Dernière saison en 2019"
-  },
-  {
-    question: "Combien de pays font partie de l'Union Européenne en 2024 ?",
-    answer: 27,
-    type: "nombre",
-    category: "Politique",
-    hint: "Après le Brexit"
-  },
-  {
-    question: "En combien de temps (en heures) la Terre fait-elle un tour complet sur elle-même ?",
-    answer: 24,
-    type: "nombre",
-    category: "Science",
-    hint: "Un jour"
-  },
-  {
-    question: "Combien de planètes compte notre système solaire ?",
-    answer: 8,
-    type: "nombre",
-    category: "Espace",
-    hint: "Pluton n'est plus une planète depuis 2006"
-  },
-  {
-    question: "Combien de joueurs compte une équipe de football sur le terrain ?",
-    answer: 11,
-    type: "nombre",
-    category: "Sport",
-    hint: "Dont le gardien"
-  },
-  {
-    question: "Combien de continents existe-t-il sur Terre ?",
-    answer: 7,
-    type: "nombre",
-    category: "Géographie",
-    hint: "Afrique, Amérique du Nord, Amérique du Sud, Antarctique, Asie, Europe, Océanie"
-  },
-  {
-    question: "Combien de lettres compte l'alphabet français ?",
-    answer: 26,
-    type: "nombre",
-    category: "Culture",
-    hint: "Comme l'anglais"
-  },
-  {
-    question: "Combien de couleurs primaires existe-t-il en peinture ?",
-    answer: 3,
-    type: "nombre",
-    category: "Art",
-    hint: "Rouge, jaune, bleu"
-  },
-  {
-    question: "Combien de dents un adulte possède-t-il normalement ?",
-    answer: 32,
-    type: "nombre",
-    category: "Santé",
-    hint: "Dents de sagesse incluses"
-  },
-  {
-    question: "Combien de doigts possède une main humaine ?",
-    answer: 5,
-    type: "nombre",
-    category: "Biologie",
-    hint: "Pouce inclus"
-  },
-  // Questions années supplémentaires
-  {
-    question: "En quelle année le Titanic a-t-il coulé ?",
-    answer: 1912,
-    type: "annee",
-    category: "Histoire",
-    hint: "14-15 avril"
-  },
-  {
-    question: "Quelle année marque la fin de la Seconde Guerre mondiale ?",
-    answer: 1945,
-    type: "annee",
-    category: "Histoire",
-    hint: "8 mai en Europe"
-  },
-  {
-    question: "En quelle année l'homme a-t-il marché sur la Lune pour la première fois ?",
-    answer: 1969,
-    type: "annee",
-    category: "Espace",
-    hint: "Apollo 11"
-  },
-  {
-    question: "Quelle année voit la chute du mur de Berlin ?",
-    answer: 1989,
-    type: "annee",
-    category: "Histoire",
-    hint: "9 novembre"
-  },
-  {
-    question: "En quelle année Facebook (Meta) a-t-il été créé ?",
-    answer: 2004,
-    type: "annee",
-    category: "Technologie",
-    hint: "Par Mark Zuckerberg"
-  },
-  {
-    question: "Quelle année marque la création de YouTube ?",
-    answer: 2005,
-    type: "annee",
-    category: "Technologie",
-    hint: "Février"
-  },
-  {
-    question: "En quelle année l'iPhone est-il sorti pour la première fois ?",
-    answer: 2007,
-    type: "annee",
-    category: "Technologie",
-    hint: "Par Steve Jobs"
-  },
-  {
-    question: "Quelle année voit la sortie du film 'Black Panther' ?",
-    answer: 2018,
-    type: "annee",
-    category: "Cinéma",
-    hint: "Marvel"
-  },
-  {
-    question: "En quelle année 'La Casa de Papel' a-t-elle été diffusée pour la première fois ?",
-    answer: 2017,
-    type: "annee",
-    category: "Séries",
-    hint: "Série espagnole"
-  },
-  {
-    question: "Quelle année marque le premier vol commercial du Concorde ?",
-    answer: 1976,
-    type: "annee",
-    category: "Histoire",
-    hint: "21 janvier"
-  },
-  // Calculs et données
-  {
-    question: "Quel est le résultat de 15 × 4 ?",
-    answer: 60,
-    type: "calcul",
-    category: "Mathématiques",
-    hint: "15 + 15 + 15 + 15"
-  },
-  {
-    question: "Combien de secondes compte une minute ?",
-    answer: 60,
-    type: "nombre",
-    category: "Temps",
-    hint: "60 minutes = 1 heure"
-  },
-  {
-    question: "Combien de minutes compte une heure ?",
-    answer: 60,
-    type: "nombre",
-    category: "Temps",
-    hint: "60 secondes × 60"
-  },
-  {
-    question: "Combien de jours compte une année non bissextile ?",
-    answer: 365,
-    type: "nombre",
-    category: "Temps",
-    hint: "366 pour les bissextiles"
-  },
-  {
-    question: "Combien de trimestres compte une année ?",
-    answer: 4,
-    type: "nombre",
-    category: "Temps",
-    hint: "3 mois chacun"
-  },
-  {
-    question: "Quel est le résultat de 100 ÷ 4 ?",
-    answer: 25,
-    type: "calcul",
-    category: "Mathématiques",
-    hint: "Un quart de 100"
-  },
-  {
-    question: "Combien de côtés compte un hexagone ?",
-    answer: 6,
-    type: "nombre",
-    category: "Géométrie",
-    hint: "Hexa = 6"
-  },
-  {
-    question: "Combien de faces compte un dé à jouer standard ?",
-    answer: 6,
-    type: "nombre",
-    category: "Jeux",
-    hint: "Numérotées de 1 à 6"
-  },
-  {
-    question: "Combien de sommets compte un triangle ?",
-    answer: 3,
-    type: "nombre",
-    category: "Géométrie",
-    hint: "Trois côtés, trois angles"
-  },
-  {
-    question: "Combien de cordes compte une guitare standard ?",
-    answer: 6,
-    type: "nombre",
-    category: "Musique",
-    hint: "Mi, La, Ré, Sol, Si, Mi"
-  },
-  // Géographie
-  {
-    question: "Combien de régions compte la France métropolitaine ?",
-    answer: 13,
-    type: "nombre",
-    category: "Géographie",
-    hint: "Avant 2016, il y en avait 22"
-  },
-  {
-    question: "Combien de départements compte la France (métropole + DOM-TOM) ?",
-    answer: 101,
-    type: "nombre",
-    category: "Géographie",
-    hint: "96 en métropole + 5 DOM"
-  },
-  {
-    question: "Combien de fuseaux horaires compte la Russie ?",
-    answer: 11,
-    type: "nombre",
-    category: "Géographie",
-    hint: "Pays le plus vaste du monde"
-  },
-  {
-    question: "Combien d'États compte les États-Unis ?",
-    answer: 50,
-    type: "nombre",
-    category: "Géographie",
-    hint: "48 contigus + Alaska + Hawaï"
-  },
-  {
-    question: "Combien de pays compte l'Afrique ?",
-    answer: 54,
-    type: "nombre",
-    category: "Géographie",
-    hint: "Continent le plus peuplé"
-  },
-  // Sport
-  {
-    question: "Combien de sets gagnants faut-il pour remporter un match de tennis en Grand Chelem (hommes) ?",
-    answer: 3,
-    type: "nombre",
-    category: "Sport",
-    hint: "5 sets maximum"
-  },
-  {
-    question: "Combien de points compte un touchdown au football américain ?",
-    answer: 6,
-    type: "nombre",
-    category: "Sport",
-    hint: "Sans le bonus"
-  },
-  {
-    question: "Combien de joueurs compte une équipe de basket sur le terrain ?",
-    answer: 5,
-    type: "nombre",
-    category: "Sport",
-    hint: "Par équipe"
-  },
-  {
-    question: "Combien de manches compte un match de baseball ?",
-    answer: 9,
-    type: "nombre",
-    category: "Sport",
-    hint: "Innings"
-  },
-  {
-    question: "Combien de tours compte le Tour de France cycliste ?",
-    answer: 21,
-    type: "nombre",
-    category: "Sport",
-    hint: "Environ 3 semaines"
-  },
-  // Sciences
-  {
-    question: "Combien d'os compte le corps humain adulte ?",
-    answer: 206,
-    type: "nombre",
-    category: "Biologie",
-    hint: "Plus de 300 chez le bébé"
-  },
-  {
-    question: "Combien de paires de chromosomes possède l'être humain ?",
-    answer: 23,
-    type: "nombre",
-    category: "Biologie",
-    hint: "46 chromosomes au total"
-  },
-  {
-    question: "Quelle est la température de fusion de la glace (en °C) ?",
-    answer: 0,
-    type: "nombre",
-    category: "Physique",
-    hint: "À pression atmosphérique"
-  },
-  {
-    question: "Combien de sens traditionnels possède l'être humain ?",
-    answer: 5,
-    type: "nombre",
-    category: "Biologie",
-    hint: "Vue, ouïe, toucher, goût, odorat"
-  },
-  {
-    question: "Combien de dents de lait a un enfant ?",
-    answer: 20,
-    type: "nombre",
-    category: "Santé",
-    hint: "Tomberont pour les définitives"
-  },
-  // Arts et Culture
-  {
-    question: "Combien de symphonies a composé Beethoven ?",
-    answer: 9,
-    type: "nombre",
-    category: "Musique",
-    hint: "La 9ème contient l'Ode à la joie"
-  },
-  {
-    question: "Combien de tableaux composent la série 'Les Nymphéas' de Monet ?",
-    answer: 250,
-    type: "nombre",
-    category: "Art",
-    hint: "Environ, peints sur 30 ans"
-  },
-  {
-    question: "Combien de pièces Shakespeare a-t-il écrites ?",
-    answer: 37,
-    type: "nombre",
-    category: "Littérature",
-    hint: "Environ"
-  },
-  {
-    question: "Combien de films compte la saga Harry Potter (principale) ?",
-    answer: 8,
-    type: "nombre",
-    category: "Cinéma",
-    hint: "7 livres mais 8 films"
-  },
-  {
-    question: "Combien de saisons compte la série 'Friends' ?",
-    answer: 10,
-    type: "nombre",
-    category: "Séries",
-    hint: "De 1994 à 2004"
-  },
-  // Jeux Vidéo
-  {
-    question: "En quelle année Minecraft est-il sorti officiellement ?",
-    answer: 2011,
-    type: "annee",
-    category: "Jeux Vidéo",
-    hint: "Créé par Notch"
-  },
-  {
-    question: "En quelle année Fortnite Battle Royale est-il sorti ?",
-    answer: 2017,
-    type: "annee",
-    category: "Jeux Vidéo",
-    hint: "Phénomène mondial"
-  },
-  {
-    question: "Combien de joueurs compte une partie de Among Us ?",
-    answer: 10,
-    type: "nombre",
-    category: "Jeux Vidéo",
-    hint: "Maximum"
-  },
-  {
-    question: "En quelle année est sorti The Legend of Zelda: Breath of the Wild ?",
-    answer: 2017,
-    type: "annee",
-    category: "Jeux Vidéo",
-    hint: "Avec la Switch"
-  },
-  {
-    question: "En quelle année Pokémon Go a-t-il été lancé ?",
-    answer: 2016,
-    type: "annee",
-    category: "Jeux Vidéo",
-    hint: "Été 2016"
-  },
-  // Questions récentes 2024-2025
-  {
-    question: "En quelle année a eu lieu le mariage du Prince Harry et Meghan Markle ?",
-    answer: 2018,
-    type: "annee",
-    category: "Actualité",
-    hint: "19 mai"
-  },
-  {
-    question: "Quelle année marque le retour de Johnny Hallyday sur scène après son cancer (avant son décès) ?",
-    answer: 2015,
-    type: "annee",
-    category: "Musique",
-    hint: "Tournée 'Rester Vivant'"
-  },
-  {
-    question: "En quelle année les attentats du Bataclan ont-ils eu lieu ?",
-    answer: 2015,
-    type: "annee",
-    category: "Actualité",
-    hint: "13 novembre"
-  },
-  {
-    question: "Quelle année voit le lancement de Disney+ en France ?",
-    answer: 2020,
-    type: "annee",
-    category: "Streaming",
-    hint: "31 mars"
-  },
-  {
-    question: "En quelle année le nombre d'habitants sur Terre a dépassé 8 milliards ?",
-    answer: 2022,
-    type: "annee",
-    category: "Démographie",
-    hint: "15 novembre"
-  },
-  {
-    question: "Quelle année marque le premier vol de l'hélicoptère Ingenuity sur Mars ?",
-    answer: 2021,
-    type: "annee",
-    category: "Espace",
-    hint: "Premier vol motorisé sur une autre planète"
-  },
-  {
-    question: "En quelle année le James Webb Space Telescope a-t-il été lancé ?",
-    answer: 2021,
-    type: "annee",
-    category: "Espace",
-    hint: "25 décembre"
-  },
-  {
-    question: "Quelle année voit la création de l'IA ChatGPT par OpenAI ?",
-    answer: 2022,
-    type: "annee",
-    category: "Technologie",
-    hint: "30 novembre"
-  },
-  {
-    question: "En quelle année le SMS a-t-il fêté ses 30 ans ?",
-    answer: 2022,
-    type: "annee",
-    category: "Technologie",
-    hint: "Premier SMS envoyé en 1992"
-  },
-  {
-    question: "Quelle année marque l'interdiction des vols commerciaux du Concorde ?",
-    answer: 2003,
-    type: "annee",
-    category: "Histoire",
-    hint: "24 octobre dernier vol"
-  },
-  // Calculs
-  {
-    question: "Quel est le résultat de 7 × 8 ?",
-    answer: 56,
-    type: "calcul",
-    category: "Mathématiques",
-    hint: "Tables de multiplication"
-  },
-  {
-    question: "Quel est le résultat de 12 × 12 ?",
-    answer: 144,
-    type: "calcul",
-    category: "Mathématiques",
-    hint: "Carré parfait"
-  },
-  {
-    question: "Quel est le résultat de 1000 ÷ 8 ?",
-    answer: 125,
-    type: "calcul",
-    category: "Mathématiques",
-    hint: "Division"
-  },
-  {
-    question: "Quel est le résultat de 9 × 9 ?",
-    answer: 81,
-    type: "calcul",
-    category: "Mathématiques",
-    hint: "Carré de 9"
-  },
-  {
-    question: "Combien de minutes compte 2 heures et 30 minutes ?",
-    answer: 150,
-    type: "calcul",
-    category: "Temps",
-    hint: "120 + 30"
-  },
-  // Divers
-  {
-    question: "Combien de lettres compte le mot 'international' ?",
-    answer: 13,
-    type: "nombre",
-    category: "Langue",
-    hint: "i-n-t-e-r-n-a-t-i-o-n-a-l"
-  },
-  {
-    question: "Combien de voyelles compte l'alphabet français ?",
-    answer: 6,
-    type: "nombre",
-    category: "Langue",
-    hint: "A, E, I, O, U, Y"
-  },
-  {
-    question: "Combien de saisons compte une année ?",
-    answer: 4,
-    type: "nombre",
-    category: "Temps",
-    hint: "Printemps, été, automne, hiver"
-  },
-  {
-    question: "Combien de points cardinaux existe-t-il ?",
-    answer: 4,
-    type: "nombre",
-    category: "Géographie",
-    hint: "Nord, Sud, Est, Ouest"
-  },
-  {
-    question: "Combien de places compte un jury populaire en France (assises) ?",
-    answer: 9,
-    type: "nombre",
-    category: "Justice",
-    hint: "6 jurés + 3 magistrats"
-  },
-  // Plus de questions années
-  {
-    question: "En quelle année le Canal de Suez a-t-il été inauguré ?",
-    answer: 1869,
-    type: "annee",
-    category: "Histoire",
-    hint: "17 novembre"
-  },
-  {
-    question: "Quelle année marque la fin de la Première Guerre mondiale ?",
-    answer: 1918,
-    type: "annee",
-    category: "Histoire",
-    hint: "11 novembre"
-  },
-  {
-    question: "En quelle année la Tour Eiffel a-t-elle été inaugurée ?",
-    answer: 1889,
-    type: "annee",
-    category: "Histoire",
-    hint: "Exposition universelle"
-  },
-  {
-    question: "Quelle année voit la première émission de 'Koh-Lanta' ?",
-    answer: 2001,
-    type: "annee",
-    category: "Télévision",
-    hint: "4 août"
-  },
-  {
-    question: "En quelle année 'The Voice' a-t-elle été créée ?",
-    answer: 2012,
-    type: "annee",
-    category: "Télévision",
-    hint: "Version française"
-  },
-  {
-    question: "Quelle année marque le tout premier film de l'Univers Cinématographique Marvel (Iron Man) ?",
-    answer: 2008,
-    type: "annee",
-    category: "Cinéma",
-    hint: "Début du MCU"
-  },
-  {
-    question: "En quelle année est sorti 'Avatar' de James Cameron ?",
-    answer: 2009,
-    type: "annee",
-    category: "Cinéma",
-    hint: "Film le plus rentable pendant 10 ans"
-  },
-  {
-    question: "Quelle année voit la sortie de 'Titanic' ?",
-    answer: 1997,
-    type: "annee",
-    category: "Cinéma",
-    hint: "James Cameron"
-  },
-  {
-    question: "En quelle année Google a-t-il été fondé ?",
-    answer: 1998,
-    type: "annee",
-    category: "Technologie",
-    hint: "4 septembre"
-  },
-  {
-    question: "Quelle année marque la création de l'Union Européenne (Traité de Maastricht) ?",
-    answer: 1992,
-    type: "annee",
-    category: "Politique",
-    hint: "7 février"
-  },
-  {
-    question: "En quelle année le Berlin Wall est-il tombé ?",
-    answer: 1989,
-    type: "annee",
-    category: "Histoire",
-    hint: "9 novembre"
-  },
-  {
-    question: "Quelle année voit la mort de Michael Jackson ?",
-    answer: 2009,
-    type: "annee",
-    category: "Musique",
-    hint: "25 juin"
-  },
-  {
-    question: "En quelle année Lady Gaga a-t-elle sorti son premier album 'The Fame' ?",
-    answer: 2008,
-    type: "annee",
-    category: "Musique",
-    hint: "Single 'Just Dance'"
-  },
-  {
-    question: "Quelle année marque le premier titre de Champion du Monde de l'équipe de France de handball masculine ?",
-    answer: 1995,
-    type: "annee",
-    category: "Sport",
-    hint: "En Islande"
-  },
-  {
-    question: "En quelle année Zinedine Zidane a-t-il marqué son coup de tête en finale du Mondial ?",
-    answer: 1998,
-    type: "annee",
-    category: "Sport",
-    hint: "12 juillet, deux buts de la tête"
-  },
-  {
-    question: "Quelle année voit le sacre de Rafael Nadal à Roland-Garros pour la première fois ?",
-    answer: 2005,
-    type: "annee",
-    category: "Sport",
-    hint: "Il avait 19 ans"
-  },
-  {
-    question: "En quelle année la France a-t-elle organisé l'Euro de football ?",
-    answer: 2016,
-    type: "annee",
-    category: "Sport",
-    hint: "Finaliste contre le Portugal"
-  },
-  {
-    question: "Quelle année marque le dernier sacre de la France en Coupe Davis ?",
-    answer: 2017,
-    type: "annee",
-    category: "Sport",
-    hint: "Avec Lucas Pouille"
-  },
-  {
-    question: "En quelle année Kylian Mbappé a-t-il été sacré champion du monde ?",
-    answer: 2018,
-    type: "annee",
-    category: "Sport",
-    hint: "Il avait 19 ans"
-  },
-  {
-    question: "Quelle année voit la première participation du VAR en Coupe du Monde ?",
-    answer: 2018,
-    type: "annee",
-    category: "Sport",
-    hint: "En Russie"
-  },
-  // Plus de calculs et nombres
-  {
-    question: "Combien de syllabes compte un alexandrin ?",
-    answer: 12,
-    type: "nombre",
-    category: "Littérature",
-    hint: "Vers classique français"
-  },
-  {
-    question: "Combien de dés utilise-t-on au jeu de Yahtzee ?",
-    answer: 5,
-    type: "nombre",
-    category: "Jeux",
-    hint: "Cinq dés"
-  },
-  {
-    question: "Combien de cases compte un plateau d'échecs ?",
-    answer: 64,
-    type: "nombre",
-    category: "Jeux",
-    hint: "8 × 8"
-  },
-  {
-    question: "Combien de pièces chaque joueur a-t-il au début d'une partie d'échecs ?",
-    answer: 16,
-    type: "nombre",
-    category: "Jeux",
-    hint: "1 roi, 1 dame, 2 tours, 2 fous, 2 cavaliers, 8 pions"
-  },
-  {
-    question: "Combien de trous compte un terrain de golf standard ?",
-    answer: 18,
-    type: "nombre",
-    category: "Sport",
-    hint: "Parcours complet"
-  },
-  {
-    question: "Combien de périodes compte un match de hockey sur glace ?",
-    answer: 3,
-    type: "nombre",
-    category: "Sport",
-    hint: "20 minutes chacune"
-  },
-  {
-    question: "Combien de rangs compte une armée de bataille dans un jeu de cartes standard ?",
-    answer: 13,
-    type: "nombre",
-    category: "Jeux",
-    hint: "As à Roi"
-  },
-  {
-    question: "Combien de cartes compte un jeu de tarot français ?",
-    answer: 78,
-    type: "nombre",
-    category: "Jeux",
-    hint: "56 cartes classiques + 21 atouts + 1 excuse"
-  },
-  {
-    question: "Combien de couleurs compte un arc-en-ciel ?",
-    answer: 7,
-    type: "nombre",
-    category: "Nature",
-    hint: "Violet, indigo, bleu, vert, jaune, orange, rouge"
-  },
-  {
-    question: "Combien de pattes possède une araignée ?",
-    answer: 8,
-    type: "nombre",
-    category: "Nature",
-    hint: "Arachnide"
-  }
-];
+    id: 'ref_001',
+    question: "Que couvre la supply chain selon le référentiel du bac pro métiers de la logistique ?",
+    options: [
+      'Uniquement le transport routier final',
+      'Les flux de produits, d’information, de services et financiers, de la matière première au client',
+      'Seulement le stockage en entrepôt',
+      'La comptabilité fournisseur'
+    ],
+    correctOption: 1,
+    explanation: "Le référentiel définit la supply chain comme l’ensemble des flux physiques, d’information, de services et financiers, de l’achat jusqu’à la livraison.",
+    category: 'C1.1',
+    hint: 'Pôle 1 — positionner l’activité dans la supply chain'
+  },
+  {
+    id: 'ref_002',
+    question: "Quel flux est un flux d’information, et non un flux physique ?",
+    options: [
+      'Le déplacement d’une palette vers le quai',
+      'La transmission du bon de livraison dans le WMS',
+      'Le déchargement du camion',
+      'Le gerbage en palettier'
+    ],
+    correctOption: 1,
+    explanation: "Le WMS et les documents portent le flux d’information. Le déplacement de la marchandise est un flux physique.",
+    category: 'C1.1',
+    hint: 'Distinguer flux physiques et flux d’information'
+  },
+  {
+    id: 'ref_003',
+    question: "À la réception, quel contrôle permet d’émettre des réserves ?",
+    options: [
+      'Le contrôle quantitatif et qualitatif des produits et des documents',
+      'Le choix de la musique de quai',
+      'La couleur des gants uniquement',
+      'Le nombre de pauses de l’équipe'
+    ],
+    correctOption: 0,
+    explanation: "C1.4 : contrôler quantité et qualité, identifier avaries ou manquants, puis émettre des réserves et ouvrir un litige si besoin.",
+    category: 'C1.4',
+    hint: 'Pôle 1 — traiter la réception'
+  },
+  {
+    id: 'ref_004',
+    question: "Quelle méthode de rotation sort d’abord les produits dont la date limite est la plus proche ?",
+    options: ['LIFO', 'FIFO', 'FEFO', 'Au hasard'],
+    correctOption: 2,
+    explanation: "FEFO (First Expired, First Out) privilégie la date de péremption. C’est le critère de conservation visé pour les produits datés.",
+    category: 'C1.5',
+    hint: 'Mise en stock et rotation'
+  },
+  {
+    id: 'ref_005',
+    question: "Un client interne, dans le référentiel, est surtout :",
+    options: [
+      'Un client qui achète sur le site web',
+      'Un service de l’organisation, par exemple une ligne de production à approvisionner',
+      'Le transporteur externe',
+      'Le service des douanes'
+    ],
+    correctOption: 1,
+    explanation: "C2.1 distingue le client interne (ordre de fabrication, ligne de production) du client externe.",
+    category: 'C2.1',
+    hint: 'Pôle 2 — demande client'
+  },
+  {
+    id: 'ref_006',
+    question: "Optimiser une unité de charge, c’est principalement :",
+    options: [
+      'Empiler sans limite de hauteur ni de masse',
+      'Constituer une palette stable qui respecte le client, le produit et le plan de palettisation',
+      'Mélanger tous les lots sans étiquette',
+      'Laisser le colis au sol dans l’allée'
+    ],
+    correctOption: 1,
+    explanation: "C2.2.3 : choisir le support, garantir l’intégrité des produits et élaborer un plan de palettisation.",
+    category: 'C2.2',
+    hint: 'Préparation de commandes'
+  },
+  {
+    id: 'ref_007',
+    question: "Le picking désigne :",
+    options: [
+      'Le prélèvement des produits aux emplacements pour préparer une commande',
+      'La réparation d’un chariot',
+      'La facturation du transport',
+      'Le tri des déchets de bureau uniquement'
+    ],
+    correctOption: 0,
+    explanation: "Le savoir associé à C2.2 nomme le picking, le packing et le copacking dans la préparation de commandes.",
+    category: 'C2.2',
+    hint: 'Circuit de prélèvement'
+  },
+  {
+    id: 'ref_008',
+    question: "Contribuer à la logistique industrielle (C2.3), c’est notamment :",
+    options: [
+      'Approvisionner une ligne de production et tracer les mouvements de stock',
+      'Choisir la publicité du produit',
+      'Recruter le directeur général',
+      'Fixer le prix de vente magasin'
+    ],
+    correctOption: 0,
+    explanation: "C2.3 : approvisionner la ligne, saisir les mouvements, identifier l’impact d’un dysfonctionnement.",
+    category: 'C2.3',
+    hint: 'Pôle 2 — production'
+  },
+  {
+    id: 'ref_009',
+    question: "Organiser une tournée en compte propre comprend :",
+    options: [
+      'L’itinéraire, le véhicule, le plan de chargement et les temps de conduite et de repos',
+      'Uniquement le logo sur le camion',
+      'La suppression des documents de transport',
+      'Le choix du fournisseur de matière première'
+    ],
+    correctOption: 0,
+    explanation: "C2.4 : élaborer l’itinéraire, respecter la réglementation sociale, choisir le véhicule et le plan de chargement.",
+    category: 'C2.4',
+    hint: 'Transport en compte propre'
+  },
+  {
+    id: 'ref_010',
+    question: "Confier l’expédition à un prestataire externe exige de :",
+    options: [
+      'Choisir un transporteur au cahier des charges et lui transmettre documents et consignes',
+      'Charger sans vérifier le véhicule',
+      'Garder le contrat de transport dans un tiroir fermé',
+      'Laisser le conducteur partir sans instruction'
+    ],
+    correctOption: 0,
+    explanation: "C2.6 : adéquation du véhicule, obligations du contrat de transport, transmission au conducteur.",
+    category: 'C2.6',
+    hint: 'Prestataire de transport'
+  },
+  {
+    id: 'ref_011',
+    question: "Les supports de charge consignés doivent être :",
+    options: [
+      'Suivis, contrôlés au retour et tracés dans la base',
+      'Jetés dès la livraison',
+      'Mélangés aux déchets banals sans comptage',
+      'Offerts au conducteur sans écriture'
+    ],
+    correctOption: 0,
+    explanation: "C2.5 : repérer les retours de supports, mettre à jour la base et contrôler quantité et qualité.",
+    category: 'C2.5',
+    hint: 'Palettes et contenants consignés'
+  },
+  {
+    id: 'ref_012',
+    question: "Adapter le processus à un produit sous température dirigée, c’est :",
+    options: [
+      'Appliquer les contraintes de conservation à la réception, au stockage et à l’expédition',
+      'Le stocker avec les produits ambiants pour gagner de la place',
+      'Couper la chaîne du froid la nuit',
+      'Retirer les étiquettes de température'
+    ],
+    correctOption: 0,
+    explanation: "C3.1 : le processus change selon le produit (température dirigée, pharmaceutique, dangereux, etc.).",
+    category: 'C3.1',
+    hint: 'Spécificités produit'
+  },
+  {
+    id: 'ref_013',
+    question: "La traçabilité (C3.2) sert à :",
+    options: [
+      'Suivre le produit, le contenant et les données jusqu’au client, y compris les retours',
+      'Effacer l’historique des lots',
+      'Remplacer le contrôle qualité',
+      'Éviter d’utiliser le WMS'
+    ],
+    correctOption: 0,
+    explanation: "Le pôle 3 demande le suivi des flux physiques, des contenants et des données, retours compris.",
+    category: 'C3.2',
+    hint: 'Qualité et suivi'
+  },
+  {
+    id: 'ref_014',
+    question: "Une action RSE attendue sur un poste logistique est :",
+    options: [
+      'Limiter les gaspillages, notamment énergétiques, et proposer une amélioration concrète',
+      'Augmenter les trajets à vide',
+      'Laisser les zones de travail encombrées',
+      'Jeter les emballages réutilisables'
+    ],
+    correctOption: 0,
+    explanation: "C3.3 : analyser la situation, limiter les gaspillages, remettre la zone en état, mesurer l’impact.",
+    category: 'C3.3',
+    hint: 'Démarche RSE'
+  },
+  {
+    id: 'ref_015',
+    question: "Coordonner une petite équipe (C3.4) inclut :",
+    options: [
+      'Le passage de consignes, les imprévus, la sécurité et l’accueil des collaborateurs, y compris en situation de handicap',
+      'Ignorer les remarques de l’équipe',
+      'Réserver les consignes à l’oral sans fin de poste',
+      'Exclure un collègue du réveil musculaire'
+    ],
+    correctOption: 0,
+    explanation: "Le référentiel vise l’animation d’une équipe de 4 à 10 personnes, l’inclusion et le réveil musculaire.",
+    category: 'C3.4',
+    hint: 'Management de proximité'
+  },
+  {
+    id: 'ref_016',
+    question: "La recommandation R.489 concerne :",
+    options: [
+      'La conduite en sécurité des chariots de manutention automoteurs à conducteur porté',
+      'Le code de la route des voitures particulières',
+      'La paie des intérimaires',
+      'L’étiquetage alimentaire uniquement'
+    ],
+    correctOption: 0,
+    explanation: "Le bloc 4 et l’unité U32 s’appuient sur la R.489 (catégories 1B, 3 et 5).",
+    category: 'C4.1',
+    hint: 'Pôle 4 — engins'
+  },
+  {
+    id: 'ref_017',
+    question: "Avant de prendre un chariot, l’opérateur doit :",
+    options: [
+      'Vérifier l’adéquation à la charge, la plaque de charge, les dispositifs de sécurité et les documents',
+      'Démarrer et lever la charge la plus lourde pour tester',
+      'Retirer le klaxon s’il fait du bruit',
+      'Ignorer les anomalies du sol'
+    ],
+    correctOption: 0,
+    explanation: "C4.1 : adéquation, plaque de charge, contrôle visuel, test des sécurités, documents réglementaires.",
+    category: 'C4.1',
+    hint: 'Mise en service'
+  },
+  {
+    id: 'ref_018',
+    question: "En fin de poste, le cariste doit :",
+    options: [
+      'Stationner selon le protocole, fourches au sol, et signaler les anomalies',
+      'Laisser le chariot en travers de l’allée, clé dessus',
+      'Garder la charge levée pour le collègue suivant',
+      'Oublier le compte rendu si la tournée est finie'
+    ],
+    correctOption: 0,
+    explanation: "C4.4 : stationnement en sécurité, maintenance de premier niveau si besoin, compte rendu des anomalies.",
+    category: 'C4.4',
+    hint: 'Fin de poste'
+  },
+  {
+    id: 'ref_019',
+    question: "Le port des EPI sur un site logistique est :",
+    options: [
+      'Adapté au risque du poste (chaussures, gilet, gants, protection bruit ou tête)',
+      'Facultatif si l’on connaît le site',
+      'Réservé aux visiteurs',
+      'Remplacé par un badge'
+    ],
+    correctOption: 0,
+    explanation: "C1.2 : signalétique, protocole et équipements de protection individuelle selon le danger.",
+    category: 'C1.2',
+    hint: 'Prévention'
+  },
+  {
+    id: 'ref_020',
+    question: "Un volume de palette 1,20 m × 0,80 m × 1,50 m vaut :",
+    options: ['0,96 m³', '1,44 m³', '2,40 m³', '14,4 m³'],
+    correctOption: 1,
+    explanation: "1,20 × 0,80 × 1,50 = 1,44 m³. Les savoirs associés demandent surface, volume et conversions (U12).",
+    category: 'U12',
+    hint: 'Savoir scientifique associé'
+  },
+  {
+    id: 'ref_021',
+    question: "Le WMS est utilisé dans le référentiel pour :",
+    options: [
+      'Gérer l’entrepôt et mettre à jour les données de réception, de stock et de préparation',
+      'Dessiner uniquement le logo de l’entreprise',
+      'Remplacer le contrat de travail',
+      'Calculer la paie des conducteurs'
+    ],
+    correctOption: 0,
+    explanation: "L’environnement numérique cité est le logiciel de gestion d’entrepôt (WMS), avec PDA et tableur.",
+    category: 'C1.6',
+    hint: 'Système d’information'
+  },
+  {
+    id: 'ref_022',
+    question: "Quelle poursuite d’études est citée après ce bac pro ?",
+    options: [
+      'BTS Gestion des transports et de la logistique associée',
+      'CAP Cuisine uniquement',
+      'Bac général scientifique obligatoire',
+      'Aucun diplôme ne prolonge ce bac'
+    ],
+    correctOption: 0,
+    explanation: "Le référentiel cite le BTS GTLA et le titre de technicien supérieur en méthodes et exploitation logistique.",
+    category: 'Diplôme',
+    hint: 'Perspectives'
+  },
+]
 
-// Mélanger et sélectionner aléatoirement
-export const getRandomCultureQuestions = (count = 10) => {
-  const shuffled = [...cultureQuestions].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
-};
-
-// Obtenir une question aléatoire
 export const getRandomCultureQuestion = () => {
-  const randomIndex = Math.floor(Math.random() * cultureQuestions.length);
-  return cultureQuestions[randomIndex];
-};
+  const index = Math.floor(Math.random() * cultureQuestions.length)
+  return cultureQuestions[index]
+}
 
-// Nombre total de questions disponibles
-export const getTotalQuestionsCount = () => cultureQuestions.length;
+export const getRandomCultureQuestions = (count = 10) => {
+  const shuffled = [...cultureQuestions].sort(() => Math.random() - 0.5)
+  return shuffled.slice(0, count)
+}
+
+export const getTotalQuestionsCount = () => cultureQuestions.length
+
+export default cultureQuestions

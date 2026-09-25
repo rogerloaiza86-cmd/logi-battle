@@ -19,6 +19,7 @@ import { getJitQuestion } from './jitQuestions'
 import { getRouteOptimizerQuestion } from './routeOptimizerQuestions'
 import { getLegalQuestion } from './legalQuestions'
 import { getMathQuestion } from './mathQuestions'
+import { referentielFor } from '../data/referentiel2025'
 
 // ===== PALETTISATION =====
 /**
@@ -112,14 +113,14 @@ export const generatePalletizationQuestion = (difficulty = 1, forceCalculation =
     type: 'palettisation',
     difficulty,
     title: '📦 Palettisation',
-    description: `Combien de colis de dimensions ${boxLength}×${boxWidth}×${boxHeight} cm pouvez-vous mettre sur une palette ${paletteLength}×${paletteWidth} cm (hauteur max: 150 cm)?`,
+    description: `Combien de colis de ${boxLength}×${boxWidth}×${boxHeight} cm sur une palette ${paletteLength}×${paletteWidth} cm, hauteur max ${maxHeight} cm ? Orienter la longueur du colis sur la longueur de la palette. Ti = colis par couche, Hi = couches, total = Ti × Hi.`,
     data: {
       boxLength,
       boxWidth,
       boxHeight,
       paletteLength,
       paletteWidth,
-      maxHeight: 150,
+      maxHeight,
     },
     correctAnswer: answer,
     explanation,
@@ -158,6 +159,10 @@ export const generateTransportCostQuestion = (difficulty = 1, forceCalculation =
   // Question de calcul originale
   let distance, weight, costPerKm, costPerTon
   let answer, explanation
+  let discount
+  let fuel
+  let toll
+  let transportDetail = ''
 
   if (difficulty === 1) {
     distance = [100, 150, 200][Math.floor(Math.random() * 3)]
@@ -167,38 +172,41 @@ export const generateTransportCostQuestion = (difficulty = 1, forceCalculation =
 
     answer = distance * costPerKm + weight * costPerTon
     explanation = `Coût = (${distance} km × ${costPerKm}€/km) + (${weight} tonnes × ${costPerTon}€/tonne)\n= ${distance * costPerKm}€ + ${weight * costPerTon}€ = ${answer}€`
+    transportDetail = `${costPerKm} €/km et ${costPerTon} €/tonne`
   } else if (difficulty === 2) {
     distance = [250, 350, 450][Math.floor(Math.random() * 3)]
     weight = [20, 25, 30][Math.floor(Math.random() * 3)]
-    const discount = [5, 10, 15][Math.floor(Math.random() * 3)]
+    discount = [5, 10, 15][Math.floor(Math.random() * 3)]
     costPerKm = 1.8
     costPerTon = 90
 
     let baseCost = distance * costPerKm + weight * costPerTon
     let discountAmount = (baseCost * discount) / 100
-    answer = baseCost - discountAmount
+    answer = Math.round(baseCost - discountAmount)
+    transportDetail = `${costPerKm} €/km, ${costPerTon} €/tonne, remise ${discount} %`
 
-    explanation = `Coût initial: ${baseCost.toFixed(2)}€\nRemise ${discount}%: -${discountAmount.toFixed(2)}€\nCoût final: ${answer.toFixed(2)}€`
+    explanation = `Coût initial: ${baseCost.toFixed(2)}€\nRemise ${discount}%: -${discountAmount.toFixed(2)}€\nCoût final arrondi: ${answer}€`
   } else {
     distance = [500, 600, 750][Math.floor(Math.random() * 3)]
     weight = [40, 50, 60][Math.floor(Math.random() * 3)]
-    const fuel = 1.5
-    const toll = 50
+    fuel = 1.5
+    toll = 50
     costPerKm = 1.5
     costPerTon = 80
 
     let baseCost = distance * costPerKm + weight * costPerTon + distance * fuel + toll
-    answer = baseCost
+    answer = Math.round(baseCost)
+    transportDetail = `${costPerKm} €/km, ${costPerTon} €/tonne, carburant ${fuel} €/km, péage ${toll} €`
 
-    explanation = `Calcul complexe avec carburant et péages:\nCoût = ${answer.toFixed(2)}€`
+    explanation = `Distance × tarif + poids × tarif + distance × carburant + péage = ${answer} €`
   }
 
   return {
     type: 'cout_transport',
     difficulty,
     title: '🚚 Coût de Transport',
-    description: `Pour un trajet de ${distance} km avec ${weight} tonnes, quel est le coût total?`,
-    data: { distance, weight, costPerKm, costPerTon },
+    description: `Trajet de ${distance} km et ${weight} tonnes. Tarifs : ${transportDetail}. Quel est le coût total arrondi à l'euro ?`,
+    data: { distance, weight, costPerKm, costPerTon, discount, fuel, toll },
     correctAnswer: Math.round(answer),
     explanation,
     hints: ['Considérez la distance', 'Considérez le poids'],
@@ -233,36 +241,37 @@ export const generateLoadingPlanQuestion = (difficulty = 1, forceCalculation = f
   let containerCapacity, packageSize, numberOfPackages
   let answer, explanation
 
+  let usablePercent = 100
   if (difficulty === 1) {
-    containerCapacity = [20, 24, 30][Math.floor(Math.random() * 3)]
-    packageSize = [1, 2, 3][Math.floor(Math.random() * 3)]
-    numberOfPackages = containerCapacity / packageSize
-
-    answer = numberOfPackages
+    const pairs = [
+      [20, 2], [20, 4], [24, 2], [24, 3], [24, 4], [30, 2], [30, 3], [30, 5],
+    ]
+    ;[containerCapacity, packageSize] = pairs[Math.floor(Math.random() * pairs.length)]
+    answer = containerCapacity / packageSize
     explanation = `${containerCapacity} unités ÷ ${packageSize} par colis = ${answer} colis`
   } else if (difficulty === 2) {
     containerCapacity = [40, 45, 50][Math.floor(Math.random() * 3)]
+    usablePercent = 90
     const usableSpace = Math.floor(containerCapacity * 0.9)
     packageSize = Math.floor(Math.random() * 2) + 2
     answer = Math.floor(usableSpace / packageSize)
-
-    explanation = `Espace utilisable: ${usableSpace} unités\n${usableSpace} ÷ ${packageSize} = ${answer} colis`
+    explanation = `Espace utilisable ${usablePercent} % : ${usableSpace} unités\n${usableSpace} ÷ ${packageSize} = ${answer} colis`
   } else {
     containerCapacity = 60
     const efficiency = [0.85, 0.90, 0.95][Math.floor(Math.random() * 3)]
+    usablePercent = Math.round(efficiency * 100)
     const usableSpace = Math.floor(containerCapacity * efficiency)
     packageSize = Math.floor(Math.random() * 3) + 2
     answer = Math.floor(usableSpace / packageSize)
-
-    explanation = `Optimisation avancée avec efficacité ${(efficiency * 100).toFixed(0)}%\nRésultat: ${answer} colis`
+    explanation = `Espace utilisable ${usablePercent} % : ${usableSpace} unités ÷ ${packageSize} = ${answer} colis`
   }
 
   return {
     type: 'loading_plan',
     difficulty,
     title: '📊 Plan de Chargement',
-    description: `Conteneur capacité ${containerCapacity} unités. Combien de colis de ${packageSize} unités pouvez-vous charger?`,
-    data: { containerCapacity, packageSize, numberOfPackages },
+    description: `Conteneur de ${containerCapacity} unités, espace utilisable ${usablePercent} %. Combien de colis de ${packageSize} unités pouvez-vous charger (division entière) ?`,
+    data: { containerCapacity, packageSize, usablePercent },
     correctAnswer: answer,
     explanation,
     hints: [
@@ -275,20 +284,23 @@ export const generateLoadingPlanQuestion = (difficulty = 1, forceCalculation = f
 // ===== CULTURE GÉNÉRALE =====
 export const generateCultureQuestion = () => {
   const cultureQ = getRandomCultureQuestion()
-  
+
   return {
     type: 'culture',
     difficulty: 2,
-    title: '🧠 Culture Générale',
+    title: '📘 Référentiel 2025',
     description: cultureQ.question,
     data: {
       category: cultureQ.category,
-      hint: cultureQ.hint,
-      type: cultureQ.type
+      options: cultureQ.options,
+      correctOption: cultureQ.correctOption,
+      explanation: cultureQ.explanation,
+      isMCQ: true,
     },
-    correctAnswer: cultureQ.answer,
-    explanation: `La réponse est : ${cultureQ.answer}`,
+    correctAnswer: cultureQ.correctOption,
+    explanation: cultureQ.explanation,
     hints: [cultureQ.hint],
+    isMCQ: true,
   }
 }
 
@@ -675,5 +687,11 @@ export const generateNextQuestion = (gameMode = 'all') => {
   // Certains types gèrent leur propre difficulté
   const skipDifficultyTypes = ['vocabulaire', 'supply_chain', 'reception', 'stock', 'safety', 'traceability', 'green', 'team_leader', 'jit', 'route', 'legal', 'math']
   const difficulty = skipDifficultyTypes.includes(type) ? null : getRandomDifficulty()
-  return generateRandomQuestion(type, difficulty)
+  const question = generateRandomQuestion(type, difficulty)
+  const isMCQ = Boolean(question.isMCQ || question.data?.options)
+  return {
+    ...question,
+    isMCQ,
+    referentiel: referentielFor(question.type),
+  }
 }

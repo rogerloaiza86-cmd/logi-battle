@@ -1,454 +1,218 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import RopeAnimation from './RopeAnimation'
-import QuestionCard from './QuestionCard'
-import VocabularyCard from './VocabularyCard'
 import BrandMark from './BrandMark'
-import { generateNextQuestion } from '../utils/questionGenerator'
+import QuestionView from './QuestionView'
 import { useGameStore } from '../hooks/useGameStore'
+import { useSplitRound } from '../hooks/useSplitRound'
 import { gamesService } from '../services/database'
-
-const ROUND_TIME = 30
-const VOCABULARY_TIME = 20
+import { gradePlayerAnswer, toPublicQuestion } from '../utils/roundRules'
 
 export const GameBoard = ({ onBack, gameMode, isHost }) => {
   const gameStore = useGameStore()
   const channelRef = useRef(null)
-  
-  const [question, setQuestion] = useState(null)
-  const [showIncorrect, setShowIncorrect] = useState(false)
-  const [particles, setParticles] = useState([])
-  const [timeLeft, setTimeLeft] = useState(ROUND_TIME)
-  const [roundTime, setRoundTime] = useState(ROUND_TIME)
-  const [isRoundActive, setIsRoundActive] = useState(true)
-  const [teamAStatus, setTeamAStatus] = useState('playing')
-  const [teamBStatus, setTeamBStatus] = useState('playing')
-  const [teamATime, setTeamATime] = useState(null)
-  const [teamBTime, setTeamBTime] = useState(null)
-  const [roundWinner, setRoundWinner] = useState(null)
-  const [bothTeamsAnswered, setBothTeamsAnswered] = useState(false)
-  const [roundNumber, setRoundNumber] = useState(1)
-  const [logs, setLogs] = useState([
-    { id: 1, user: 'User_42', action: 'a répondu correctement !', team: 'A', points: '+250', time: '14:30' },
-    { id: 2, user: 'CargoKing', action: 'a raté le timing.', team: 'B', points: '-50', time: '14:28' },
-    { id: 3, user: 'LogiMaster', action: 'est en série de 5 !', team: 'A', points: 'Bonus Combo Actif', time: '14:25' },
-  ])
-  const roundStartTime = useRef(null)
+  const [logs, setLogs] = useState([])
 
-  // Enregistrement des scores dans la BD en temps réel
-  useEffect(() => {
-    if (isHost && gameStore.gameId) {
-      gamesService.updateGameScore(
-        gameStore.gameId,
-        gameStore.teamA.score,
-        gameStore.teamB.score,
-        gameStore.ropePosition
-      ).catch(console.error)
-    }
-  }, [gameStore.teamA.score, gameStore.teamB.score, gameStore.ropePosition, isHost, gameStore.gameId])
-
-  useEffect(() => {
-    // Configuration du Broadcast
-    if (isHost && gameStore.gameId) {
-      const channel = gamesService.getGameChannel(gameStore.gameId)
-      if (channel) {
-        channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
-          handleAnswer(payload.team, payload.isCorrect)
-        }).subscribe()
-        channelRef.current = channel
-      }
-    }
-
-    startNewRound()
-    
-    return () => {
-      // Nettoyage au démontage
-    }
-  }, [])
-
-  useEffect(() => {
-    let interval
-    if (isRoundActive && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => prev - 1)
-      }, 1000)
-    } else if (timeLeft === 0 && isRoundActive) {
-      endRound()
-    }
-    return () => clearInterval(interval)
-  }, [isRoundActive, timeLeft])
-
-  const startNewRound = () => {
-    const newQuestion = {
-      ...generateNextQuestion(gameMode),
-      id: `q_${Date.now()}`,
-    }
-    setQuestion(newQuestion)
-    const time = newQuestion.type === 'vocabulaire' ? VOCABULARY_TIME : ROUND_TIME
-    setRoundTime(time)
-    setTimeLeft(time)
-    setIsRoundActive(true)
-    setTeamAStatus('playing')
-    setTeamBStatus('playing')
-    setTeamATime(null)
-    setTeamBTime(null)
-    setRoundWinner(null)
-    setBothTeamsAnswered(false)
-    roundStartTime.current = Date.now()
-
-    if (channelRef.current) {
-      channelRef.current.send({
-        type: 'broadcast',
-        event: 'new_question',
-        payload: {
-          questionData: newQuestion,
-          time: time
-        }
-      })
-    }
-  }
-
-  const endRound = () => {
-    setIsRoundActive(false)
-    setBothTeamsAnswered(true)
-    
-    let winner = null
-    
-    if (teamAStatus === 'correct' && teamBStatus === 'correct') {
-      winner = teamATime < teamBTime ? 'A' : 'B'
-    } else if (teamAStatus === 'correct') {
-      winner = 'A'
-    } else if (teamBStatus === 'correct') {
-      winner = 'B'
-    }
-    
-    setRoundWinner(winner)
-    
-    if (channelRef.current) {
-      channelRef.current.send({
-        type: 'broadcast',
-        event: 'round_end',
-        payload: {
-          winner: winner,
-          correctAnswer: question?.answer
-        }
-      })
-    }
-
-    if (winner === 'A') {
-      gameStore.incrementTeamAScore(1)
-      createParticles('A')
-      addLog(gameStore.teamA.name, 'a répondu correctement !', 'A', '+250')
-    } else if (winner === 'B') {
-      gameStore.incrementTeamBScore(1)
-      createParticles('B')
-      addLog(gameStore.teamB.name, 'a répondu correctement !', 'B', '+250')
-    }
-    
-    const delay = question?.type === 'vocabulaire' ? 4000 : 2500
-    
-    setTimeout(() => {
-      if (gameStore.gameStatus !== 'finished') {
-        setRoundNumber((prev) => prev + 1)
-        startNewRound()
-      }
-    }, delay)
-  }
+  const round = useSplitRound(gameMode, {
+    onRoundResolved: ({ winner }) => {
+      if (winner === 'A') useGameStore.getState().incrementTeamAScore(1)
+      else if (winner === 'B') useGameStore.getState().incrementTeamBScore(1)
+      const status = useGameStore.getState().gameStatus
+      if (winner === 'A') addLog(useGameStore.getState().teamA.name, 'remporte la manche.', 'A', '+1')
+      else if (winner === 'B') addLog(useGameStore.getState().teamB.name, 'remporte la manche.', 'B', '+1')
+      else addLog('Manche', 'sans point : égalité ou aucune bonne réponse.', 'A', '0')
+      return status === 'finished'
+    },
+  })
 
   const addLog = (user, action, team, points) => {
     const now = new Date()
     const time = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`
-    setLogs(prev => [{ id: Date.now(), user, action, team, points, time }, ...prev.slice(0, 4)])
+    setLogs((prev) => [{ id: Date.now(), user, action, team, points, time }, ...prev.slice(0, 5)])
   }
 
-  const handleAnswer = (team, isCorrect) => {
-    const responseTime = Date.now() - roundStartTime.current
-    
-    if (team === 'A') {
-      if (isCorrect) {
-        setTeamAStatus('correct')
-        setTeamATime(responseTime)
-      } else {
-        setTeamAStatus('wrong')
-        setShowIncorrect(true)
-        setTimeout(() => setShowIncorrect(false), 400)
-        addLog(gameStore.teamA.name, 'a raté le timing.', 'A', '-50')
-      }
-    } else {
-      if (isCorrect) {
-        setTeamBStatus('correct')
-        setTeamBTime(responseTime)
-      } else {
-        setTeamBStatus('wrong')
-        setShowIncorrect(true)
-        setTimeout(() => setShowIncorrect(false), 400)
-        addLog(gameStore.teamB.name, 'a raté le timing.', 'B', '-50')
-      }
+  useEffect(() => {
+    if (!(isHost && gameStore.gameId)) return undefined
+    gamesService.updateGameScore(
+      gameStore.gameId,
+      gameStore.teamA.score,
+      gameStore.teamB.score,
+      gameStore.ropePosition
+    ).catch(console.error)
+    return undefined
+  }, [gameStore.teamA.score, gameStore.teamB.score, gameStore.ropePosition, isHost, gameStore.gameId])
+
+  useEffect(() => {
+    if (!(isHost && gameStore.gameId)) return undefined
+    const channel = gamesService.getGameChannel(gameStore.gameId)
+    if (!channel) return undefined
+    channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
+      const current = round.questionRef.current
+      if (!current || payload?.answer == null) return
+      round.handleAnswer(payload.team, gradePlayerAnswer(current, payload.answer))
+    })
+    channel.subscribe()
+    channelRef.current = channel
+    return () => {
+      channelRef.current = null
     }
-    
-    const otherTeamStatus = team === 'A' ? teamBStatus : teamAStatus
+  }, [isHost, gameStore.gameId, round.handleAnswer, round.questionRef])
 
-    if (otherTeamStatus !== 'playing') {
-      setBothTeamsAnswered(true)
-      endRound()
+  useEffect(() => {
+    if (!isHost || !channelRef.current || !round.question || !round.isRoundActive) return undefined
+    const send = () => {
+      channelRef.current?.send({
+        type: 'broadcast',
+        event: 'new_question',
+        payload: {
+          questionData: toPublicQuestion(round.question),
+          time: round.roundTime,
+        },
+      })
     }
-  }
+    send()
+    const timer = setInterval(send, 4000)
+    return () => clearInterval(timer)
+  }, [isHost, round.question, round.isRoundActive, round.roundTime])
 
-  const createParticles = (winningTeam) => {
-    // Animation effect handled by CSS
-  }
+  const winner = gameStore.ropePosition >= 100
+    ? 'A'
+    : gameStore.ropePosition <= -100
+      ? 'B'
+      : gameStore.teamA.score === gameStore.teamB.score
+        ? null
+        : gameStore.teamA.score > gameStore.teamB.score
+          ? 'A'
+          : 'B'
 
-  const getWinner = () => {
-    if (gameStore.ropePosition >= 100) return 'A'
-    if (gameStore.ropePosition <= -100) return 'B'
-    if (gameStore.teamA.score > gameStore.teamB.score) return 'A'
-    if (gameStore.teamB.score > gameStore.teamA.score) return 'B'
-    return null
-  }
+  const timerColor = round.timeLeft <= 5 ? '#ef4444' : round.timeLeft <= 10 ? '#eab308' : '#f4b942'
+  const showOver = round.finished || gameStore.gameStatus === 'finished'
 
-  const handleRestart = () => {
-    gameStore.resetGame()
-    setRoundNumber(1)
-    onBack()
+  const teamCard = (team) => {
+    const isA = team === 'A'
+    const status = isA ? round.teamAStatus : round.teamBStatus
+    const responseTime = isA ? round.teamATime : round.teamBTime
+    return (
+      <div className={`rounded-3xl border p-4 ${isA ? 'border-[#7fa99b]/30' : 'border-[#f4b942]/30'} bg-[#0f2539]/40`}>
+        <div className="flex items-center justify-between mb-3">
+          <p className={`text-sm font-bold ${isA ? 'text-[#7fa99b]' : 'text-[#f4b942]'}`}>
+            {isA ? gameStore.teamA.name : gameStore.teamB.name}
+          </p>
+          <span className="text-xs text-gray-400">
+            {status === 'correct' ? 'Bonne réponse' : status === 'wrong' ? 'Mauvaise réponse' : 'En jeu'}
+          </span>
+        </div>
+        <QuestionView
+          question={round.question}
+          team={team}
+          onAnswer={(isCorrect) => round.handleAnswer(team, isCorrect)}
+          disabled={!round.isRoundActive || status !== 'playing'}
+          isAnswering={!round.isRoundActive || status !== 'playing'}
+          responseTime={responseTime}
+          showCorrectAnswer={round.bothTeamsAnswered || round.timeLeft === 0}
+        />
+      </div>
+    )
   }
-
-  // Calculate timer circle progress
-  const timerProgress = (timeLeft / roundTime) * 283
-  const timerColor = timeLeft <= 5 ? '#ef4444' : timeLeft <= 10 ? '#eab308' : '#f4b942'
 
   return (
     <div className="min-h-screen geronimo-screen flex flex-col">
-      {/* Header */}
-      <header className="bg-[#0f2539]/92 border-b border-white/5 px-8 py-4 relative z-10">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <BrandMark nameClassName="text-[1.35rem]" />
-          </div>
-          <div className="flex items-center gap-6">
-            <button 
-              onClick={handleRestart}
+      <header className="bg-[#0f2539]/92 border-b border-white/5 px-4 md:px-8 py-4 relative z-10">
+        <div className="flex items-center justify-between gap-4">
+          <BrandMark nameClassName="text-[1.35rem]" />
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-bold text-white">
+              Manche {round.roundNumber}/{round.totalRounds}
+            </span>
+            <span className="text-2xl font-black" style={{ color: timerColor }}>{round.timeLeft}s</span>
+            <button
+              onClick={() => {
+                gameStore.resetGame()
+                onBack()
+              }}
               className="text-red-400 hover:text-red-300 transition-colors flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-red-500/10"
-              title="Arrêter la partie"
             >
               <span className="material-icons text-lg">stop</span>
-              <span className="text-sm font-medium hidden sm:inline">Arrêter</span>
+              <span className="text-sm font-medium">Arrêter</span>
             </button>
-            <button className="text-gray-500 hover:text-white transition-colors">
-              <span className="material-icons">bar_chart</span>
-            </button>
-            <button className="text-gray-500 hover:text-white transition-colors">
-              <span className="material-icons">settings</span>
-            </button>
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
-              <span className="material-icons text-white text-sm">person</span>
-            </div>
           </div>
         </div>
       </header>
 
-      {/* Score Bar */}
-      <div className="bg-[#0f2539]/92 px-8 py-4 relative z-10">
-        <div className="flex items-center justify-between mb-4">
-          {/* Team Alpha */}
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[#7fa99b]/20 flex items-center justify-center border border-[#7fa99b]/30">
-              <span className="material-icons text-[#7fa99b]">local_shipping</span>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wider">ÉQUIPE ÉTOILE</p>
-              <p className="text-3xl font-black text-[#7fa99b]">{gameStore.teamA.score.toLocaleString()}</p>
-            </div>
+      <div className="bg-[#0f2539]/92 px-4 md:px-8 py-4">
+        <div className="flex items-center justify-between mb-4 gap-4">
+          <div>
+            <p className="text-xs text-gray-500 uppercase tracking-wider">{gameStore.teamA.name}</p>
+            <p className="text-3xl font-black text-[#7fa99b]">{gameStore.teamA.score}</p>
           </div>
-
-          {/* VS */}
           <div className="w-12 h-12 rounded-full bg-[#1d3d59] border border-white/10 flex items-center justify-center">
             <span className="text-gray-500 font-bold text-sm">VS</span>
           </div>
-
-          {/* Team Omega */}
-          <div className="flex items-center gap-4 text-right">
-            <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wider">ÉQUIPE BOUSSOLE</p>
-              <p className="text-3xl font-black text-[#f4b942]">{gameStore.teamB.score.toLocaleString()}</p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-[#f4b942]/20 flex items-center justify-center border border-[#f4b942]/30">
-              <span className="material-icons text-[#f4b942]">bolt</span>
-            </div>
+          <div className="text-right">
+            <p className="text-xs text-gray-500 uppercase tracking-wider">{gameStore.teamB.name}</p>
+            <p className="text-3xl font-black text-[#f4b942]">{gameStore.teamB.score}</p>
           </div>
         </div>
-
-        {/* Progress Bar */}
-        <div className="relative h-10 bg-[#1d3d59] rounded-xl overflow-hidden">
-          {/* Blue Side */}
-          <div 
-            className="absolute left-0 top-0 h-full bg-gradient-to-r from-[#7fa99b] to-[#7fa99b]/80 transition-all duration-500 flex items-center px-4"
+        <div className="relative h-8 bg-[#1d3d59] rounded-xl overflow-hidden">
+          <div
+            className="absolute left-0 top-0 h-full bg-[#7fa99b] transition-all duration-500"
             style={{ width: `${Math.max(0, 50 + gameStore.ropePosition / 2)}%` }}
-          >
-            <span className="text-xs font-bold text-white/80 uppercase tracking-wider">
-              {gameStore.ropePosition > 0 ? 'DOMINE' : ''}
-            </span>
-          </div>
-          
-          {/* Orange Side */}
-          <div 
-            className="absolute right-0 top-0 h-full bg-gradient-to-l from-[#f4b942] to-[#f4b942]/80 transition-all duration-500 flex items-center justify-end px-4"
+          />
+          <div
+            className="absolute right-0 top-0 h-full bg-[#f4b942] transition-all duration-500"
             style={{ width: `${Math.max(0, 50 - gameStore.ropePosition / 2)}%` }}
-          >
-            <span className="text-xs font-bold text-white/80 uppercase tracking-wider">
-              {gameStore.ropePosition < 0 ? 'REPRISE' : ''}
-            </span>
-          </div>
-
-          {/* Center Line */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/20 transform -translate-x-1/2" />
+          />
         </div>
       </div>
 
-      {/* Main Game Area */}
-      <main className="flex-1 flex">
-        {/* Left Panel - Timer & Events */}
-        <aside className="w-72 p-6 space-y-4">
-          {/* Circular Timer */}
-          <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5">
-            <div className="relative w-32 h-32 mx-auto">
-              <svg className="w-full h-full transform -rotate-90">
-                <circle
-                  cx="64"
-                  cy="64"
-                  r="56"
-                  fill="none"
-                  stroke="#234a68"
-                  strokeWidth="8"
-                />
-                <circle
-                  cx="64"
-                  cy="64"
-                  r="56"
-                  fill="none"
-                  stroke={timerColor}
-                  strokeWidth="8"
-                  strokeLinecap="round"
-                  strokeDasharray="351.86"
-                  strokeDashoffset={351.86 - (timerProgress / 283) * 351.86}
-                  className="transition-all duration-1000 linear"
-                  style={{ filter: `drop-shadow(0 0 6px ${timerColor})` }}
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-4xl font-black text-white">{timeLeft}</span>
-                <span className="text-xs text-gray-500 uppercase">SECONDES</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Critical Event */}
-          <div className="bg-[#1d3d59] rounded-3xl p-5 border border-red-500/20">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="material-icons text-red-400 text-sm">warning</span>
-              <span className="text-xs font-bold text-red-400 uppercase tracking-wider">ÉVÉNEMENT CRITIQUE</span>
-            </div>
-            <p className="text-sm text-gray-400">
-              Débordement de palettes en approche dans le Secteur 7. Points doublés pour les 3 prochaines questions !
-            </p>
-          </div>
-        </aside>
-
-        {/* Center - Question */}
-        <section className="flex-1 p-6">
-          <div className="max-w-2xl mx-auto">
-            {/* Question Badge */}
-            <div className="flex justify-center mb-6">
-              <span className="px-4 py-2 bg-[#f4b942] text-[#17314a] text-xs font-bold uppercase tracking-wider rounded-full">
-                QUESTION {roundNumber}/20
-              </span>
-            </div>
-
-            {/* Question Card */}
-            {question && (
-              <div className="bg-[#1d3d59] rounded-3xl p-8 border border-white/5">
-                {/* Category */}
-                <p className="text-[#7fa99b] text-xs font-bold uppercase tracking-[0.2em] mb-4">
-                  {question.type === 'palettisation' && 'GESTION DU FRET'}
-                  {question.type === 'cout_transport' && 'DYNAMIQUE DE FLOTTE'}
-                  {question.type === 'vocabulaire' && 'TERMINOLOGIE'}
-                  {question.type === 'culture' && 'CONNAISSANCES GÉNÉRALES'}
-                </p>
-
-                {/* Question Text */}
-                <h2 className="text-2xl font-bold text-white mb-8 leading-relaxed">
-                  {question.description}
-                </h2>
-
-                {/* Options */}
-                <div className="grid grid-cols-2 gap-4">
-                  {['A', 'B', 'C', 'D'].map((letter, index) => (
-                    <button
-                      key={letter}
-                      className="group relative bg-[#234a68] hover:bg-[#2d5875] rounded-2xl p-5 text-left transition-all border border-transparent hover:border-white/10"
-                    >
-                      <span className="absolute top-4 left-4 text-gray-500 text-sm font-bold">{letter}</span>
-                      <p className="text-white font-medium pl-6">
-                        {index === 0 && '1,2 Mètres'}
-                        {index === 1 && '2,4 Mètres'}
-                        {index === 2 && 'Sans Limite'}
-                        {index === 3 && 'Limité par le Poids'}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+      <main className="flex-1 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_18rem] gap-4 p-4 md:p-6">
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {teamCard('A')}
+          {teamCard('B')}
         </section>
-
-        {/* Right Panel - Battle Logs */}
-        <aside className="w-80 p-6">
-          <div className="bg-[#1d3d59] rounded-3xl p-5 border border-white/5 h-full">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Journal d'affrontement en direct</span>
-            </div>
-
-            <div className="space-y-4">
-              {logs.map((log) => (
-                <div key={log.id} className="flex gap-3">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    log.team === 'A' ? 'bg-[#7fa99b]/20' : 'bg-[#f4b942]/20'
-                  }`}>
-                    <span className={`material-icons text-sm ${
-                      log.team === 'A' ? 'text-[#7fa99b]' : 'text-[#f4b942]'
-                    }`}>
-                      {log.points.startsWith('+') ? 'check' : 'close'}
-                    </span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm">
-                      <span className={`font-bold ${
-                        log.team === 'A' ? 'text-[#7fa99b]' : 'text-[#f4b942]'
-                      }`}>{log.user}</span>
-                      {' '}{log.action}
-                    </p>
-                    <p className={`text-xs ${
-                      log.points.startsWith('+') ? 'text-[#7fa99b]' : 'text-red-400'
-                    }`}>{log.points}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Global Morale */}
-            <div className="mt-6 pt-6 border-t border-white/5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-gray-500 uppercase">MORAL GLOBAL</span>
-                <span className="text-xs font-bold text-[#7fa99b]">88%</span>
+        <aside className="bg-[#1d3d59] rounded-3xl p-5 border border-white/5">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Journal de manche</p>
+          {logs.length === 0 && <p className="text-sm text-gray-500">Les résultats apparaîtront ici.</p>}
+          <div className="space-y-3">
+            {logs.map((log) => (
+              <div key={log.id}>
+                <p className="text-sm text-white">
+                  <span className={log.team === 'A' ? 'text-[#7fa99b] font-bold' : 'text-[#f4b942] font-bold'}>{log.user}</span>
+                  {' '}{log.action}
+                </p>
+                <p className="text-xs text-gray-400">{log.points} · {log.time}</p>
               </div>
-              <div className="h-1.5 bg-[#234a68] rounded-full overflow-hidden">
-                <div className="h-full w-[88%] bg-[#7fa99b] rounded-full" />
-              </div>
-            </div>
+            ))}
           </div>
         </aside>
       </main>
+
+      <AnimatePresence>
+        {showOver && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6"
+          >
+            <div className="bg-[#1d3d59] rounded-3xl p-8 max-w-lg w-full text-center border border-white/10">
+              <h2 className="text-3xl font-black text-white mb-2">
+                {winner === 'A' ? gameStore.teamA.name : winner === 'B' ? gameStore.teamB.name : 'Égalité'}
+              </h2>
+              <p className="text-gray-300 mb-6">
+                {gameStore.teamA.score} — {gameStore.teamB.score}
+              </p>
+              <button
+                onClick={() => {
+                  gameStore.resetGame()
+                  onBack()
+                }}
+                className="w-full py-4 rounded-xl bg-[#f4b942] text-[#17314a] font-bold"
+              >
+                Retour aux équipes
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

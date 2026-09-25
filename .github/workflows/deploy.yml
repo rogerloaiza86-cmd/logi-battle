@@ -31,6 +31,8 @@ jobs:
           cache-dependency-path: logi-battle/package-lock.json
       - name: Install dependencies
         run: cd logi-battle && npm ci
+      - name: Test
+        run: cd logi-battle && npm test
       - name: Build
         run: cd logi-battle && npm run build
       - name: Setup Pages

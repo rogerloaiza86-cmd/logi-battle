@@ -157,10 +157,10 @@ const modules = [
   },
   {
     id: 'culture',
-    title: 'Garde du Coffre',
-    subtitle: 'Culture Générale',
+    title: 'Référentiel 2025',
+    subtitle: 'Métiers de la logistique',
     icon: 'psychology',
-    description: 'Stockage haute-sécurité et contrôle d\'accès.',
+    description: 'Compétences C1 à C4 du bac pro métiers de la logistique.',
     level: 'NIV 01',
     progress: 10,
     color: 'orange',
@@ -385,7 +385,7 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               className="relative overflow-hidden brand-card battle-trajectory p-6 group cursor-pointer"
-              onClick={() => onHostMode('culture')}
+              onClick={() => onHostMode('all')}
             >
               <div className="relative z-10">
                 <h3 className="text-2xl font-black text-white mb-2 italic">SCANNER QR</h3>

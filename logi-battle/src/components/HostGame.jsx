@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import QRCode from 'qrcode'
 import { useGameStore } from '../hooks/useGameStore'
 import GameBoard from './GameBoard'
 import BrandMark from './BrandMark'
@@ -13,6 +14,7 @@ export const HostGame = ({ onBack, gameMode }) => {
   const [gameStarted, setGameStarted] = useState(false)
   const [copied, setCopied] = useState(false)
   const [isInitializing, setIsInitializing] = useState(true)
+  const [qrDataUrl, setQrDataUrl] = useState('')
 
   // Générer un ID de jeu unique et l'enregistrer dans Supabase
   useEffect(() => {
@@ -36,16 +38,21 @@ export const HostGame = ({ onBack, gameMode }) => {
 
   // URL pour les joueurs (à adapter selon votre déploiement)
   const getPlayerUrl = () => {
-    // En production, remplacez par votre vraie URL
-    const baseUrl = window.location.origin
-    return `${baseUrl}/join?game=${gameId}`
+    const base = import.meta.env.BASE_URL || '/'
+    const prefix = base.endsWith('/') ? base.slice(0, -1) : base
+    return `${window.location.origin}${prefix}/join?game=${gameId}`
   }
 
-  // URL du QR Code (utilisation d'une API gratuite)
-  const getQrCodeUrl = () => {
-    const url = encodeURIComponent(getPlayerUrl())
-    return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${url}`
-  }
+  useEffect(() => {
+    if (!gameId) return undefined
+    let cancelled = false
+    QRCode.toDataURL(getPlayerUrl(), { width: 280, margin: 1 }).then((url) => {
+      if (!cancelled) setQrDataUrl(url)
+    }).catch(console.error)
+    return () => {
+      cancelled = true
+    }
+  }, [gameId])
 
   const copyLink = () => {
     navigator.clipboard.writeText(getPlayerUrl())
@@ -107,10 +114,10 @@ export const HostGame = ({ onBack, gameMode }) => {
 
             {/* QR Code */}
             <div className="bg-white rounded-xl p-4 w-fit mx-auto mb-6">
-              {gameId && (
+              {qrDataUrl && (
                 <img
-                  src={getQrCodeUrl()}
-                  alt="QR Code"
+                  src={qrDataUrl}
+                  alt="QR Code pour rejoindre la partie"
                   className="w-48 h-48"
                 />
               )}

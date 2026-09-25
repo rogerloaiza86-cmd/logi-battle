@@ -20,7 +20,7 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
       safety: '🛡️ Safety First',
       traceability: '📡 Traçabilité Track',
       green: '🌍 Green Logistique',
-      culture: '🧠 Culture Générale',
+      culture: '📘 Référentiel 2025',
       all: '🎲 Mode Mixte'
     }
     return labels[gameMode] || 'Mode de jeu'

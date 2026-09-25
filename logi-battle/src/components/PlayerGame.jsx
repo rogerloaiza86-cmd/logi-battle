@@ -14,30 +14,31 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
 
   const isTeamA = team === 'A'
 
-  // Écoute en temps réel Supabase
+  // Écoute en temps réel Supabase. La bonne réponse reste sur l'écran hôte.
   useEffect(() => {
     const channel = gamesService.getGameChannel(gameId)
-    if (channel) {
-      channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
-        setCurrentQuestion({
-          question: payload.questionData.description,
-          answer: payload.questionData.correctAnswer || payload.questionData.answer,
-          hint: payload.questionData.hints?.[0] || '',
-          type: payload.questionData.type,
-          category: payload.questionData.category || ''
-        })
-        setTimeLeft(payload.time || 30)
-        setGameStatus('playing')
-        setUserAnswer('')
-        setResult(null)
+    if (!channel) return undefined
+    channel.on('broadcast', { event: 'new_question' }, ({ payload }) => {
+      const data = payload.questionData
+      if (!data) return
+      setCurrentQuestion({
+        id: data.id,
+        question: data.description,
+        options: data.data?.options || null,
+        isMCQ: Boolean(data.isMCQ || data.data?.options),
+        hint: data.hints?.[0] || '',
+        type: data.type,
+        category: data.data?.category || data.referentiel?.competence || '',
+        time: payload.time || 30,
       })
-
-      channel.on('broadcast', { event: 'round_end' }, ({ payload }) => {
-        setGameStatus('waiting')
-      })
-
-      channelRef.current = channel
-    }
+      setTimeLeft(payload.time || 30)
+      setGameStatus('playing')
+      setUserAnswer('')
+      setResult(null)
+    })
+    channel.subscribe()
+    channelRef.current = channel
+    return undefined
   }, [gameId])
 
   // Timer
@@ -48,7 +49,8 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
         setTimeLeft((prev) => prev - 1)
       }, 1000)
     } else if (timeLeft === 0 && gameStatus === 'playing') {
-      handleSubmit()
+      setGameStatus('waiting')
+      setResult('wrong')
     }
     return () => clearInterval(interval)
   }, [gameStatus, timeLeft])
@@ -67,30 +69,22 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
     }
   }
 
-  const handleSubmit = () => {
-    if (!userAnswer || gameStatus !== 'playing') return
-    
-    // Pour vocabulaire ou culture (lettres A,B,C,D transformées potentiellement) ou chiffres
-    // La logique existante comparait parseInt avec number. Ajustons si qcm.
-    const isCorrect = 
-      String(userAnswer).trim().toLowerCase() === String(currentQuestion?.answer).trim().toLowerCase() ||
-      parseInt(userAnswer) === currentQuestion?.answer
-      
-    setResult(isCorrect ? 'correct' : 'wrong')
+  const sendAnswer = (answer) => {
+    if (gameStatus !== 'playing' || answer == null || answer === '') return
     setGameStatus('answered')
-    
-    if (isCorrect) {
-      setScore((prev) => prev + 1)
-    }
-
-    // Envoyer la réponse à l'hôte
+    setResult('sent')
     if (channelRef.current) {
       channelRef.current.send({
         type: 'broadcast',
         event: 'player_answer',
-        payload: { team, isCorrect, playerName }
+        payload: { team, answer, playerName },
       })
     }
+  }
+
+  const handleSubmit = () => {
+    if (!userAnswer || gameStatus !== 'playing') return
+    sendAnswer(currentQuestion?.isMCQ ? Number(userAnswer) : userAnswer)
   }
 
   const getTimerColor = () => {
@@ -150,7 +144,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
             <motion.div
               className={`h-full ${timeLeft <= 5 ? 'bg-red-500' : timeLeft <= 10 ? 'bg-amber-500' : isTeamA ? 'bg-blue-500' : 'bg-primary'}`}
               initial={{ width: '100%' }}
-              animate={{ width: `${(timeLeft / 30) * 100}%` }}
+              animate={{ width: `${(timeLeft / (currentQuestion?.time || 30)) * 100}%` }}
               transition={{ duration: 1, ease: 'linear' }}
             />
           </div>
@@ -174,8 +168,7 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
               {/* Question Card */}
               <div className="bg-slate-800 rounded-2xl p-5 mb-4 border border-white/10">
                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  {currentQuestion?.type === 'vocabulaire' ? '📚 Vocabulaire' : '🧠 Culture Générale'}
-                  {currentQuestion?.category && ` • ${currentQuestion.category}`}
+                  {currentQuestion?.category || 'Référentiel logistique'}
                 </span>
                 <h2 className="text-lg font-bold text-white mt-2 leading-snug">
                   {currentQuestion?.question}
@@ -187,7 +180,22 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                 )}
               </div>
 
-              {/* Answer Display */}
+              {currentQuestion?.isMCQ ? (
+                <div className="grid gap-2 mb-4">
+                  {currentQuestion.options.map((option, index) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => sendAnswer(index)}
+                      className="w-full text-left p-4 rounded-xl bg-slate-800 border border-white/10 text-white"
+                    >
+                      <span className="font-bold mr-2">{String.fromCharCode(65 + index)}</span>
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+              <>
               <div className={`bg-slate-900 rounded-xl p-4 mb-4 border-2 text-center ${
                 isTeamA ? 'border-blue-500/30' : 'border-primary/30'
               }`}>
@@ -196,7 +204,6 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
                 </span>
               </div>
 
-              {/* Keypad */}
               <div className="grid grid-cols-3 gap-2">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'C', 0, 'backspace'].map((num) => (
                   <motion.button
@@ -231,6 +238,8 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
               >
                 Valider
               </motion.button>
+              </>
+              )}
             </motion.div>
           )}
 
@@ -245,12 +254,10 @@ export const PlayerGame = ({ gameId, playerName, team }) => {
               <div className={`text-6xl mb-4 ${result === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
                 {result === 'correct' ? '✓' : '✗'}
               </div>
-              <h2 className={`text-2xl font-bold ${result === 'correct' ? 'text-green-400' : 'text-red-400'}`}>
-                {result === 'correct' ? 'Bonne réponse !' : 'Mauvaise réponse'}
+              <h2 className="text-2xl font-bold text-white">
+                {result === 'sent' ? 'Réponse envoyée' : 'Temps écoulé'}
               </h2>
-              <p className="text-gray-400 mt-2">
-                La réponse était : <span className="text-white font-bold">{currentQuestion?.answer}</span>
-              </p>
+              <p className="text-gray-400 mt-2">L'écran de la classe valide la manche.</p>
               <p className="text-gray-500 text-sm mt-4">Prochaine question dans quelques secondes...</p>
             </motion.div>
           )}

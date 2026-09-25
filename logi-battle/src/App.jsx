@@ -16,8 +16,12 @@ import './styles/index.css'
 
 function App() {
   const [userProfile, setUserProfile] = useState(() => {
-    const saved = localStorage.getItem('user_profile')
-    return saved ? JSON.parse(saved) : null
+    try {
+      const saved = localStorage.getItem('user_profile')
+      return saved ? JSON.parse(saved) : null
+    } catch {
+      return null
+    }
   })
   
   const [currentPath, setCurrentPath] = useState(window.location.pathname)
@@ -58,7 +62,8 @@ function App() {
   }
 
   // Route: /join - Page pour les joueurs qui scannent le QR
-  if (currentPath === '/join' || window.location.search.includes('game=')) {
+  const isJoinRoute = currentPath.endsWith('/join') || new URLSearchParams(window.location.search).has('game')
+  if (isJoinRoute) {
     return (
       <div className="dark">
         <PlayerJoin userProfile={userProfile} />
@@ -99,7 +104,11 @@ function App() {
           onMatchEnd={(result) => {
             // Enregistrer le résultat du match
             if (championshipMatch.type !== 'free') {
-              const winner = result.winner === 'A' ? 'challenger' : 'champion'
+              const winner = result.winner === 'A'
+                ? 'challenger'
+                : result.winner === 'B'
+                  ? 'champion'
+                  : 'draw'
               recordMatch(
                 championshipMatch.classId,
                 championshipMatch.challenger.id,

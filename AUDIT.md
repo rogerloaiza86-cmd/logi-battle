@@ -1,5 +1,8 @@
 # Audit complet — Geronimo Coop (Logi Battle)
 
+> Les correctifs décrits plus bas ont été lancés ensuite : duel jouable, QCM branchés, match nul, multijoueur, secrets retirés du suivi Git, questions rattachées au bac pro métiers de la logistique (arrêté du 8 janvier 2025). Le détail du référentiel est dans `docs/referentiel/`.
+
+
 Date : 25 septembre 2026  
 Périmètre : application React/Vite `logi-battle/`, schéma Supabase, CI GitHub Pages, scripts racine.  
 Méthode : lecture du code, contrôle structurel des banques de questions, vérification du dépôt Git public.

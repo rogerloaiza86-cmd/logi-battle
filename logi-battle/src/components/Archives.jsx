@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { readChampionshipState } from '../utils/roundRules'
 
 const STORAGE_KEYS = {
   championship: 'logi-battle-championship',
@@ -20,7 +21,7 @@ export const Archives = ({ onBack }) => {
 
   const loadData = () => {
     // Load championship data
-    const championship = JSON.parse(localStorage.getItem(STORAGE_KEYS.championship) || '{}')
+    const championship = readChampionshipState()
     const players = JSON.parse(localStorage.getItem(STORAGE_KEYS.players) || '[]')
     
     // Extract all matches

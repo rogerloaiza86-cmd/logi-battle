@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { readChampionshipState } from '../utils/roundRules'
 
 const STORAGE_KEYS = {
   players: 'logi-battle-players',
@@ -32,7 +33,7 @@ export const HQDashboard = ({ onBack }) => {
   const loadStats = () => {
     // Load from all storage keys
     const players = JSON.parse(localStorage.getItem(STORAGE_KEYS.players) || '[]')
-    const championship = JSON.parse(localStorage.getItem(STORAGE_KEYS.championship) || '{}')
+    const championship = readChampionshipState()
     const history = JSON.parse(localStorage.getItem(STORAGE_KEYS.history) || '[]')
 
     const classes = championship.classes || []
@@ -74,7 +75,7 @@ export const HQDashboard = ({ onBack }) => {
     })
 
     // Sort by date and take last 10
-    activities.sort((a, b) => b.date - a.date)
+    activities.sort((a, b) => new Date(b.date) - new Date(a.date))
     setRecentActivity(activities.slice(0, 10))
   }
 
@@ -95,6 +96,8 @@ export const HQDashboard = ({ onBack }) => {
       Object.values(STORAGE_KEYS).forEach(key => {
         localStorage.removeItem(key)
       })
+      localStorage.removeItem('championship-storage')
+      localStorage.removeItem('user_profile')
       alert('Toutes les données ont été supprimées.')
       window.location.reload()
     }

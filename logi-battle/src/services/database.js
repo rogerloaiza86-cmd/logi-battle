@@ -1,4 +1,3 @@
-import db from './firebase'
 import { supabase } from './supabase'
 import {
   collection,
@@ -15,6 +14,12 @@ import {
 const DB_MODE = import.meta.env.VITE_DB_MODE || 'local'
 const USE_FIREBASE = DB_MODE === 'firebase'
 const USE_SUPABASE = DB_MODE === 'supabase'
+
+async function firebaseDb() {
+  const mod = await import('./firebase.js')
+  if (!mod.default) throw new Error('Firebase non initialisé')
+  return mod.default
+}
 
 // ===== LOCAL DATABASE =====
 const localDB = {
@@ -45,7 +50,7 @@ export const gamesService = {
     }
 
     if (!USE_FIREBASE) {
-      const gameId = `game_${localDB.nextGameId++}`
+      const gameId = customGameId || `game_${localDB.nextGameId++}`
       const newGame = {
         gameId,
         teamAName,
@@ -64,7 +69,7 @@ export const gamesService = {
 
     const gameId = `game_${Date.now()}`
     try {
-      await setDoc(doc(db, 'games', gameId), {
+      await setDoc(doc(await firebaseDb(), 'games', gameId), {
         gameId,
         teamAName,
         teamBName,
@@ -98,7 +103,7 @@ export const gamesService = {
     }
 
     try {
-      const gameDoc = await getDoc(doc(db, 'games', gameId))
+      const gameDoc = await getDoc(doc(await firebaseDb(), 'games', gameId))
       return gameDoc.exists() ? gameDoc.data() : null
     } catch (error) {
       console.error('Error getting game:', error)
@@ -135,7 +140,7 @@ export const gamesService = {
     }
 
     try {
-      await updateDoc(doc(db, 'games', gameId), updateData)
+      await updateDoc(doc(await firebaseDb(), 'games', gameId), updateData)
       return true
     } catch (error) {
       console.error('Error updating game score:', error)
@@ -158,7 +163,7 @@ export const gamesService = {
     }
 
     try {
-      await updateDoc(doc(db, 'games', gameId), { status })
+      await updateDoc(doc(await firebaseDb(), 'games', gameId), { status })
       return true
     } catch (error) {
       console.error('Error updating game status:', error)
@@ -185,19 +190,6 @@ export const gamesService = {
       }
     }
 
-    if (!USE_FIREBASE) {
-      // Pas de vraie souscription en mode local par défaut
-      // On retourne une "dummy" unsubscribe function
-      return () => {}
-    }
-
-    if (!USE_FIREBASE) {
-      // Pas de vraie souscription en mode local par défaut
-      // On retourne une "dummy" unsubscribe function
-      return () => {}
-    }
-
-    // TODO: Implémenter Firestore onSnapshot si on repasse à Firebase un jour
     return () => {}
   },
 
@@ -247,7 +239,7 @@ export const questionsService = {
 
     const questionId = `q_${Date.now()}`
     try {
-      await setDoc(doc(db, 'questions', questionId), {
+      await setDoc(doc(await firebaseDb(), 'questions', questionId), {
         id: questionId,
         type,
         difficulty,
@@ -277,7 +269,7 @@ export const questionsService = {
     }
 
     try {
-      const questionDoc = await getDoc(doc(db, 'questions', questionId))
+      const questionDoc = await getDoc(doc(await firebaseDb(), 'questions', questionId))
       return questionDoc.exists() ? questionDoc.data() : null
     } catch (error) {
       console.error('Error getting question:', error)
@@ -307,7 +299,7 @@ export const questionsService = {
 
     try {
       const q = query(
-        collection(db, 'questions'),
+        collection(await firebaseDb(), 'questions'),
         where('type', '==', type),
         where('difficulty', '==', difficulty)
       )

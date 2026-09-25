@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export const QuestionCard = ({ 
@@ -47,26 +47,22 @@ export const QuestionCard = ({
   const handleKeyPress = (e) => {
     if (disabled) return
     if (e.key === 'Enter') {
+      e.preventDefault()
       handleSubmit()
     } else if (e.key === 'Backspace') {
-      setUserInput(userInput.slice(0, -1))
+      setUserInput((prev) => prev.slice(0, -1))
     } else if (/\d/.test(e.key)) {
-      if (userInput.length < 6) {
-        setUserInput(userInput + e.key)
-      }
+      setUserInput((prev) => (prev.length < 6 ? prev + e.key : prev))
     }
   }
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyPress)
-    return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [userInput, disabled])
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-lg flex flex-col items-center gap-4"
+      tabIndex={disabled ? -1 : 0}
+      onKeyDown={handleKeyPress}
+      className="w-full max-w-lg flex flex-col items-center gap-4 outline-none focus:ring-2 focus:ring-white/20 rounded-2xl"
     >
       {/* Question Card */}
       <motion.div

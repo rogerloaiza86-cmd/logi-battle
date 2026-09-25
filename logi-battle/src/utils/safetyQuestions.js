@@ -472,16 +472,15 @@ export const safetyQuestions = [
     id: 'safety_024',
     type: 'ergonomics',
     difficulty: 2,
-    question: "La limite réglementaire de charge pour une manutention manuelle occasionnelle est de :",
+    question: "Pour limiter les TMS lors du port de charge (C1.2), que privilégie le référentiel ?",
     options: [
-      '15 kg pour homme, 10 kg pour femme',
-      '25 kg pour homme, 15 kg pour femme',
-      '50 kg pour tout le monde',
-      'Pas de limite légale'
+      'Porter la charge à bout de bras, dos rond',
+      'Une aide mécanique (transpalette, table élévatrice) et une prise près du corps',
+      'Une limite unique de 50 kg pour tout le monde',
+      'Soulever en torsion pour aller plus vite'
     ],
-    correctOption: 0,
-    explanation: "Recommandations : 25kg homme/15kg femme pour charges fréquentes. Au-delà, utiliser des aides mécaniques.",
-    correction: "En France, les valeurs limites recommandées sont 25kg (homme) et 15kg (femme) pour une manutention fréquente. Pour l'occasionnel : 30kg/20kg. Mais l'employeur doit évaluer les risques.",
+    correctOption: 1,
+    explanation: "Le référentiel associe le port de charge aux TMS et aux aides qui réduisent l’effort. Il n’y a pas un seuil unique à retenir comme bonne réponse de situation.",
     category: 'Ergonomie',
     context: 'Limites poids'
   },

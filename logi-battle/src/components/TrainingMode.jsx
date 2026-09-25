@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import QuestionCard from './QuestionCard'
-import VocabularyCard from './VocabularyCard'
+import QuestionView from './QuestionView'
 import { generateNextQuestion } from '../utils/questionGenerator'
 
 const ROUND_TIME = 45
@@ -20,6 +19,8 @@ export const TrainingMode = ({ onBack }) => {
   const [showResults, setShowResults] = useState(false)
   const [questionHistory, setQuestionHistory] = useState([])
   const roundStartTime = useRef(null)
+  const answeredRef = useRef(0)
+  const lockedRef = useRef(false)
 
   const modules = [
     { id: 'palettisation', title: 'Palettisation', icon: 'inventory_2', color: 'orange', description: 'Maîtrisez les calculs de palettisation' },
@@ -37,7 +38,7 @@ export const TrainingMode = ({ onBack }) => {
     { id: 'route', title: 'Routes', icon: 'map', color: 'blue', description: 'Optimisation des routes' },
     { id: 'legal', title: 'Légal', icon: 'gavel', color: 'orange', description: 'Connaissances légales' },
     { id: 'math', title: 'Calculs', icon: 'calculate', color: 'blue', description: 'Calculs logistiques avancés' },
-    { id: 'culture', title: 'Culture G', icon: 'psychology', color: 'orange', description: 'Culture générale logistique' },
+    { id: 'culture', title: 'Référentiel 2025', icon: 'psychology', color: 'orange', description: 'Compétences du bac pro métiers de la logistique' },
   ]
 
   useEffect(() => {
@@ -60,6 +61,8 @@ export const TrainingMode = ({ onBack }) => {
     setTotalAnswered(0)
     setCorrectAnswers(0)
     setQuestionHistory([])
+    answeredRef.current = 0
+    lockedRef.current = false
     startNewQuestion(moduleId)
   }
 
@@ -71,12 +74,16 @@ export const TrainingMode = ({ onBack }) => {
     setQuestion(newQuestion)
     setTimeLeft(ROUND_TIME)
     setIsRoundActive(true)
+    lockedRef.current = false
     roundStartTime.current = Date.now()
   }
 
   const handleAnswer = (isCorrect) => {
+    if (lockedRef.current) return
+    lockedRef.current = true
     setIsRoundActive(false)
-    setTotalAnswered(prev => prev + 1)
+    answeredRef.current += 1
+    setTotalAnswered(answeredRef.current)
     
     const responseTime = Date.now() - roundStartTime.current
     const timeBonus = Math.max(0, Math.floor(timeLeft / 5) * 10)
@@ -106,18 +113,18 @@ export const TrainingMode = ({ onBack }) => {
     }
 
     setTimeout(() => {
-      if (totalAnswered + 1 < 10) {
-        startNewQuestion()
-      } else {
-        setShowResults(true)
-      }
+      if (answeredRef.current < 10) startNewQuestion()
+      else setShowResults(true)
     }, 2000)
   }
 
   const handleTimeout = () => {
+    if (lockedRef.current) return
+    lockedRef.current = true
     setIsRoundActive(false)
     setStreak(0)
-    setTotalAnswered(prev => prev + 1)
+    answeredRef.current += 1
+    setTotalAnswered(answeredRef.current)
     setQuestionHistory(prev => [...prev, {
       question: question?.title || 'Question',
       isCorrect: false,
@@ -127,11 +134,8 @@ export const TrainingMode = ({ onBack }) => {
     }])
 
     setTimeout(() => {
-      if (totalAnswered + 1 < 10) {
-        startNewQuestion()
-      } else {
-        setShowResults(true)
-      }
+      if (answeredRef.current < 10) startNewQuestion()
+      else setShowResults(true)
     }, 2000)
   }
 
@@ -212,25 +216,14 @@ export const TrainingMode = ({ onBack }) => {
         <main className="flex-1 flex items-center justify-center p-6">
           <div className="w-full max-w-xl">
             {question && (
-              question.isMCQ || question.type === 'vocabulaire' ? (
-                <VocabularyCard
-                  question={question}
-                  team="A"
-                  onAnswer={handleAnswer}
-                  isAnswering={!isRoundActive}
-                  disabled={!isRoundActive}
-                  showCorrectAnswer={!isRoundActive}
-                />
-              ) : (
-                <QuestionCard
-                  question={question}
-                  team="A"
-                  onAnswer={handleAnswer}
-                  isAnswering={!isRoundActive}
-                  disabled={!isRoundActive}
-                  showCorrectAnswer={!isRoundActive}
-                />
-              )
+              <QuestionView
+                question={question}
+                team="A"
+                onAnswer={handleAnswer}
+                isAnswering={!isRoundActive}
+                disabled={!isRoundActive}
+                showCorrectAnswer={!isRoundActive}
+              />
             )}
           </div>
         </main>
