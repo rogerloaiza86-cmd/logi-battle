@@ -2,9 +2,12 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useChampionshipStore } from '../hooks/useChampionshipStore'
 import { NIVEAUX, NIVEAU_LABEL } from '../data/niveaux'
+import { createClassCode, createTeacherKey, saveClassOnline } from '../services/classCloud'
 
 export const GroupManager = ({ classData, onBack, onViewChampionship, onStartGame }) => {
-  const { createGroup, deleteGroup, getCurrentChampion, getRankings, resetChampionship, setClassNiveau } = useChampionshipStore()
+  const { createGroup, deleteGroup, getCurrentChampion, getRankings, resetChampionship, setClassNiveau, attachOnline, getClass } = useChampionshipStore()
+  const [publishMessage, setPublishMessage] = useState('')
+  const [publishing, setPublishing] = useState(false)
   
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [newGroupName, setNewGroupName] = useState('')
@@ -31,6 +34,22 @@ export const GroupManager = ({ classData, onBack, onViewChampionship, onStartGam
     setMembers(newMembers)
   }
 
+  const handlePublish = async () => {
+    setPublishing(true)
+    setPublishMessage('')
+    const current = getClass(classData.id) || classData
+    const online = current.online?.teacherKey
+      ? current.online
+      : { code: createClassCode(), teacherKey: createTeacherKey() }
+    if (!current.online?.teacherKey) attachOnline(classData.id, online)
+    const fresh = getClass(classData.id) || { ...current, online }
+    const result = await saveClassOnline(fresh, online)
+    setPublishing(false)
+    setPublishMessage(result.ok
+      ? `En ligne. Code ${online.code}. Clé professeur : ${online.teacherKey}`
+      : result.error)
+  }
+
   const handleStartFreeMatch = () => {
     if (groups.length >= 2) {
       // Match libre entre les deux premiers groupes
@@ -50,6 +69,15 @@ export const GroupManager = ({ classData, onBack, onViewChampionship, onStartGam
           <div>
             <h2 className="text-2xl font-bold text-white">{classData.name}</h2>
             <p className="text-gray-500">{NIVEAU_LABEL[classData.niveau] || 'Seconde'} · {groups.length} groupe{groups.length !== 1 ? 's' : ''} • {classData.matches?.length || 0} matchs joués</p>
+            <button
+              type="button"
+              onClick={handlePublish}
+              disabled={publishing}
+              className="mt-3 min-h-12 px-4 rounded-xl bg-[#f4b942] text-[#17314a] font-bold disabled:opacity-40"
+            >
+              {publishing ? 'Publication…' : classData.online?.code ? 'Mettre à jour en ligne' : 'Publier en ligne'}
+            </button>
+            {publishMessage && <p className="mt-2 text-sm text-amber-100 break-all">{publishMessage}</p>}
             <label className="block mt-3 max-w-xs">
               <span className="text-xs text-gray-400">Niveau des questions</span>
               <select

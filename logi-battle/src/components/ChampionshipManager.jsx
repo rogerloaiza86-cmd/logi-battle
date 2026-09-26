@@ -4,6 +4,7 @@ import { useChampionshipStore } from '../hooks/useChampionshipStore'
 import { NIVEAUX, NIVEAU_LABEL } from '../data/niveaux'
 import GroupManager from './GroupManager'
 import ChampionshipBoard from './ChampionshipBoard'
+import ClassTransfer from './ClassTransfer'
 
 export const ChampionshipManager = ({ onBack, onStartGame }) => {
   const [view, setView] = useState('list') // 'list', 'class', 'groups', 'championship'
@@ -101,6 +102,8 @@ export const ChampionshipManager = ({ onBack, onStartGame }) => {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-6"
             >
+              <ClassTransfer />
+
               {/* Create Class Button */}
               {!showCreateForm ? (
                 <motion.button
@@ -212,6 +215,7 @@ export const ChampionshipManager = ({ onBack, onStartGame }) => {
                       <h3 className="text-lg font-bold text-white mb-1">{cls.name}</h3>
                       <p className="text-xs font-bold uppercase tracking-wider text-primary mb-2">
                         {NIVEAU_LABEL[cls.niveau] || 'Seconde'}
+                        {cls.online?.code ? ` · ${cls.online.code}` : ''}
                       </p>
                       {cls.description && (
                         <p className="text-sm text-gray-500 mb-3">{cls.description}</p>

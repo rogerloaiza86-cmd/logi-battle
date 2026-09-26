@@ -13,6 +13,7 @@ import { questionRespecteNiveau } from '../src/data/niveaux.js'
 import { decouverteQuestions } from '../src/utils/decouverteQuestions.js'
 import { applyArenaResult, rankGroups } from '../src/utils/classement.js'
 import { describeMatch, sortMatches } from '../src/utils/matchJournal.js'
+import { buildRegisterFile, parseRegisterFile } from '../src/utils/classRegisterFile.js'
 
 const types = [
   'palettisation', 'cout_transport', 'loading_plan', 'vocabulaire', 'supply_chain',
@@ -142,5 +143,19 @@ assert(titleNote.result === 'Bravo conserve le titre', 'journal titre')
 assert(titleNote.scoreLabel === '2 — 4', 'score titre')
 const ordered = sortMatches([{ date: '2026-01-01T00:00:00.000Z' }, { date: '2026-06-01T00:00:00.000Z' }])
 assert(ordered[0].date.startsWith('2026-06'), 'les matchs récents passent devant')
+
+const register = buildRegisterFile([{
+  id: 'class_1',
+  name: '2LOG A',
+  niveau: 'seconde',
+  groups: [{ id: 'a', name: 'Alpha', stats: { points: 3, wins: 1, losses: 0, draws: 0, totalMatches: 1, titleDefenses: 0 } }],
+  matches: [],
+  online: { code: 'AB23CD45', teacherKey: 'CLEPROFESSEURTRESLONGUE123456' },
+}])
+const restored = parseRegisterFile(JSON.stringify(register))
+assert(restored.ok && restored.classes[0].name === '2LOG A', 'reprise du fichier')
+assert(restored.classes[0].groups[0].stats.points === 3, 'points repris')
+assert(restored.classes[0].online.teacherKey === 'CLEPROFESSEURTRESLONGUE123456', 'clé professeur reprise')
+assert(!parseRegisterFile('{}').ok, 'fichier étranger refusé')
 
 console.log(`Référentiel OK — ${types.length} modules, ${cultureQuestions.length} questions de diplôme.`)

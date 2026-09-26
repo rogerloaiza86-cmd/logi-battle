@@ -1,3 +1,5 @@
+import { supabase } from './supabase'
+
 /** Code court de salle, sans caractère ambigu (0/O, 1/I). */
 
 export const ROOM_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -15,7 +17,7 @@ export function normalizeRoomCode(raw) {
 }
 
 export function isRealtimeReady() {
-  return Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY)
+  return Boolean(supabase)
 }
 
 export function roomEntryLabel() {

@@ -7,6 +7,14 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { normaliserNiveau } from '../data/niveaux'
 import { applyArenaResult, rankGroups } from '../utils/classement'
+import { saveClassOnline } from '../services/classCloud'
+import { sanitizeClass } from '../utils/classRegisterFile'
+
+function publishIfOnline(get, classId) {
+  const cls = get().classes.find((item) => item.id === classId)
+  if (!cls?.online?.code || !cls?.online?.teacherKey) return
+  saveClassOnline(cls, cls.online).catch(() => {})
+}
 
 export const useChampionshipStore = create(
   persist(
@@ -37,6 +45,26 @@ export const useChampionshipStore = create(
         }))
         return newClass.id
       },
+
+      importClasses: (incoming) => {
+        const clean = (incoming || []).map(sanitizeClass).filter(Boolean)
+        if (!clean.length) return 0
+        set((state) => {
+          const byId = new Map(state.classes.map((cls) => [cls.id, cls]))
+          clean.forEach((cls) => byId.set(cls.id, cls))
+          const classes = [...byId.values()]
+          return { classes, currentClass: state.currentClass || classes[0]?.id || null }
+        })
+        return clean.length
+      },
+
+      attachOnline: (classId, online) => {
+        set((state) => ({
+          classes: state.classes.map((cls) => (
+            cls.id === classId ? { ...cls, online } : cls
+          )),
+        }))
+      },
       
       // Supprimer une classe
       deleteClass: (classId) => {
@@ -60,6 +88,7 @@ export const useChampionshipStore = create(
             c.id === classId ? { ...c, niveau: normaliserNiveau(niveau) } : c
           )),
         }))
+        publishIfOnline(get, classId)
       },
 
       createGroup: (classId, groupName, members) => {
@@ -99,6 +128,7 @@ export const useChampionshipStore = create(
             return c
           }),
         }))
+        publishIfOnline(get, classId)
         return newGroup.id
       },
       
@@ -128,6 +158,7 @@ export const useChampionshipStore = create(
             return c
           }),
         }))
+        publishIfOnline(get, classId)
       },
       
       // Sélectionner un groupe pour jouer
@@ -208,7 +239,7 @@ export const useChampionshipStore = create(
             return c
           }),
         }))
-        
+        publishIfOnline(get, classId)
         return match
       },
 
@@ -240,6 +271,7 @@ export const useChampionshipStore = create(
             }
           }),
         }))
+        publishIfOnline(get, classId)
         return match
       },
       
@@ -271,6 +303,7 @@ export const useChampionshipStore = create(
             return c
           }),
         }))
+        publishIfOnline(get, classId)
       },
       
       // ========== GETTERS ==========
