@@ -20,6 +20,7 @@ import { getRouteOptimizerQuestion } from './routeOptimizerQuestions'
 import { getLegalQuestion } from './legalQuestions'
 import { getMathQuestion } from './mathQuestions'
 import { referentielFor } from '../data/referentiel2025'
+import { formatQuestionDescription } from './questionPrompt'
 
 // ===== PALETTISATION =====
 /**
@@ -357,7 +358,7 @@ export const generateReceptionQuestion = () => {
     type: 'reception',
     difficulty: receptionQ.difficulty,
     title: '🚛 Réception & Contrôle',
-    description: receptionQ.question,
+    description: formatQuestionDescription(receptionQ.question, receptionQ.scenario),
     data: {
       category: receptionQ.category,
       options: receptionQ.options,
@@ -379,7 +380,7 @@ export const generateStockQuestion = () => {
     type: 'stock',
     difficulty: stockQ.difficulty,
     title: '📦 Stock Master 3D',
-    description: stockQ.question,
+    description: formatQuestionDescription(stockQ.question, stockQ.scenario),
     data: {
       category: stockQ.category,
       options: stockQ.options,
@@ -401,7 +402,7 @@ export const generateSafetyQuestion = () => {
     type: 'safety',
     difficulty: safetyQ.difficulty,
     title: '🛡️ Safety First',
-    description: safetyQ.question,
+    description: formatQuestionDescription(safetyQ.question, safetyQ.scenario),
     data: {
       category: safetyQ.category,
       options: safetyQ.options,
@@ -423,7 +424,7 @@ export const generateTraceabilityQuestion = () => {
     type: 'traceability',
     difficulty: traceQ.difficulty,
     title: '📡 Traçabilité Track',
-    description: traceQ.question,
+    description: formatQuestionDescription(traceQ.question, traceQ.scenario),
     data: {
       category: traceQ.category,
       options: traceQ.options,
@@ -445,7 +446,7 @@ export const generateGreenLogisticsQuestion = () => {
     type: 'green',
     difficulty: greenQ.difficulty,
     title: '🌍 Green Logistique',
-    description: greenQ.question,
+    description: formatQuestionDescription(greenQ.question, greenQ.scenario),
     data: {
       category: greenQ.category,
       options: greenQ.options,
@@ -467,7 +468,7 @@ export const generateTeamLeaderQuestion = () => {
     type: 'team_leader',
     difficulty: leaderQ.difficulty,
     title: '👔 Team Leader',
-    description: leaderQ.question,
+    description: formatQuestionDescription(leaderQ.question, leaderQ.scenario),
     data: {
       category: leaderQ.category,
       scenario: leaderQ.scenario,
