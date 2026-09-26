@@ -5,11 +5,12 @@ import BrandMark from './BrandMark'
 export const Login = ({ onLogin }) => {
   const [name, setName] = useState('')
   const [className, setClassName] = useState('')
+  const [role, setRole] = useState('professeur')
 
   const handleSubmit = (e) => {
     e.preventDefault()
     if (name.trim() && className.trim()) {
-      const profile = { name: name.trim(), class: className.trim().toUpperCase() }
+      const profile = { name: name.trim(), class: className.trim().toUpperCase(), role }
       localStorage.setItem('user_profile', JSON.stringify(profile))
       onLogin(profile)
     }
@@ -46,6 +47,29 @@ export const Login = ({ onLogin }) => {
             </div>
 
             <div>
+              <p className="block text-xs font-bold text-gray-400 tracking-widest mb-2 uppercase">Rôle</p>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  ['professeur', 'Professeur'],
+                  ['eleve', 'Élève'],
+                ].map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setRole(id)}
+                    className={`min-h-12 rounded-xl border font-bold ${
+                      role === id
+                        ? 'bg-[#f4b942] text-[#17314a] border-[#f4b942]'
+                        : 'bg-[#1d3d59] text-gray-300 border-white/10'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
               <label className="block text-xs font-bold text-gray-400 tracking-widest mb-2 uppercase">
                 Classe
               </label>
@@ -64,7 +88,7 @@ export const Login = ({ onLogin }) => {
               disabled={!name.trim() || !className.trim()}
               className="w-full mt-8 bg-[#f4b942] hover:bg-[#d99926] hover:scale-[1.02] disabled:hover:scale-100 disabled:opacity-50 disabled:cursor-not-allowed text-[#17314a] py-4 rounded-full shadow-lg shadow-orange-500/20 transition-all font-bold tracking-widest uppercase"
             >
-              Initialiser
+              Entrer
             </button>
           </form>
         </div>

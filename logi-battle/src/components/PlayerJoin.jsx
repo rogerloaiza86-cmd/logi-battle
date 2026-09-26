@@ -5,7 +5,7 @@ import BrandMark from './BrandMark'
 import { joinRoom } from '../services/roomChannel'
 import { ROOM_ALPHABET, normalizeRoomCode } from '../services/roomCode'
 
-export const PlayerJoin = ({ userProfile }) => {
+export const PlayerJoin = ({ userProfile, onLogout }) => {
   const codeFromUrl = normalizeRoomCode(new URLSearchParams(window.location.search).get('game'))
   const [step, setStep] = useState(codeFromUrl ? 2 : 1)
   const [gameId, setGameId] = useState(codeFromUrl)
@@ -196,6 +196,16 @@ export const PlayerJoin = ({ userProfile }) => {
                 )}
               </button>
             </div>
+            {classRoster?.rankings?.length > 0 && (
+              <ol className="space-y-1 text-sm text-white">
+                {classRoster.rankings.map((group) => (
+                  <li key={group.id} className="flex justify-between">
+                    <span>{group.rank}. {group.name}</span>
+                    <span className="text-[#f4b942]">{group.points} pts</span>
+                  </li>
+                ))}
+              </ol>
+            )}
             {error && <p className="text-amber-200 text-sm">{error}</p>}
             <button
               type="submit"
@@ -205,6 +215,11 @@ export const PlayerJoin = ({ userProfile }) => {
               {isJoining ? 'Connexion au code…' : 'Rejoindre la classe'}
             </button>
           </form>
+        )}
+        {onLogout && (
+          <button type="button" onClick={onLogout} className="mt-6 mx-auto block text-sm text-gray-400">
+            Changer de rôle
+          </button>
         )}
       </motion.div>
     </div>

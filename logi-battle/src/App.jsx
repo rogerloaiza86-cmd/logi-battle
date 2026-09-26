@@ -63,6 +63,14 @@ function App() {
     setUserProfile(null)
   }
 
+  if (userProfile.role === 'eleve') {
+    return (
+      <div className="dark">
+        <PlayerJoin userProfile={userProfile} onLogout={handleLogout} />
+      </div>
+    )
+  }
+
   // Route: /join - Page pour les joueurs qui scannent le QR
   const isJoinRoute = currentPath.endsWith('/join') || new URLSearchParams(window.location.search).has('game')
   if (isJoinRoute) {

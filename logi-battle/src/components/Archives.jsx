@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { readChampionshipState } from '../utils/roundRules'
+import { describeMatch, sortMatches } from '../utils/matchJournal'
+import { rankGroups } from '../utils/classement'
 
 const STORAGE_KEYS = {
   championship: 'logi-battle-championship',
@@ -13,6 +15,7 @@ export const Archives = ({ onBack }) => {
   const [matches, setMatches] = useState([])
   const [achievements, setAchievements] = useState([])
   const [leaderboard, setLeaderboard] = useState([])
+  const [classPulse, setClassPulse] = useState({ wins: 0, draws: 0, groups: 0, classes: 0 })
   const [selectedMatch, setSelectedMatch] = useState(null)
 
   useEffect(() => {
@@ -25,36 +28,35 @@ export const Archives = ({ onBack }) => {
     const players = JSON.parse(localStorage.getItem(STORAGE_KEYS.players) || '[]')
     
     // Extract all matches
-    const allMatches = []
     const classes = championship.classes || []
-    
-    classes.forEach(cls => {
-      cls.matches?.forEach(match => {
-        const challenger = cls.groups?.find(g => g.id === match.challengerId)
-        const champion = cls.groups?.find(g => g.id === match.championId)
-        
-        allMatches.push({
-          ...match,
-          className: cls.name,
-          challengerName: challenger?.name || 'Inconnu',
-          championName: champion?.name || 'Inconnu',
-        })
+    const allMatches = []
+    let wins = 0
+    let draws = 0
+    let groups = 0
+
+    classes.forEach((cls) => {
+      groups += cls.groups?.length || 0
+      cls.groups?.forEach((group) => {
+        wins += group.stats?.wins || 0
+        draws += group.stats?.draws || 0
+      })
+      cls.matches?.forEach((match) => {
+        allMatches.push(describeMatch(match, cls.groups || [], cls.name))
       })
     })
-    
-    // Sort by date (newest first)
-    allMatches.sort((a, b) => b.date - a.date)
-    setMatches(allMatches)
 
-    // Build leaderboard from players
-    const playerStats = players.map(player => ({
-      ...player,
-      winRate: player.stats?.totalGames > 0 
-        ? Math.round((player.stats.wins / player.stats.totalGames) * 100)
-        : 0,
-    })).sort((a, b) => (b.stats?.totalScore || 0) - (a.stats?.totalScore || 0))
-    
-    setLeaderboard(playerStats)
+    setMatches(sortMatches(allMatches))
+    setClassPulse({
+      wins,
+      draws,
+      groups,
+      classes: classes.length,
+    })
+    setLeaderboard(classes.map((cls) => ({
+      id: cls.id,
+      name: cls.name,
+      groups: rankGroups(cls.groups || []),
+    })).filter((board) => board.groups.length > 0))
 
     // Collect achievements
     const allAchievements = []
@@ -80,18 +82,6 @@ export const Archives = ({ onBack }) => {
       hour: '2-digit',
       minute: '2-digit',
     })
-  }
-
-  const getResultColor = (result) => {
-    if (result === 'challenger') return 'text-green-400'
-    if (result === 'champion') return 'text-[#f4b942]'
-    return 'text-gray-400'
-  }
-
-  const getResultLabel = (result) => {
-    if (result === 'challenger') return 'Challenger Gagne'
-    if (result === 'champion') return 'Champion Défend'
-    return 'Match Nul'
   }
 
   return (
@@ -176,8 +166,8 @@ export const Archives = ({ onBack }) => {
                               <span className="material-icons text-[#7fa99b]">groups</span>
                             </div>
                             <div>
-                              <p className="text-white font-bold">{match.challengerName}</p>
-                              <p className="text-xs text-gray-500">Challenger</p>
+                              <p className="text-white font-bold">{match.left}</p>
+                              <p className="text-xs text-gray-500">{match.leftRole} · {match.className}</p>
                             </div>
                           </div>
 
@@ -190,20 +180,20 @@ export const Archives = ({ onBack }) => {
                               <span className="text-2xl">👑</span>
                             </div>
                             <div>
-                              <p className="text-white font-bold">{match.championName}</p>
-                              <p className="text-xs text-gray-500">Champion</p>
+                              <p className="text-white font-bold">{match.right}</p>
+                              <p className="text-xs text-gray-500">{match.rightRole}</p>
                             </div>
                           </div>
                         </div>
 
                         {/* Result */}
                         <div className="flex items-center gap-4">
-                          <span className={`text-sm font-bold ${getResultColor(match.winner)}`}>
-                            {getResultLabel(match.winner)}
+                          <span className={`text-sm font-bold ${match.draw ? 'text-gray-300' : 'text-[#7fa99b]'}`}>
+                            {match.result}
                           </span>
-                          {match.score && (
+                          {match.scoreLabel && (
                             <span className="text-sm text-gray-400">
-                              {match.score.teamA} - {match.score.teamB}
+                              {match.scoreLabel}
                             </span>
                           )}
                           <span className="text-xs text-gray-500">
@@ -231,90 +221,35 @@ export const Archives = ({ onBack }) => {
                 <div className="w-20 h-20 rounded-full bg-[#1d3d59] flex items-center justify-center mx-auto mb-4">
                   <span className="material-icons text-4xl text-gray-600">emoji_events</span>
                 </div>
-                <h2 className="text-xl font-bold text-white mb-2">Aucun joueur classé</h2>
-                <p className="text-gray-500">Créez des joueurs et jouez pour apparaître dans le classement</p>
+                <h2 className="text-xl font-bold text-white mb-2">Aucun groupe classé</h2>
+                <p className="text-gray-500">Inscrivez des groupes dans une classe pour voir leur classement</p>
               </div>
             ) : (
-              <>
-                <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5 mb-6">
-                  <h2 className="text-lg font-bold text-white mb-4">🏆 Top 3</h2>
-                  <div className="grid grid-cols-3 gap-4">
-                    {leaderboard.slice(0, 3).map((player, index) => (
-                      <div
-                        key={player.id}
-                        className={`text-center p-4 rounded-2xl ${
-                          index === 0 ? 'bg-yellow-500/20 border border-yellow-500/30' :
-                          index === 1 ? 'bg-gray-400/20 border border-gray-400/30' :
-                          'bg-amber-700/20 border border-amber-700/30'
-                        }`}
-                      >
-                        <div className="text-3xl mb-2">
-                          {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
-                        </div>
-                        <div 
-                          className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2"
-                          style={{ backgroundColor: `${player.avatar?.color || '#f4b942'}40` }}
-                        >
-                          <span 
-                            className="material-icons"
-                            style={{ color: player.avatar?.color || '#f4b942' }}
-                          >
-                            {player.avatar?.icon || 'person'}
-                          </span>
-                        </div>
-                        <p className="text-white font-bold truncate">{player.name}</p>
-                        <p className="text-lg font-black text-[#f4b942]">{player.stats?.totalScore || 0} pts</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-[#1d3d59] rounded-3xl border border-white/5 overflow-hidden">
+              leaderboard.map((board) => (
+                <div key={board.id} className="bg-[#1d3d59] rounded-3xl border border-white/5 overflow-hidden">
                   <div className="p-4 border-b border-white/5">
-                    <h3 className="font-bold text-white">Classement Complet</h3>
+                    <h3 className="font-bold text-white">{board.name}</h3>
                   </div>
                   <div className="divide-y divide-white/5">
-                    {leaderboard.map((player, index) => (
-                      <div
-                        key={player.id}
-                        className="flex items-center gap-4 p-4 hover:bg-[#234a68] transition-colors"
-                      >
+                    {board.groups.map((group) => (
+                      <div key={group.id} className="flex items-center gap-4 p-4">
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold ${
-                          index < 3 
-                            ? 'bg-[#f4b942]/20 text-[#f4b942]'
-                            : 'bg-[#0f2539] text-gray-400'
+                          group.rank === 1 ? 'bg-[#f4b942]/20 text-[#f4b942]' : 'bg-[#0f2539] text-gray-400'
                         }`}>
-                          {index + 1}
+                          {group.rank}
                         </div>
-                        
-                        <div 
-                          className="w-10 h-10 rounded-lg flex items-center justify-center"
-                          style={{ backgroundColor: `${player.avatar?.color || '#f4b942'}20` }}
-                        >
-                          <span 
-                            className="material-icons"
-                            style={{ color: player.avatar?.color || '#f4b942' }}
-                          >
-                            {player.avatar?.icon || 'person'}
-                          </span>
-                        </div>
-                        
                         <div className="flex-1">
-                          <p className="text-white font-bold">{player.name}</p>
+                          <p className="text-white font-bold">{group.name}</p>
                           <p className="text-xs text-gray-500">
-                            {player.stats?.wins || 0}V / {player.stats?.losses || 0}D
+                            {group.stats?.wins || 0}V · {group.stats?.draws || 0}N · {group.stats?.losses || 0}D
                           </p>
                         </div>
-                        
-                        <div className="text-right">
-                          <p className="text-lg font-black text-[#f4b942]">{player.stats?.totalScore || 0}</p>
-                          <p className="text-xs text-gray-500">{player.winRate}% Win</p>
-                        </div>
+                        <p className="text-lg font-black text-[#f4b942]">{group.stats?.points || 0} pts</p>
                       </div>
                     ))}
                   </div>
                 </div>
-              </>
+              ))
             )}
           </motion.div>
         )}
@@ -329,10 +264,10 @@ export const Archives = ({ onBack }) => {
             {/* Achievement Categories */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               {[
-                { icon: 'emoji_events', label: 'Victoires', count: 0, color: '#f4b942' },
-                { icon: 'local_fire_department', label: 'Séries', count: 0, color: '#ef4444' },
-                { icon: 'psychology', label: 'Connaissances', count: 0, color: '#7fa99b' },
-                { icon: 'groups', label: 'Social', count: 0, color: '#22c55e' },
+                { icon: 'emoji_events', label: 'Victoires', count: classPulse.wins, color: '#f4b942' },
+                { icon: 'handshake', label: 'Nuls', count: classPulse.draws, color: '#ef4444' },
+                { icon: 'groups', label: 'Groupes', count: classPulse.groups, color: '#7fa99b' },
+                { icon: 'school', label: 'Classes', count: classPulse.classes, color: '#22c55e' },
               ].map((cat) => (
                 <div key={cat.label} className="bg-[#1d3d59] rounded-2xl p-4 border border-white/5 text-center">
                   <div 
@@ -429,15 +364,15 @@ export const Archives = ({ onBack }) => {
                   <div className="w-16 h-16 rounded-2xl bg-[#7fa99b]/20 flex items-center justify-center mb-2">
                     <span className="material-icons text-3xl text-[#7fa99b]">groups</span>
                   </div>
-                  <p className="text-white font-bold">{selectedMatch.challengerName}</p>
-                  <p className="text-xs text-gray-500">Challenger</p>
+                  <p className="text-white font-bold">{selectedMatch.left}</p>
+                  <p className="text-xs text-gray-500">{selectedMatch.leftRole}</p>
                 </div>
 
                 <div className="text-center">
                   <p className="text-3xl font-black text-gray-400">VS</p>
-                  {selectedMatch.score && (
+                  {selectedMatch.scoreLabel && (
                     <p className="text-2xl font-bold text-[#f4b942]">
-                      {selectedMatch.score.teamA} - {selectedMatch.score.teamB}
+                      {selectedMatch.scoreLabel}
                     </p>
                   )}
                 </div>
@@ -446,22 +381,18 @@ export const Archives = ({ onBack }) => {
                   <div className="w-16 h-16 rounded-2xl bg-[#f4b942]/20 flex items-center justify-center mb-2">
                     <span className="text-3xl">👑</span>
                   </div>
-                  <p className="text-white font-bold">{selectedMatch.championName}</p>
-                  <p className="text-xs text-gray-500">Champion</p>
+                  <p className="text-white font-bold">{selectedMatch.right}</p>
+                  <p className="text-xs text-gray-500">{selectedMatch.rightRole}</p>
                 </div>
               </div>
 
               <div className={`text-center p-4 rounded-xl mb-6 ${
-                selectedMatch.winner === 'challenger' 
-                  ? 'bg-green-500/20 border border-green-500/30' 
-                  : 'bg-[#f4b942]/20 border border-[#f4b942]/30'
+                selectedMatch.draw
+                  ? 'bg-white/10 border border-white/10'
+                  : 'bg-[#7fa99b]/20 border border-[#7fa99b]/30'
               }`}>
                 <p className="text-sm text-gray-400 mb-1">Résultat</p>
-                <p className={`text-xl font-bold ${getResultColor(selectedMatch.winner)}`}>
-                  {selectedMatch.winner === 'challenger' 
-                    ? `🏆 ${selectedMatch.challengerName} remporte le titre !` 
-                    : `👑 ${selectedMatch.championName} conserve son titre !`}
-                </p>
+                <p className="text-xl font-bold text-white">{selectedMatch.result}</p>
               </div>
 
               {selectedMatch.duration && (

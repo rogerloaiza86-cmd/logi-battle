@@ -87,6 +87,12 @@ export const HostGame = ({ onBack, gameMode }) => {
       niveau,
       groupA: { id: groupA.id, name: groupA.name, members: groupA.members },
       groupB: { id: groupB.id, name: groupB.name, members: groupB.members },
+      rankings: getRankings(selectedClass.id).map((group) => ({
+        id: group.id,
+        name: group.name,
+        rank: group.rank,
+        points: group.stats?.points || 0,
+      })),
     }
   }
 

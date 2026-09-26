@@ -12,6 +12,7 @@ import { createRoomCode, normalizeRoomCode, ROOM_ALPHABET } from '../src/service
 import { questionRespecteNiveau } from '../src/data/niveaux.js'
 import { decouverteQuestions } from '../src/utils/decouverteQuestions.js'
 import { applyArenaResult, rankGroups } from '../src/utils/classement.js'
+import { describeMatch, sortMatches } from '../src/utils/matchJournal.js'
 
 const types = [
   'palettisation', 'cout_transport', 'loading_plan', 'vocabulaire', 'supply_chain',
@@ -116,5 +117,30 @@ const afterDraw = applyArenaResult(groups, 'a', 'b', null)
 assert(afterDraw.every((group) => group.stats.points === 1), 'nul = 1 point chacun')
 const ranked = rankGroups(afterWin)
 assert(ranked[0].id === 'a' && ranked[0].rank === 1 && ranked[0].isChampion, 'le leader du classement est champion')
+
+const journalGroups = [{ id: 'a', name: 'Alpha' }, { id: 'b', name: 'Bravo' }]
+const arenaNote = describeMatch({
+  id: 'm1',
+  type: 'arena',
+  groupAId: 'a',
+  groupBId: 'b',
+  arenaWinner: 'A',
+  winner: 'challenger',
+  date: '2026-09-01T10:00:00.000Z',
+  score: { A: 3, B: 1 },
+}, journalGroups, '2LOG')
+assert(arenaNote.result === 'Alpha gagne', 'journal arène')
+assert(arenaNote.scoreLabel === '3 — 1', 'score arène')
+const drawNote = describeMatch({
+  type: 'arena', groupAId: 'a', groupBId: 'b', arenaWinner: null, winner: 'draw', date: '2026-09-02',
+}, journalGroups)
+assert(drawNote.result === 'Match nul' && drawNote.draw, 'journal nul')
+const titleNote = describeMatch({
+  challengerId: 'a', championId: 'b', winner: 'champion', date: '2026-08-01', score: { teamA: 2, teamB: 4 },
+}, journalGroups)
+assert(titleNote.result === 'Bravo conserve le titre', 'journal titre')
+assert(titleNote.scoreLabel === '2 — 4', 'score titre')
+const ordered = sortMatches([{ date: '2026-01-01T00:00:00.000Z' }, { date: '2026-06-01T00:00:00.000Z' }])
+assert(ordered[0].date.startsWith('2026-06'), 'les matchs récents passent devant')
 
 console.log(`Référentiel OK — ${types.length} modules, ${cultureQuestions.length} questions de diplôme.`)

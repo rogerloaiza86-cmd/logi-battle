@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { readChampionshipState } from '../utils/roundRules'
+import { describeMatch, sortMatches } from '../utils/matchJournal'
+import { rankGroups } from '../utils/classement'
 
 const STORAGE_KEYS = {
   players: 'logi-battle-players',
@@ -17,6 +19,7 @@ export const HQDashboard = ({ onBack }) => {
     totalTime: 0,
   })
   const [recentActivity, setRecentActivity] = useState([])
+  const [classBoards, setClassBoards] = useState([])
   const [activeTab, setActiveTab] = useState('overview')
   const [settings, setSettings] = useState({
     soundEnabled: true,
@@ -37,6 +40,7 @@ export const HQDashboard = ({ onBack }) => {
     const history = JSON.parse(localStorage.getItem(STORAGE_KEYS.history) || '[]')
 
     const classes = championship.classes || []
+    const groupCount = classes.reduce((count, cls) => count + (cls.groups?.length || 0), 0)
     
     let totalGames = 0
     let totalTime = 0
@@ -56,27 +60,29 @@ export const HQDashboard = ({ onBack }) => {
       totalGames,
       totalPlayers: players.length,
       totalClasses: classes.length,
+      totalGroups: groupCount,
       totalTime,
     })
 
-    // Build recent activity
     const activities = []
-    
-    // Add recent matches from championship
-    classes.forEach(cls => {
-      cls.matches?.slice(-5).forEach(match => {
+    classes.forEach((cls) => {
+      cls.matches?.forEach((match) => {
+        const note = describeMatch(match, cls.groups || [], cls.name)
         activities.push({
           type: 'match',
-          date: match.date,
-          description: `Match: ${cls.groups?.find(g => g.id === match.challengerId)?.name || 'Challenger'} vs ${cls.groups?.find(g => g.id === match.championId)?.name || 'Champion'}`,
-          result: match.winner === 'challenger' ? 'Nouveau Champion!' : 'Défense réussie',
+          date: note.date,
+          description: `${note.className} · ${note.left} vs ${note.right}`,
+          result: note.result,
+          draw: note.draw,
         })
       })
     })
-
-    // Sort by date and take last 10
-    activities.sort((a, b) => new Date(b.date) - new Date(a.date))
-    setRecentActivity(activities.slice(0, 10))
+    setRecentActivity(sortMatches(activities).slice(0, 10))
+    setClassBoards(classes.map((cls) => ({
+      id: cls.id,
+      name: cls.name,
+      groups: rankGroups(cls.groups || []),
+    })).filter((board) => board.groups.length > 0))
   }
 
   const loadSettings = () => {
@@ -231,9 +237,9 @@ export const HQDashboard = ({ onBack }) => {
                         </p>
                       </div>
                       <span className={`text-xs px-2 py-1 rounded-full ${
-                        activity.result.includes('Champion')
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-[#f4b942]/20 text-[#f4b942]'
+                        activity.draw
+                          ? 'bg-white/10 text-gray-300'
+                          : 'bg-green-500/20 text-green-400'
                       }`}>
                         {activity.result}
                       </span>
@@ -334,45 +340,26 @@ export const HQDashboard = ({ onBack }) => {
             </div>
 
             <div className="bg-[#1d3d59] rounded-3xl p-6 border border-white/5">
-              <h2 className="text-lg font-bold text-white mb-4">Distribution des Compétences</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                  { name: 'Palettisation', progress: 75, color: '#f4b942' },
-                  { name: 'Transport', progress: 60, color: '#7fa99b' },
-                  { name: 'Chargement', progress: 45, color: '#22c55e' },
-                  { name: 'Vocabulaire', progress: 80, color: '#ef4444' },
-                ].map((skill) => (
-                  <div key={skill.name} className="text-center p-4 bg-[#0f2539] rounded-xl">
-                    <div className="relative w-20 h-20 mx-auto mb-3">
-                      <svg className="w-full h-full transform -rotate-90">
-                        <circle
-                          cx="40"
-                          cy="40"
-                          r="35"
-                          fill="none"
-                          stroke="#234a68"
-                          strokeWidth="6"
-                        />
-                        <circle
-                          cx="40"
-                          cy="40"
-                          r="35"
-                          fill="none"
-                          stroke={skill.color}
-                          strokeWidth="6"
-                          strokeLinecap="round"
-                          strokeDasharray="220"
-                          strokeDashoffset={220 - (220 * skill.progress / 100)}
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-lg font-bold text-white">{skill.progress}%</span>
-                      </div>
+              <h2 className="text-lg font-bold text-white mb-4">Classements des classes</h2>
+              {classBoards.length === 0 ? (
+                <p className="text-gray-500">Aucune classe avec des groupes. Créez-les dans le championnat.</p>
+              ) : (
+                <div className="space-y-6">
+                  {classBoards.map((board) => (
+                    <div key={board.id}>
+                      <p className="text-sm font-bold text-[#f4b942] mb-2">{board.name}</p>
+                      <ol className="space-y-2">
+                        {board.groups.map((group) => (
+                          <li key={group.id} className="flex items-center justify-between text-white">
+                            <span>{group.rank}. {group.name}</span>
+                            <span className="text-[#f4b942] font-bold">{group.stats?.points || 0} pts</span>
+                          </li>
+                        ))}
+                      </ol>
                     </div>
-                    <p className="text-sm text-gray-400">{skill.name}</p>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
         )}
