@@ -62,6 +62,10 @@ export function toPublicQuestion(question) {
   }
 }
 
+export function answerTargetsQuestion(question, questionId) {
+  return Boolean(question?.id) && questionId === question.id
+}
+
 export function gradePlayerAnswer(question, answer) {
   if (!question || answer == null || answer === '') return false
   if (!questionUsesKeypad(question)) {

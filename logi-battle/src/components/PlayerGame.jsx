@@ -31,7 +31,7 @@ export const PlayerGame = ({ room, gameId, playerName, team }) => {
         category: data.data?.category || data.referentiel?.competence || '',
         time: payload.time || 30,
       })
-      setTimeLeft(payload.time || 30)
+      setTimeLeft(Number(payload.time) > 0 ? Number(payload.time) : 30)
       setGameStatus('playing')
       setUserAnswer('')
       setResult(null)
@@ -70,9 +70,11 @@ export const PlayerGame = ({ room, gameId, playerName, team }) => {
 
   const sendAnswer = (answer) => {
     if (gameStatus !== 'playing' || answer == null || answer === '') return
+    const questionId = currentQuestion?.id
+    if (!questionId) return
     setGameStatus('answered')
     setResult('sent')
-    roomRef.current?.send('player_answer', { team, answer, playerName })
+    roomRef.current?.send('player_answer', { team, answer, playerName, questionId })
   }
 
   const handleSubmit = () => {
