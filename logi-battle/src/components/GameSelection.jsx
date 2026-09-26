@@ -412,7 +412,7 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
 
           {/* Section Title */}
           <div className="mb-6">
-            <p className="brand-kicker mb-1">Un module ouvre le code de la salle</p>
+            <p className="brand-kicker mb-1">Un module ouvre le code de la salle. Le niveau se choisit ensuite : Seconde, Première ou Terminale.</p>
             <div className="flex flex-wrap items-end justify-between gap-3">
               <h2 className="text-3xl font-black text-white italic font-display">Modules Geronimo Coop</h2>
               <button

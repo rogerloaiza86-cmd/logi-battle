@@ -6,7 +6,7 @@ import { ROUND_TIME, TOTAL_ROUNDS, VOCABULARY_TIME, resolveRoundWinner } from '.
  * Manche en écran partagé. Les statuts sont lus dans une ref pour que
  * la dernière réponse compte dans le même tour que setState.
  */
-export function useSplitRound(gameMode, { onRoundResolved, totalRounds = TOTAL_ROUNDS } = {}) {
+export function useSplitRound(gameMode, { onRoundResolved, totalRounds = TOTAL_ROUNDS, niveau = 'terminale' } = {}) {
   const [question, setQuestion] = useState(null)
   const [timeLeft, setTimeLeft] = useState(ROUND_TIME)
   const [roundTime, setRoundTime] = useState(ROUND_TIME)
@@ -40,7 +40,7 @@ export function useSplitRound(gameMode, { onRoundResolved, totalRounds = TOTAL_R
       continueTimer.current = null
     }
     const next = {
-      ...generateNextQuestion(gameMode),
+      ...generateNextQuestion(gameMode, niveau),
       id: `q_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
     }
     questionRef.current = next
@@ -60,7 +60,7 @@ export function useSplitRound(gameMode, { onRoundResolved, totalRounds = TOTAL_R
     setRoundWinner(null)
     setBothTeamsAnswered(false)
     return next
-  }, [gameMode])
+  }, [gameMode, niveau])
 
   const endRound = useCallback(() => {
     if (endingRef.current || finishedRef.current) return

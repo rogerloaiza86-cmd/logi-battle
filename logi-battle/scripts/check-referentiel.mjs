@@ -9,6 +9,8 @@ import {
 } from '../src/utils/questionGenerator.js'
 import { gradePlayerAnswer, questionUsesKeypad, resolveRoundWinner } from '../src/utils/roundRules.js'
 import { createRoomCode, normalizeRoomCode, ROOM_ALPHABET } from '../src/services/roomCode.js'
+import { questionRespecteNiveau } from '../src/data/niveaux.js'
+import { decouverteQuestions } from '../src/utils/decouverteQuestions.js'
 
 const types = [
   'palettisation', 'cout_transport', 'loading_plan', 'vocabulaire', 'supply_chain',
@@ -69,5 +71,36 @@ assert(normalizeRoomCode('GAMEABCDE') === 'ABCDE', 'préfixe collé')
 const roomCode = createRoomCode()
 assert(roomCode.length === 5, 'code de salle sur 5 caractères')
 assert([...roomCode].every((char) => ROOM_ALPHABET.includes(char)), 'alphabet sans ambiguïté')
+
+const themes = new Set(decouverteQuestions.map((question) => question.theme))
+assert(themes.size === 5, 'cinq thèmes de découverte')
+assert(decouverteQuestions.length >= 40, 'banque de découverte trop courte')
+for (const question of decouverteQuestions) {
+  assert(question.options.length === 4, `${question.id} doit avoir 4 choix`)
+  assert(question.correctOption >= 0 && question.correctOption < 4, `${question.id} index`)
+  assert(!/\b(wms|tms|incoterm)\b/i.test(question.question), `${question.id} trop technique`)
+}
+assert(new Set(decouverteQuestions.map((question) => question.correctOption)).size === 4, 'bonnes réponses dispersées')
+
+for (const moduleId of ['all', 'cout_transport', 'loading_plan', 'math', 'palettisation', 'safety', 'vocabulaire']) {
+  for (let index = 0; index < 12; index += 1) {
+    const seconde = generateNextQuestion(moduleId, 'seconde')
+    assert(questionRespecteNiveau(seconde, 'seconde'), `${moduleId} seconde hors cadre: ${seconde.type}`)
+    assert(seconde.themeEleve, 'thème élève manquant')
+  }
+}
+
+let premiereCalcul = false
+for (let index = 0; index < 20; index += 1) {
+  const premiere = generateNextQuestion('palettisation', 'premiere')
+  assert(questionRespecteNiveau(premiere, 'premiere'), 'première hors cadre')
+  if (questionUsesKeypad(premiere)) premiereCalcul = true
+  const transport = generateNextQuestion('cout_transport', 'premiere')
+  assert(!questionUsesKeypad(transport), 'première : coût composé interdit')
+}
+assert(premiereCalcul, 'la première doit pouvoir calculer une palettisation guidée')
+
+const terminale = generateNextQuestion('culture', 'terminale')
+assert(terminale.niveau === 'terminale', 'terminale non marquée')
 
 console.log(`Référentiel OK — ${types.length} modules, ${cultureQuestions.length} questions de diplôme.`)

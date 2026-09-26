@@ -20,6 +20,8 @@ import { getRouteOptimizerQuestion } from './routeOptimizerQuestions'
 import { getLegalQuestion } from './legalQuestions'
 import { getMathQuestion } from './mathQuestions'
 import { referentielFor } from '../data/referentiel2025'
+import { themeEleveDe } from '../data/niveaux'
+import { generateQuestionPourNiveau } from './niveauQuestions'
 
 // ===== PALETTISATION =====
 /**
@@ -649,7 +651,21 @@ export const getRandomQuestionType = (includeCulture = true, includeVocabulary =
   return types[Math.floor(Math.random() * types.length)]
 }
 
-export const generateNextQuestion = (gameMode = 'all') => {
+export const generateNextQuestion = (gameMode = 'all', niveau = 'terminale') => {
+  if (niveau === 'seconde' || niveau === 'premiere') {
+    const question = generateQuestionPourNiveau(gameMode, niveau, {
+      palletCalc: () => generatePalletizationQuestion(1, true),
+    })
+    const isMCQ = Boolean(question.isMCQ || question.data?.options)
+    return {
+      ...question,
+      isMCQ,
+      niveau,
+      themeEleve: question.themeEleve || themeEleveDe(question),
+      referentiel: question.referentiel || referentielFor(question.type),
+    }
+  }
+
   let type
   
   if (gameMode === 'culture') {
@@ -692,6 +708,8 @@ export const generateNextQuestion = (gameMode = 'all') => {
   return {
     ...question,
     isMCQ,
+    niveau: 'terminale',
+    themeEleve: themeEleveDe(question),
     referentiel: referentielFor(question.type),
   }
 }

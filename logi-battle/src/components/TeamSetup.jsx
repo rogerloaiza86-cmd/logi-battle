@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useGameStore } from '../hooks/useGameStore'
+import NiveauPicker from './NiveauPicker'
 
 export const TeamSetup = ({ onStart, onBack, gameMode }) => {
   const gameStore = useGameStore()
   const [teamAName, setTeamAName] = useState('')
   const [teamBName, setTeamBName] = useState('')
   const [errors, setErrors] = useState({})
+  const [niveau, setNiveau] = useState('seconde')
 
   const getGameModeLabel = () => {
     const labels = {
@@ -48,7 +50,7 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
     // Mettre à jour le store avec les noms des équipes
     gameStore.setTeamNames(teamAName.trim(), teamBName.trim())
     gameStore.setGameStatus('active')
-    onStart()
+    onStart(niveau)
   }
 
   const handleBack = () => {
@@ -91,8 +93,9 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="w-full max-w-2xl"
+        className="w-full max-w-2xl space-y-6"
       >
+        <NiveauPicker value={niveau} onChange={setNiveau} />
         <div className="grid md:grid-cols-2 gap-6 md:gap-8">
           {/* Team A Card */}
           <motion.div

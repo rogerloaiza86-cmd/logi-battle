@@ -34,6 +34,8 @@ export function toPublicQuestion(question) {
     isMCQ: Boolean(question.isMCQ || options),
     hints: question.hints || [],
     referentiel: question.referentiel || null,
+    themeEleve: question.themeEleve || null,
+    niveau: question.niveau || null,
     data: options
       ? {
           options,

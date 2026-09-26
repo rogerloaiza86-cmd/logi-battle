@@ -11,7 +11,7 @@ function readRoster(channel) {
 }
 
 export function openRoom(code) {
-  if (!isRealtimeReady()) return null
+  if (!isRealtimeReady() || !supabase) return null
   const normalized = normalizeRoomCode(code)
   if (!normalized) return null
 

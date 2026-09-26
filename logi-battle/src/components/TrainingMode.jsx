@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import QuestionView from './QuestionView'
+import NiveauPicker from './NiveauPicker'
 import { generateNextQuestion } from '../utils/questionGenerator'
 
 const ROUND_TIME = 45
 
 export const TrainingMode = ({ onBack }) => {
   const [selectedModule, setSelectedModule] = useState(null)
+  const [niveau, setNiveau] = useState('seconde')
+  const niveauRef = useRef('seconde')
+  niveauRef.current = niveau
   const [isPlaying, setIsPlaying] = useState(false)
   const [question, setQuestion] = useState(null)
   const [timeLeft, setTimeLeft] = useState(ROUND_TIME)
@@ -68,7 +72,7 @@ export const TrainingMode = ({ onBack }) => {
 
   const startNewQuestion = (moduleId) => {
     const newQuestion = {
-      ...generateNextQuestion(moduleId || selectedModule),
+      ...generateNextQuestion(moduleId || selectedModule, niveauRef.current),
       id: `q_${Date.now()}`,
     }
     setQuestion(newQuestion)
@@ -381,7 +385,10 @@ export const TrainingMode = ({ onBack }) => {
         <div className="mb-8">
           <p className="text-[#f4b942] text-xs font-bold uppercase tracking-[0.2em] mb-2">Pratique Solo</p>
           <h2 className="text-3xl font-black text-white italic">CHOISISSEZ VOTRE MODULE</h2>
-          <p className="text-gray-400 mt-2">Entraînez-vous sur des questions spécifiques sans la pression du temps.</p>
+          <p className="text-gray-400 mt-2">Le niveau filtre les questions : la Seconde reste sur la découverte.</p>
+          <div className="mt-6 max-w-3xl">
+            <NiveauPicker value={niveau} onChange={setNiveau} />
+          </div>
         </div>
 
         {/* Modules Grid */}

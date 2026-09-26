@@ -28,6 +28,7 @@ function App() {
   const [gameMode, setGameMode] = useState(null)
   const [showTeamSetup, setShowTeamSetup] = useState(false)
   const [isHostMode, setIsHostMode] = useState(false)
+  const [niveau, setNiveau] = useState('seconde')
   
   // Championship mode
   const [isChampionshipMode, setIsChampionshipMode] = useState(false)
@@ -148,7 +149,8 @@ function App() {
     setShowTeamSetup(true)
   }
 
-  const handleTeamSetupComplete = () => {
+  const handleTeamSetupComplete = (nextNiveau) => {
+    setNiveau(nextNiveau || 'seconde')
     setShowTeamSetup(false)
   }
 
@@ -241,7 +243,8 @@ function App() {
     return (
       <div className="dark">
         <GameBoard 
-          gameMode={gameMode} 
+          gameMode={gameMode}
+          niveau={niveau}
           onBack={handleBackToTeamSetup} 
         />
       </div>

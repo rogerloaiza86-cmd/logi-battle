@@ -12,6 +12,8 @@ import {
   roomEntryLabel,
   roomJoinUrl,
 } from '../services/roomCode'
+import NiveauPicker from './NiveauPicker'
+import { NIVEAU_LABEL, messageReport } from '../data/niveaux'
 
 export const HostGame = ({ onBack, gameMode }) => {
   const gameStore = useGameStore()
@@ -24,6 +26,7 @@ export const HostGame = ({ onBack, gameMode }) => {
   const [qrDataUrl, setQrDataUrl] = useState('')
   const [teamAName, setTeamAName] = useState(gameStore.teamA.name)
   const [teamBName, setTeamBName] = useState(gameStore.teamB.name)
+  const [niveau, setNiveau] = useState('seconde')
 
   useEffect(() => {
     gameStore.resetGame()
@@ -86,6 +89,7 @@ export const HostGame = ({ onBack, gameMode }) => {
         audience="class"
         room={room}
         roomCode={code}
+        niveau={niveau}
       />
     )
   }
@@ -172,6 +176,13 @@ export const HostGame = ({ onBack, gameMode }) => {
           </section>
 
           <section className="space-y-4">
+            <div className="rounded-2xl border border-white/10 bg-[#1d3d59] p-4">
+              <NiveauPicker value={niveau} onChange={setNiveau} />
+              {messageReport(gameMode, niveau) && (
+                <p className="mt-3 text-sm text-amber-100">{messageReport(gameMode, niveau)}</p>
+              )}
+              <p className="mt-2 text-xs text-gray-400">Classe affichée : {NIVEAU_LABEL[niveau]}</p>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="block">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#7fa99b]">Équipe A</span>

@@ -6,8 +6,9 @@ import { useGameStore } from '../hooks/useGameStore'
 import { useSplitRound } from '../hooks/useSplitRound'
 import { gamesService } from '../services/database'
 import { gradePlayerAnswer, questionUsesKeypad, toPublicQuestion } from '../utils/roundRules'
+import { NIVEAU_LABEL } from '../data/niveaux'
 
-export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room = null, roomCode = '' }) => {
+export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room = null, roomCode = '', niveau = 'seconde' }) => {
   const gameStore = useGameStore()
   const channelRef = useRef(null)
   const liveRef = useRef({ question: null, active: false, time: 30 })
@@ -17,6 +18,7 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
   const classMode = audience === 'class' && isHost
 
   const round = useSplitRound(gameMode, {
+    niveau,
     onRoundResolved: ({ winner }) => {
       if (winner === 'A') useGameStore.getState().incrementTeamAScore(1)
       else if (winner === 'B') useGameStore.getState().incrementTeamBScore(1)
@@ -181,6 +183,7 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
             {classMode && roomCode && (
               <span className="hidden sm:inline text-2xl font-black font-mono tracking-[0.2em] text-[#f4b942]">{roomCode}</span>
             )}
+            <span className="hidden md:inline text-xs font-bold uppercase tracking-wider text-gray-300">{NIVEAU_LABEL[niveau] || 'Seconde'}</span>
             <span className="text-sm font-bold text-white">
               Manche {round.roundNumber}/{round.totalRounds}
             </span>
@@ -319,9 +322,14 @@ function ClassArena({ question, revealed, teamAName, teamBName, teamAStatus, tea
   return (
     <section className="space-y-4">
       <div className="rounded-3xl border border-white/10 bg-[#1d3d59] p-6 md:p-8">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#f4b942] text-center">
-          {question?.referentiel ? `${question.referentiel.unite} · ${question.referentiel.competence}` : 'Question de la classe'}
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-white text-center">
+          {question?.themeEleve || 'Question de la classe'}
         </p>
+        {question?.referentiel && (
+          <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#f4b942] text-center">
+            {question.referentiel.unite} · {question.referentiel.competence}
+          </p>
+        )}
         <h2 className="mt-4 text-2xl md:text-4xl font-black text-white text-center leading-snug">
           {question?.description || 'Préparation de la manche…'}
         </h2>

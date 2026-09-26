@@ -28,7 +28,7 @@ export const PlayerGame = ({ room, gameId, playerName, team }) => {
         isMCQ: Boolean(data.isMCQ || data.data?.options),
         hint: data.hints?.[0] || '',
         type: data.type,
-        category: data.data?.category || data.referentiel?.competence || '',
+        category: data.themeEleve || data.data?.category || data.referentiel?.competence || '',
         time: payload.time || 30,
       })
       setTimeLeft(payload.time || 30)

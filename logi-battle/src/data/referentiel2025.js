@@ -26,6 +26,7 @@ export const MODULE_REFERENTIEL = {
   vocabulaire: { unite: 'U31', competence: 'C1.1', pole: 'Pôle 1', savoir: 'Vocabulaire des activités logistiques' },
   math: { unite: 'U12', competence: 'U12', pole: 'Maths', savoir: 'Volumes, conversions, taux' },
   culture: { unite: 'U31', competence: 'C1-C4', pole: 'Référentiel', savoir: 'Compétences du bac pro 2025' },
+  decouverte: { unite: 'U31', competence: 'C1.1', pole: 'Pôle 1', savoir: 'Découverte de l’entrepôt et des acteurs' },
   all: { unite: 'U21-U32', competence: 'C1-C4', pole: 'Mixte', savoir: 'Ensemble des pôles' },
 }
 
