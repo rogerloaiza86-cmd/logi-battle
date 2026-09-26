@@ -11,6 +11,7 @@ import { gradePlayerAnswer, questionUsesKeypad, resolveRoundWinner } from '../sr
 import { createRoomCode, normalizeRoomCode, ROOM_ALPHABET } from '../src/services/roomCode.js'
 import { questionRespecteNiveau } from '../src/data/niveaux.js'
 import { decouverteQuestions } from '../src/utils/decouverteQuestions.js'
+import { applyArenaResult, rankGroups } from '../src/utils/classement.js'
 
 const types = [
   'palettisation', 'cout_transport', 'loading_plan', 'vocabulaire', 'supply_chain',
@@ -102,5 +103,18 @@ assert(premiereCalcul, 'la première doit pouvoir calculer une palettisation gui
 
 const terminale = generateNextQuestion('culture', 'terminale')
 assert(terminale.niveau === 'terminale', 'terminale non marquée')
+
+const groups = [
+  { id: 'a', name: 'Alpha', stats: { wins: 0, losses: 0, draws: 0, totalMatches: 0, points: 0, titleDefenses: 2 } },
+  { id: 'b', name: 'Bravo', stats: { wins: 0, losses: 0, draws: 0, totalMatches: 0, points: 0, titleDefenses: 0 } },
+]
+const afterWin = applyArenaResult(groups, 'a', 'b', 'A')
+assert(afterWin.find((group) => group.id === 'a').stats.points === 3, 'victoire = 3 points')
+assert(afterWin.find((group) => group.id === 'b').stats.points === 0, 'défaite = 0 point')
+assert(afterWin.find((group) => group.id === 'a').stats.titleDefenses === 2, 'un match d’arène ne gonfle pas les défenses')
+const afterDraw = applyArenaResult(groups, 'a', 'b', null)
+assert(afterDraw.every((group) => group.stats.points === 1), 'nul = 1 point chacun')
+const ranked = rankGroups(afterWin)
+assert(ranked[0].id === 'a' && ranked[0].rank === 1 && ranked[0].isChampion, 'le leader du classement est champion')
 
 console.log(`Référentiel OK — ${types.length} modules, ${cultureQuestions.length} questions de diplôme.`)

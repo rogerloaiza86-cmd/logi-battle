@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useChampionshipStore } from '../hooks/useChampionshipStore'
+import { NIVEAUX, NIVEAU_LABEL } from '../data/niveaux'
 import GroupManager from './GroupManager'
 import ChampionshipBoard from './ChampionshipBoard'
 
@@ -12,14 +13,16 @@ export const ChampionshipManager = ({ onBack, onStartGame }) => {
   
   const [newClassName, setNewClassName] = useState('')
   const [newClassDesc, setNewClassDesc] = useState('')
+  const [newClassNiveau, setNewClassNiveau] = useState('seconde')
   const [showCreateForm, setShowCreateForm] = useState(false)
 
   const handleCreateClass = (e) => {
     e.preventDefault()
     if (newClassName.trim()) {
-      const classId = createClass(newClassName.trim(), newClassDesc.trim())
+      const classId = createClass(newClassName.trim(), newClassDesc.trim(), newClassNiveau)
       setNewClassName('')
       setNewClassDesc('')
+      setNewClassNiveau('seconde')
       setShowCreateForm(false)
       setSelectedClassId(classId)
       setView('class')
@@ -140,6 +143,18 @@ export const ChampionshipManager = ({ onBack, onStartGame }) => {
                         className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none"
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1">Niveau</label>
+                      <select
+                        value={newClassNiveau}
+                        onChange={(event) => setNewClassNiveau(event.target.value)}
+                        className="w-full min-h-12 bg-slate-900 border border-slate-700 rounded-xl px-4 text-white"
+                      >
+                        {NIVEAUX.map((niveau) => (
+                          <option key={niveau.id} value={niveau.id}>{niveau.label}</option>
+                        ))}
+                      </select>
+                    </div>
                     <div className="flex gap-3">
                       <button
                         type="button"
@@ -195,6 +210,9 @@ export const ChampionshipManager = ({ onBack, onStartGame }) => {
                       </div>
                       
                       <h3 className="text-lg font-bold text-white mb-1">{cls.name}</h3>
+                      <p className="text-xs font-bold uppercase tracking-wider text-primary mb-2">
+                        {NIVEAU_LABEL[cls.niveau] || 'Seconde'}
+                      </p>
                       {cls.description && (
                         <p className="text-sm text-gray-500 mb-3">{cls.description}</p>
                       )}

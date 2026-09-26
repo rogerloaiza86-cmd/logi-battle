@@ -8,11 +8,12 @@ import { gamesService } from '../services/database'
 import { gradePlayerAnswer, questionUsesKeypad, toPublicQuestion } from '../utils/roundRules'
 import { NIVEAU_LABEL } from '../data/niveaux'
 
-export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room = null, roomCode = '', niveau = 'seconde' }) => {
+export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room = null, roomCode = '', niveau = 'seconde', rankings = [], onMatchEnd }) => {
   const gameStore = useGameStore()
   const channelRef = useRef(null)
   const liveRef = useRef({ question: null, active: false, time: 30 })
   const seenRef = useRef(new Set())
+  const reportedRef = useRef(false)
   const [logs, setLogs] = useState([])
   const [replies, setReplies] = useState([])
   const classMode = audience === 'class' && isHost
@@ -147,6 +148,17 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
   const timerColor = round.timeLeft <= 5 ? '#ef4444' : round.timeLeft <= 10 ? '#eab308' : '#f4b942'
   const showOver = round.finished || gameStore.gameStatus === 'finished'
 
+  useEffect(() => {
+    if (!showOver || reportedRef.current) return undefined
+    reportedRef.current = true
+    onMatchEnd?.({
+      winner,
+      score: { A: gameStore.teamA.score, B: gameStore.teamB.score },
+      rounds: round.roundNumber,
+    })
+    return undefined
+  }, [showOver])
+
   const teamCard = (team) => {
     const isA = team === 'A'
     const status = isA ? round.teamAStatus : round.teamBStatus
@@ -246,6 +258,19 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
           </section>
         )}
         <aside className="bg-[#1d3d59] rounded-3xl p-5 border border-white/5">
+          {rankings.length > 0 && (
+            <div className="mb-6">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Classement de la classe</p>
+              <ol className="space-y-2">
+                {rankings.map((group) => (
+                  <li key={group.id} className="flex items-center justify-between text-sm text-white">
+                    <span>{group.rank}. {group.name}</span>
+                    <span className="text-[#f4b942] font-bold">{group.stats.points} pts</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Journal de manche</p>
           {logs.length === 0 && <p className="text-sm text-gray-500">Les résultats apparaîtront ici.</p>}
           <div className="space-y-3">
@@ -276,6 +301,16 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
               <p className="text-gray-300 mb-6">
                 {gameStore.teamA.score} — {gameStore.teamB.score}
               </p>
+              {rankings.length > 0 && (
+                <ol className="mb-6 space-y-2 text-left">
+                  {rankings.map((group) => (
+                    <li key={group.id} className="flex justify-between text-white">
+                      <span>{group.rank}. {group.name}</span>
+                      <span className="text-[#f4b942]">{group.stats.points} pts</span>
+                    </li>
+                  ))}
+                </ol>
+              )}
               <button
                 onClick={() => {
                   gameStore.resetGame()

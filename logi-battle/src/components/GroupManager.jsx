@@ -1,16 +1,18 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useChampionshipStore } from '../hooks/useChampionshipStore'
+import { NIVEAUX, NIVEAU_LABEL } from '../data/niveaux'
 
 export const GroupManager = ({ classData, onBack, onViewChampionship, onStartGame }) => {
-  const { createGroup, deleteGroup, getCurrentChampion, resetChampionship } = useChampionshipStore()
+  const { createGroup, deleteGroup, getCurrentChampion, getRankings, resetChampionship, setClassNiveau } = useChampionshipStore()
   
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [newGroupName, setNewGroupName] = useState('')
-  const [members, setMembers] = useState(['', '', ''])
+  const [members, setMembers] = useState(['', '', '', '', '', ''])
   
   const currentChampion = getCurrentChampion(classData.id)
   const groups = classData.groups || []
+  const rankings = getRankings(classData.id)
 
   const handleCreateGroup = (e) => {
     e.preventDefault()
@@ -18,7 +20,7 @@ export const GroupManager = ({ classData, onBack, onViewChampionship, onStartGam
       const validMembers = members.filter(m => m.trim()).map(m => m.trim())
       createGroup(classData.id, newGroupName.trim(), validMembers)
       setNewGroupName('')
-      setMembers(['', '', ''])
+      setMembers(['', '', '', '', '', ''])
       setShowCreateForm(false)
     }
   }
@@ -47,7 +49,19 @@ export const GroupManager = ({ classData, onBack, onViewChampionship, onStartGam
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-white">{classData.name}</h2>
-            <p className="text-gray-500">{groups.length} groupe{groups.length !== 1 ? 's' : ''} • {classData.matches?.length || 0} matchs joués</p>
+            <p className="text-gray-500">{NIVEAU_LABEL[classData.niveau] || 'Seconde'} · {groups.length} groupe{groups.length !== 1 ? 's' : ''} • {classData.matches?.length || 0} matchs joués</p>
+            <label className="block mt-3 max-w-xs">
+              <span className="text-xs text-gray-400">Niveau des questions</span>
+              <select
+                value={classData.niveau || 'seconde'}
+                onChange={(event) => setClassNiveau(classData.id, event.target.value)}
+                className="mt-1 w-full min-h-12 bg-slate-900 border border-slate-700 rounded-xl px-3 text-white"
+              >
+                {NIVEAUX.map((niveau) => (
+                  <option key={niveau.id} value={niveau.id}>{niveau.label}</option>
+                ))}
+              </select>
+            </label>
           </div>
           
           <div className="flex gap-3">
@@ -98,6 +112,20 @@ export const GroupManager = ({ classData, onBack, onViewChampionship, onStartGam
         )}
       </div>
 
+      {rankings.length > 0 && (
+        <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+          <h3 className="text-lg font-bold text-white mb-4">Classement</h3>
+          <ol className="space-y-2">
+            {rankings.map((group) => (
+              <li key={group.id} className="flex items-center justify-between text-white">
+                <span>{group.rank}. {group.name}</span>
+                <span className="text-primary font-bold">{group.stats.points} pts · {group.stats.wins}V {group.stats.draws}N {group.stats.losses}D</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
       {/* Create Group */}
       {!showCreateForm ? (
         <motion.button
@@ -107,7 +135,7 @@ export const GroupManager = ({ classData, onBack, onViewChampionship, onStartGam
           className="w-full p-4 border-2 border-dashed border-primary/30 rounded-xl bg-slate-800/50 hover:bg-slate-800 hover:border-primary/50 transition-all flex items-center justify-center gap-3"
         >
           <span className="material-icons text-primary">add</span>
-          <span className="font-bold text-gray-300">Ajouter un groupe / trinôme</span>
+          <span className="font-bold text-gray-300">Ajouter un groupe</span>
         </motion.button>
       ) : (
         <motion.form
@@ -133,7 +161,7 @@ export const GroupManager = ({ classData, onBack, onViewChampionship, onStartGam
             </div>
             
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Membres du trinôme (1 à 3)</label>
+              <label className="block text-sm text-gray-400 mb-2">Élèves du groupe (jusqu’à 6)</label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {members.map((member, index) => (
                   <input
@@ -154,7 +182,7 @@ export const GroupManager = ({ classData, onBack, onViewChampionship, onStartGam
                 onClick={() => {
                   setShowCreateForm(false)
                   setNewGroupName('')
-                  setMembers(['', '', ''])
+                  setMembers(['', '', '', '', '', ''])
                 }}
                 className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl text-gray-300 font-bold transition-colors"
               >
@@ -177,7 +205,7 @@ export const GroupManager = ({ classData, onBack, onViewChampionship, onStartGam
         <div className="text-center py-12 bg-slate-800/50 rounded-2xl border border-dashed border-slate-700">
           <span className="material-icons text-5xl text-slate-600 mb-3">groups</span>
           <p className="text-gray-500">Aucun groupe dans cette classe</p>
-          <p className="text-gray-600 text-sm">Créez des groupes de 1 à 3 joueurs</p>
+          <p className="text-gray-600 text-sm">Créez des groupes de 1 à 6 élèves</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -12,6 +12,7 @@ export const PlayerJoin = ({ userProfile }) => {
   const [playerName, setPlayerName] = useState(userProfile?.name || '')
   const [team, setTeam] = useState(null)
   const [room, setRoom] = useState(null)
+  const [classRoster, setClassRoster] = useState(null)
   const [joined, setJoined] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
   const [error, setError] = useState('')
@@ -25,9 +26,8 @@ export const PlayerJoin = ({ userProfile }) => {
     setGameId((current) => normalizeRoomCode(`${current}${char}`))
   }
 
-  const handleJoinGame = async (event) => {
-    event.preventDefault()
-    if (!gameId || !playerName.trim() || !team) return
+  const openArena = async () => {
+    if (gameId.length !== 5) return
     setIsJoining(true)
     setError('')
     try {
@@ -38,14 +38,40 @@ export const PlayerJoin = ({ userProfile }) => {
           : 'Aucune arène avec ce code. Regardez le code affiché en classe.')
         return
       }
+      found.room.on('class_roster', ({ payload }) => setClassRoster(payload))
+      found.room.send('hello', { role: 'player' })
+      setRoom(found.room)
+      setStep(2)
+    } finally {
+      setIsJoining(false)
+    }
+  }
+
+  const handleJoinGame = async (event) => {
+    event.preventDefault()
+    if (!gameId || !playerName.trim() || !team) return
+    setIsJoining(true)
+    setError('')
+    try {
+      const activeRoom = room
+      if (!activeRoom) {
+        setError('La salle n’est plus reliée. Revenez au code.')
+        return
+      }
       try {
-        await found.room.track({ role: 'player', name: playerName.trim(), team })
+        await activeRoom.track({
+          role: 'player',
+          name: playerName.trim(),
+          team,
+          groupId: team === 'A' ? classRoster?.groupA?.id : classRoster?.groupB?.id,
+          groupName: team === 'A' ? classRoster?.groupA?.name : classRoster?.groupB?.name,
+        })
       } catch {
-        found.room.close()
+        activeRoom.close()
+        setRoom(null)
         setError('La salle n’a pas accepté ce poste. Réessayez.')
         return
       }
-      setRoom(found.room)
       setJoined(true)
     } finally {
       setIsJoining(false)
@@ -111,13 +137,14 @@ export const PlayerJoin = ({ userProfile }) => {
                 <span className="material-icons">backspace</span>
               </button>
             </div>
+            {error && <p className="mt-3 text-amber-200 text-sm">{error}</p>}
             <button
               type="button"
-              onClick={() => gameId.length === 5 && setStep(2)}
-              disabled={gameId.length !== 5}
+              onClick={openArena}
+              disabled={gameId.length !== 5 || isJoining}
               className="w-full min-h-14 mt-4 bg-[#f4b942] disabled:opacity-40 text-[#17314a] font-bold rounded-2xl text-lg"
             >
-              Continuer
+              {isJoining ? 'Connexion au code…' : 'Continuer'}
             </button>
           </div>
         )}
@@ -147,20 +174,26 @@ export const PlayerJoin = ({ userProfile }) => {
               <button
                 type="button"
                 onClick={() => setTeam('A')}
-                className={`min-h-28 rounded-2xl border-2 text-lg font-bold ${
+                className={`min-h-28 rounded-2xl border-2 text-lg font-bold px-3 ${
                   team === 'A' ? 'bg-[#7fa99b]/20 border-[#7fa99b] text-[#7fa99b]' : 'bg-[#0f2539] border-white/10 text-gray-300'
                 }`}
               >
-                Équipe A
+                {classRoster?.groupA?.name || 'Équipe A'}
+                {classRoster?.groupA?.members?.length > 0 && (
+                  <span className="block mt-1 text-xs font-medium opacity-80">{classRoster.groupA.members.join(', ')}</span>
+                )}
               </button>
               <button
                 type="button"
                 onClick={() => setTeam('B')}
-                className={`min-h-28 rounded-2xl border-2 text-lg font-bold ${
+                className={`min-h-28 rounded-2xl border-2 text-lg font-bold px-3 ${
                   team === 'B' ? 'bg-[#f4b942]/20 border-[#f4b942] text-[#f4b942]' : 'bg-[#0f2539] border-white/10 text-gray-300'
                 }`}
               >
-                Équipe B
+                {classRoster?.groupB?.name || 'Équipe B'}
+                {classRoster?.groupB?.members?.length > 0 && (
+                  <span className="block mt-1 text-xs font-medium opacity-80">{classRoster.groupB.members.join(', ')}</span>
+                )}
               </button>
             </div>
             {error && <p className="text-amber-200 text-sm">{error}</p>}

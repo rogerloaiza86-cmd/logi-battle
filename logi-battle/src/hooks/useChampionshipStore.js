@@ -5,6 +5,8 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { normaliserNiveau } from '../data/niveaux'
+import { applyArenaResult, rankGroups } from '../utils/classement'
 
 export const useChampionshipStore = create(
   persist(
@@ -17,16 +19,17 @@ export const useChampionshipStore = create(
       // ========== ACTIONS CLASSES ==========
       
       // Créer une nouvelle classe
-      createClass: (name, description = '') => {
+      createClass: (name, description = '', niveau = 'seconde') => {
         const newClass = {
           id: `class_${Date.now()}`,
           name,
           description,
+          niveau: normaliserNiveau(niveau),
           createdAt: new Date().toISOString(),
-          groups: [], // Les groupes/trinômes
-          matches: [], // Historique des matchs
-          currentChampion: null, // ID du groupe champion actuel
-          rankings: [], // Classement des groupes
+          groups: [],
+          matches: [],
+          currentChampion: null,
+          rankings: [],
         }
         set((state) => ({
           classes: [...state.classes, newClass],
@@ -51,11 +54,19 @@ export const useChampionshipStore = create(
       // ========== ACTIONS GROUPES ==========
       
       // Créer un groupe/trinôme dans une classe
+      setClassNiveau: (classId, niveau) => {
+        set((state) => ({
+          classes: state.classes.map((c) => (
+            c.id === classId ? { ...c, niveau: normaliserNiveau(niveau) } : c
+          )),
+        }))
+      },
+
       createGroup: (classId, groupName, members) => {
         const newGroup = {
           id: `group_${Date.now()}`,
           name: groupName,
-          members: members.slice(0, 3), // Maximum 3 membres (trinôme)
+          members: members.slice(0, 6),
           classId,
           createdAt: new Date().toISOString(),
           stats: {
@@ -200,6 +211,37 @@ export const useChampionshipStore = create(
         
         return match
       },
+
+      recordArenaMatch: (classId, groupAId, groupBId, winner, matchData = {}) => {
+        if (!classId || !groupAId || !groupBId || groupAId === groupBId) return null
+        const match = {
+          id: `match_${Date.now()}`,
+          classId,
+          groupAId,
+          groupBId,
+          challengerId: groupAId,
+          championId: groupBId,
+          winner: winner === 'A' ? 'challenger' : winner === 'B' ? 'champion' : 'draw',
+          arenaWinner: winner === 'A' || winner === 'B' ? winner : null,
+          date: new Date().toISOString(),
+          score: matchData.score,
+          rounds: matchData.rounds,
+          type: 'arena',
+        }
+        set((state) => ({
+          classes: state.classes.map((c) => {
+            if (c.id !== classId) return c
+            const ranked = rankGroups(applyArenaResult(c.groups, groupAId, groupBId, match.arenaWinner))
+            return {
+              ...c,
+              groups: ranked,
+              currentChampion: ranked[0]?.id || null,
+              matches: [...c.matches, match],
+            }
+          }),
+        }))
+        return match
+      },
       
       // Réinitialiser le championnat d'une classe
       resetChampionship: (classId) => {
@@ -256,18 +298,7 @@ export const useChampionshipStore = create(
         const cls = get().classes.find((c) => c.id === classId)
         if (!cls) return []
         
-        return [...cls.groups]
-          .sort((a, b) => {
-            // Trier par points, puis par victoires, puis par défenses de titre
-            if (b.stats.points !== a.stats.points) {
-              return b.stats.points - a.stats.points
-            }
-            if (b.stats.wins !== a.stats.wins) {
-              return b.stats.wins - a.stats.wins
-            }
-            return b.stats.titleDefenses - a.stats.titleDefenses
-          })
-          .map((g, index) => ({ ...g, rank: index + 1 }))
+        return rankGroups(cls.groups)
       },
       
       // Obtenir les groupes pouvant défier (tous sauf le champion)

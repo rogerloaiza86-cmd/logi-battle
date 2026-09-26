@@ -25,6 +25,7 @@ export function openRoom(code) {
     player_answer: new Set(),
     new_question: new Set(),
     hello: new Set(),
+    class_roster: new Set(),
     presence: new Set(),
   }
 
@@ -36,6 +37,9 @@ export function openRoom(code) {
   })
   channel.on('broadcast', { event: 'hello' }, (message) => {
     listeners.hello.forEach((fn) => fn(message))
+  })
+  channel.on('broadcast', { event: 'class_roster' }, (message) => {
+    listeners.class_roster.forEach((fn) => fn(message))
   })
   channel.on('presence', { event: 'sync' }, () => {
     const roster = readRoster(channel)

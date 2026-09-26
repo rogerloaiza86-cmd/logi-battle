@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import QRCode from 'qrcode'
 import { useGameStore } from '../hooks/useGameStore'
+import { useChampionshipStore } from '../hooks/useChampionshipStore'
 import GameBoard from './GameBoard'
 import BrandMark from './BrandMark'
 import { gamesService } from '../services/database'
@@ -27,6 +28,14 @@ export const HostGame = ({ onBack, gameMode }) => {
   const [teamAName, setTeamAName] = useState(gameStore.teamA.name)
   const [teamBName, setTeamBName] = useState(gameStore.teamB.name)
   const [niveau, setNiveau] = useState('seconde')
+  const [classId, setClassId] = useState('')
+  const [groupAId, setGroupAId] = useState('')
+  const [groupBId, setGroupBId] = useState('')
+  const classes = useChampionshipStore((state) => state.classes)
+  const recordArenaMatch = useChampionshipStore((state) => state.recordArenaMatch)
+  const getRankings = useChampionshipStore((state) => state.getRankings)
+  const selectedClass = classes.find((item) => item.id === classId) || null
+  const rankings = classId ? getRankings(classId) : []
 
   useEffect(() => {
     gameStore.resetGame()
@@ -67,6 +76,35 @@ export const HostGame = ({ onBack, gameMode }) => {
     }
   }, [code])
 
+  const publicGroups = () => {
+    if (!selectedClass) return null
+    const groupA = selectedClass.groups.find((group) => group.id === groupAId)
+    const groupB = selectedClass.groups.find((group) => group.id === groupBId)
+    if (!groupA || !groupB) return null
+    return {
+      classId: selectedClass.id,
+      className: selectedClass.name,
+      niveau,
+      groupA: { id: groupA.id, name: groupA.name, members: groupA.members },
+      groupB: { id: groupB.id, name: groupB.name, members: groupB.members },
+    }
+  }
+
+  useEffect(() => {
+    if (!room) return undefined
+    const sendRoster = () => {
+      const payload = publicGroups()
+      if (payload) room.send('class_roster', payload)
+    }
+    const unsubscribe = room.on('hello', sendRoster)
+    sendRoster()
+    const timer = setInterval(sendRoster, 3000)
+    return () => {
+      unsubscribe()
+      clearInterval(timer)
+    }
+  }, [room, classId, groupAId, groupBId, niveau, selectedClass])
+
   const copyCode = () => {
     navigator.clipboard.writeText(code).then(() => {
       setCopied(true)
@@ -75,10 +113,22 @@ export const HostGame = ({ onBack, gameMode }) => {
   }
 
   const startGame = () => {
-    gameStore.setTeamNames(teamAName.trim() || 'ÉQUIPE A', teamBName.trim() || 'ÉQUIPE B')
+    const groupA = selectedClass?.groups.find((group) => group.id === groupAId)
+    const groupB = selectedClass?.groups.find((group) => group.id === groupBId)
+    gameStore.setTeamNames(
+      groupA?.name || teamAName.trim() || 'ÉQUIPE A',
+      groupB?.name || teamBName.trim() || 'ÉQUIPE B',
+    )
     gameStore.setGameStatus('active')
     setGameStarted(true)
   }
+
+  const handleMatchEnd = (result) => {
+    if (!classId || !groupAId || !groupBId) return
+    recordArenaMatch(classId, groupAId, groupBId, result.winner, result)
+  }
+
+  const classReady = !classId || (groupAId && groupBId && groupAId !== groupBId)
 
   if (gameStarted) {
     return (
@@ -90,6 +140,8 @@ export const HostGame = ({ onBack, gameMode }) => {
         room={room}
         roomCode={code}
         niveau={niveau}
+        rankings={rankings}
+        onMatchEnd={handleMatchEnd}
       />
     )
   }
@@ -176,13 +228,64 @@ export const HostGame = ({ onBack, gameMode }) => {
           </section>
 
           <section className="space-y-4">
-            <div className="rounded-2xl border border-white/10 bg-[#1d3d59] p-4">
-              <NiveauPicker value={niveau} onChange={setNiveau} />
-              {messageReport(gameMode, niveau) && (
-                <p className="mt-3 text-sm text-amber-100">{messageReport(gameMode, niveau)}</p>
+            <div className="rounded-2xl border border-white/10 bg-[#1d3d59] p-4 space-y-4">
+              <label className="block">
+                <span className="text-xs font-bold uppercase tracking-[0.18em] text-[#f4b942]">Classe</span>
+                <select
+                  value={classId}
+                  onChange={(event) => {
+                    const nextId = event.target.value
+                    setClassId(nextId)
+                    setGroupAId('')
+                    setGroupBId('')
+                    const found = classes.find((item) => item.id === nextId)
+                    if (found?.niveau) setNiveau(found.niveau)
+                  }}
+                  className="mt-2 w-full min-h-12 rounded-xl bg-[#0f2539] border border-white/10 px-3 text-white"
+                >
+                  <option value="">Sans classe enregistrée</option>
+                  {classes.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name} · {NIVEAU_LABEL[item.niveau] || 'Seconde'}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {selectedClass ? (
+                <p className="text-sm text-gray-300">
+                  Niveau imposé par la classe : {NIVEAU_LABEL[niveau]}. {selectedClass.groups.length} groupe{selectedClass.groups.length > 1 ? 's' : ''} inscrit{selectedClass.groups.length > 1 ? 's' : ''}.
+                </p>
+              ) : (
+                <NiveauPicker value={niveau} onChange={setNiveau} />
               )}
-              <p className="mt-2 text-xs text-gray-400">Classe affichée : {NIVEAU_LABEL[niveau]}</p>
+              {messageReport(gameMode, niveau) && (
+                <p className="text-sm text-amber-100">{messageReport(gameMode, niveau)}</p>
+              )}
+              {classes.length === 0 && (
+                <p className="text-sm text-gray-400">Créez la classe et ses groupes dans le championnat, puis revenez ici pour les faire jouer.</p>
+              )}
             </div>
+            {selectedClass ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[['A', groupAId, setGroupAId, '#7fa99b'], ['B', groupBId, setGroupBId, '#f4b942']].map(([side, value, setValue, color]) => (
+                  <label key={side} className="block">
+                    <span className="text-xs font-bold uppercase tracking-wider" style={{ color }}>Groupe {side}</span>
+                    <select
+                      value={value}
+                      onChange={(event) => setValue(event.target.value)}
+                      className="mt-2 w-full min-h-12 rounded-xl bg-[#0f2539] border border-white/10 px-3 text-white"
+                    >
+                      <option value="">Choisir</option>
+                      {selectedClass.groups.map((group) => (
+                        <option key={group.id} value={group.id} disabled={group.id === (side === 'A' ? groupBId : groupAId)}>
+                          {group.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ))}
+              </div>
+            ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="block">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#7fa99b]">Équipe A</span>
@@ -201,6 +304,7 @@ export const HostGame = ({ onBack, gameMode }) => {
                 />
               </label>
             </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="rounded-2xl border-2 border-[#7fa99b]/40 bg-[#0f2539]/50 p-4">
@@ -217,7 +321,8 @@ export const HostGame = ({ onBack, gameMode }) => {
               type="button"
               whileTap={{ scale: 0.98 }}
               onClick={startGame}
-              className="w-full min-h-16 rounded-2xl bg-[#f4b942] text-[#17314a] font-black text-lg uppercase tracking-wider"
+              disabled={!classReady}
+              className="w-full min-h-16 rounded-2xl bg-[#f4b942] text-[#17314a] font-black text-lg uppercase tracking-wider disabled:opacity-40"
             >
               Lancer la manche
             </motion.button>

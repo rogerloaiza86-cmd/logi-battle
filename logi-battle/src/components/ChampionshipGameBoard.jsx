@@ -10,6 +10,7 @@ export const ChampionshipGameBoard = ({
   champion, 
   classId,
   matchType,
+  niveau = 'seconde',
   onBack, 
   onMatchEnd 
 }) => {
@@ -31,6 +32,7 @@ export const ChampionshipGameBoard = ({
   const [ropePosition, setRopePosition] = useState(0)
   const [matchStartTime] = useState(Date.now())
   const round = useSplitRound(gameMode || 'all', {
+    niveau,
     onRoundResolved: ({ winner }) => {
       if (winner === 'A') {
         setTeamA((prev) => ({ ...prev, score: prev.score + 1 }))

@@ -29,6 +29,7 @@ function App() {
   const [showTeamSetup, setShowTeamSetup] = useState(false)
   const [isHostMode, setIsHostMode] = useState(false)
   const [niveau, setNiveau] = useState('seconde')
+  const [arena, setArena] = useState(null)
   
   // Championship mode
   const [isChampionshipMode, setIsChampionshipMode] = useState(false)
@@ -40,7 +41,7 @@ function App() {
   const [isHQMode, setIsHQMode] = useState(false)
   const [isArchivesMode, setIsArchivesMode] = useState(false)
   
-  const { recordMatch } = useChampionshipStore()
+  const { recordMatch, recordArenaMatch, getRankings, getClass } = useChampionshipStore()
 
   // Écouter les changements d'URL
   useEffect(() => {
@@ -97,14 +98,25 @@ function App() {
           challenger={championshipMatch.challenger}
           champion={championshipMatch.champion}
           classId={championshipMatch.classId}
+          niveau={getClass(championshipMatch.classId)?.niveau || 'seconde'}
           matchType={championshipMatch.type || 'challenge'}
           onBack={() => {
             setIsChampionshipMode(false)
             setChampionshipMatch(null)
           }}
           onMatchEnd={(result) => {
-            // Enregistrer le résultat du match
-            if (championshipMatch.type !== 'free') {
+            if (championshipMatch.type === 'free') {
+              recordArenaMatch(
+                championshipMatch.classId,
+                championshipMatch.challenger.id,
+                championshipMatch.champion.id,
+                result.winner,
+                {
+                  score: result.score,
+                  rounds: result.rounds,
+                }
+              )
+            } else {
               const winner = result.winner === 'A'
                 ? 'challenger'
                 : result.winner === 'B'
@@ -149,8 +161,19 @@ function App() {
     setShowTeamSetup(true)
   }
 
-  const handleTeamSetupComplete = (nextNiveau) => {
-    setNiveau(nextNiveau || 'seconde')
+  const handleTeamSetupComplete = (setup) => {
+    if (typeof setup === 'string') {
+      setNiveau(setup)
+      setArena(null)
+      setShowTeamSetup(false)
+      return
+    }
+    setNiveau(setup?.niveau || 'seconde')
+    setArena(setup?.classId ? {
+      classId: setup.classId,
+      groupAId: setup.groupAId,
+      groupBId: setup.groupBId,
+    } : null)
     setShowTeamSetup(false)
   }
 
@@ -158,6 +181,7 @@ function App() {
     setGameMode(null)
     setShowTeamSetup(false)
     setIsHostMode(false)
+    setArena(null)
   }
 
   const handleBackToTeamSetup = () => {
@@ -200,6 +224,7 @@ function App() {
     setIsBattalionMode(false)
     setIsHQMode(false)
     setIsArchivesMode(false)
+    setArena(null)
   }
 
   // Mode Entraînement
@@ -245,6 +270,11 @@ function App() {
         <GameBoard 
           gameMode={gameMode}
           niveau={niveau}
+          rankings={arena?.classId ? getRankings(arena.classId) : []}
+          onMatchEnd={(result) => {
+            if (!arena?.classId) return
+            recordArenaMatch(arena.classId, arena.groupAId, arena.groupBId, result.winner, result)
+          }}
           onBack={handleBackToTeamSetup} 
         />
       </div>

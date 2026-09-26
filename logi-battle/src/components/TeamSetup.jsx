@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useGameStore } from '../hooks/useGameStore'
+import { useChampionshipStore } from '../hooks/useChampionshipStore'
 import NiveauPicker from './NiveauPicker'
+import { NIVEAU_LABEL } from '../data/niveaux'
 
 export const TeamSetup = ({ onStart, onBack, gameMode }) => {
   const gameStore = useGameStore()
@@ -9,6 +11,11 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
   const [teamBName, setTeamBName] = useState('')
   const [errors, setErrors] = useState({})
   const [niveau, setNiveau] = useState('seconde')
+  const [classId, setClassId] = useState('')
+  const [groupAId, setGroupAId] = useState('')
+  const [groupBId, setGroupBId] = useState('')
+  const classes = useChampionshipStore((state) => state.classes)
+  const selectedClass = classes.find((item) => item.id === classId) || null
 
   const getGameModeLabel = () => {
     const labels = {
@@ -31,15 +38,18 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
     
+    const groupA = selectedClass?.groups.find((group) => group.id === groupAId)
+    const groupB = selectedClass?.groups.find((group) => group.id === groupBId)
+    const nameA = groupA?.name || teamAName.trim()
+    const nameB = groupB?.name || teamBName.trim()
     const newErrors = {}
-    if (!teamAName.trim()) {
-      newErrors.teamA = 'Veuillez entrer un nom pour l\'équipe A'
-    }
-    if (!teamBName.trim()) {
-      newErrors.teamB = 'Veuillez entrer un nom pour l\'équipe B'
-    }
-    if (teamAName.trim().toLowerCase() === teamBName.trim().toLowerCase()) {
+    if (!nameA) newErrors.teamA = 'Choisissez ou nommez l’équipe A'
+    if (!nameB) newErrors.teamB = 'Choisissez ou nommez l’équipe B'
+    if (nameA && nameA.toLowerCase() === nameB.toLowerCase()) {
       newErrors.same = 'Les deux équipes ne peuvent pas avoir le même nom'
+    }
+    if (classId && (!groupA || !groupB)) {
+      newErrors.same = 'Choisissez deux groupes de la classe'
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -47,10 +57,14 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
       return
     }
 
-    // Mettre à jour le store avec les noms des équipes
-    gameStore.setTeamNames(teamAName.trim(), teamBName.trim())
+    gameStore.setTeamNames(nameA, nameB)
     gameStore.setGameStatus('active')
-    onStart(niveau)
+    onStart({
+      niveau: selectedClass?.niveau || niveau,
+      classId: classId || null,
+      groupAId: groupA?.id || null,
+      groupBId: groupB?.id || null,
+    })
   }
 
   const handleBack = () => {
@@ -95,7 +109,31 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
         transition={{ delay: 0.2 }}
         className="w-full max-w-2xl space-y-6"
       >
-        <NiveauPicker value={niveau} onChange={setNiveau} />
+        {selectedClass ? (
+          <p className="text-sm text-gray-300">Niveau de la classe : {NIVEAU_LABEL[selectedClass.niveau] || 'Seconde'}</p>
+        ) : (
+          <NiveauPicker value={niveau} onChange={setNiveau} />
+        )}
+        <label className="block">
+          <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Classe</span>
+          <select
+            value={classId}
+            onChange={(event) => {
+              setClassId(event.target.value)
+              setGroupAId('')
+              setGroupBId('')
+            }}
+            className="mt-2 w-full min-h-12 rounded-xl bg-[#0f2539] border border-white/10 px-3 text-white"
+          >
+            <option value="">Sans classe enregistrée</option>
+            {classes.map((item) => (
+              <option key={item.id} value={item.id}>{item.name}</option>
+            ))}
+          </select>
+        </label>
+        {selectedClass && selectedClass.groups.length < 2 && (
+          <p className="text-sm text-amber-200">Inscrivez au moins deux groupes dans le championnat avant de lancer un match classé.</p>
+        )}
         <div className="grid md:grid-cols-2 gap-6 md:gap-8">
           {/* Team A Card */}
           <motion.div
@@ -115,8 +153,25 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
             <div className="space-y-4">
               <div>
                 <label className="block text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">
-                  Nom de l'équipe
+                  {selectedClass ? 'Groupe de la classe' : "Nom de l'équipe"}
                 </label>
+                {selectedClass ? (
+                  <select
+                    value={groupAId}
+                    onChange={(e) => {
+                      setGroupAId(e.target.value)
+                      setErrors({ ...errors, teamA: undefined, same: undefined })
+                    }}
+                    className={`w-full bg-slate-900/80 border-2 ${
+                      errors.teamA ? 'border-red-500' : 'border-blue-500/30'
+                    } rounded-xl px-4 py-4 text-white focus:outline-none focus:border-blue-500 transition-colors text-lg`}
+                  >
+                    <option value="">Choisir</option>
+                    {selectedClass.groups.map((group) => (
+                      <option key={group.id} value={group.id} disabled={group.id === groupBId}>{group.name}</option>
+                    ))}
+                  </select>
+                ) : (
                 <input
                   type="text"
                   value={teamAName}
@@ -130,6 +185,7 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
                     errors.teamA ? 'border-red-500' : 'border-blue-500/30'
                   } rounded-xl px-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors text-lg`}
                 />
+                )}
                 {errors.teamA && (
                   <motion.p
                     initial={{ opacity: 0, y: -10 }}
@@ -172,8 +228,25 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
             <div className="space-y-4">
               <div>
                 <label className="block text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">
-                  Nom de l'équipe
+                  {selectedClass ? 'Groupe de la classe' : "Nom de l'équipe"}
                 </label>
+                {selectedClass ? (
+                  <select
+                    value={groupBId}
+                    onChange={(e) => {
+                      setGroupBId(e.target.value)
+                      setErrors({ ...errors, teamB: undefined, same: undefined })
+                    }}
+                    className={`w-full bg-slate-900/80 border-2 ${
+                      errors.teamB ? 'border-red-500' : 'border-primary/30'
+                    } rounded-xl px-4 py-4 text-white focus:outline-none focus:border-primary transition-colors text-lg`}
+                  >
+                    <option value="">Choisir</option>
+                    {selectedClass.groups.map((group) => (
+                      <option key={group.id} value={group.id} disabled={group.id === groupAId}>{group.name}</option>
+                    ))}
+                  </select>
+                ) : (
                 <input
                   type="text"
                   value={teamBName}
@@ -187,6 +260,7 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
                     errors.teamB ? 'border-red-500' : 'border-primary/30'
                   } rounded-xl px-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-primary transition-colors text-lg`}
                 />
+                )}
                 {errors.teamB && (
                   <motion.p
                     initial={{ opacity: 0, y: -10 }}
@@ -244,7 +318,7 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
           
           <button
             type="submit"
-            disabled={!teamAName.trim() || !teamBName.trim()}
+            disabled={selectedClass ? !(groupAId && groupBId && groupAId !== groupBId) : (!teamAName.trim() || !teamBName.trim())}
             className="flex-[2] bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold py-4 px-8 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
           >
             <span>Lancer le Duel</span>
