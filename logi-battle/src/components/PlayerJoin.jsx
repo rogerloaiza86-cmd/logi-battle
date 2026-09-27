@@ -7,7 +7,7 @@ import { ROOM_ALPHABET, normalizeRoomCode } from '../services/roomCode'
 
 export const PlayerJoin = ({ userProfile, onLogout }) => {
   const codeFromUrl = normalizeRoomCode(new URLSearchParams(window.location.search).get('game'))
-  const [step, setStep] = useState(codeFromUrl ? 2 : 1)
+  const [step, setStep] = useState(codeFromUrl.length === 5 ? 2 : 1)
   const [gameId, setGameId] = useState(codeFromUrl)
   const [playerName, setPlayerName] = useState(userProfile?.name || '')
   const [team, setTeam] = useState(null)
@@ -53,10 +53,19 @@ export const PlayerJoin = ({ userProfile, onLogout }) => {
     setIsJoining(true)
     setError('')
     try {
-      const activeRoom = room
+      let activeRoom = room
       if (!activeRoom) {
-        setError('La salle n’est plus reliée. Revenez au code.')
-        return
+        const found = await joinRoom(gameId)
+        if (!found.room) {
+          setError(found.reason === 'offline'
+            ? 'Ce poste n’a pas de liaison vers la classe. Prévenez le professeur.'
+            : 'Aucune arène avec ce code. Regardez le code affiché en classe.')
+          return
+        }
+        found.room.on('class_roster', ({ payload }) => setClassRoster(payload))
+        found.room.send('hello', { role: 'player' })
+        activeRoom = found.room
+        setRoom(found.room)
       }
       try {
         await activeRoom.track({
