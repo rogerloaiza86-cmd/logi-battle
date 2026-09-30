@@ -14,6 +14,7 @@ import { decouverteQuestions } from '../src/utils/decouverteQuestions.js'
 import { applyArenaResult, rankGroups } from '../src/utils/classement.js'
 import { describeMatch, sortMatches } from '../src/utils/matchJournal.js'
 import { buildRegisterFile, parseRegisterFile } from '../src/utils/classRegisterFile.js'
+import { enqueueSave } from '../src/services/classCloud.js'
 
 const types = [
   'palettisation', 'cout_transport', 'loading_plan', 'vocabulaire', 'supply_chain',
@@ -157,5 +158,41 @@ assert(restored.ok && restored.classes[0].name === '2LOG A', 'reprise du fichier
 assert(restored.classes[0].groups[0].stats.points === 3, 'points repris')
 assert(restored.classes[0].online.teacherKey === 'CLEPROFESSEURTRESLONGUE123456', 'clé professeur reprise')
 assert(!parseRegisterFile('{}').ok, 'fichier étranger refusé')
+
+const publishOrder = []
+let releaseFirst
+const firstGate = new Promise((resolve) => {
+  releaseFirst = resolve
+})
+const firstPublish = enqueueSave('CLASSCODE', async () => {
+  publishOrder.push('start-1')
+  await firstGate
+  publishOrder.push('end-1')
+  return 'one'
+})
+const secondPublish = enqueueSave('CLASSCODE', async () => {
+  publishOrder.push('start-2')
+  publishOrder.push('end-2')
+  return 'two'
+})
+await Promise.resolve()
+assert(publishOrder.join(',') === 'start-1', 'la publication suivante attend la précédente')
+releaseFirst()
+const [firstResult, secondResult] = await Promise.all([firstPublish, secondPublish])
+assert(firstResult === 'one' && secondResult === 'two', 'chaque publication garde son résultat')
+assert(publishOrder.join(',') === 'start-1,end-1,start-2,end-2', 'les publications d’une classe ne se croisent pas')
+
+const afterError = []
+const failedPublish = enqueueSave('OTHERCODE', async () => {
+  afterError.push('fail')
+  throw new Error('réseau')
+})
+const followedPublish = enqueueSave('OTHERCODE', async () => {
+  afterError.push('next')
+  return 'ok'
+})
+await failedPublish.then(() => {}, () => {})
+assert(await followedPublish === 'ok', 'un échec laisse passer la publication suivante')
+assert(afterError.join(',') === 'fail,next', 'la publication suivante part après l’échec')
 
 console.log(`Référentiel OK — ${types.length} modules, ${cultureQuestions.length} questions de diplôme.`)

@@ -20,17 +20,29 @@ export function cloudReady() {
   return Boolean(supabase)
 }
 
-export async function saveClassOnline(cls, online) {
-  if (!supabase) return { ok: false, error: 'La liaison en ligne n’est pas prête.' }
-  if (!online?.code || !online?.teacherKey) return { ok: false, error: 'Code ou clé manquant.' }
+const saveTails = new Map()
+
+/** Une classe = une publication à la fois. La suivante attend, sinon un aller-retour lent écrase le registre le plus récent. */
+export function enqueueSave(code, task) {
+  const previous = saveTails.get(code) || Promise.resolve()
+  const next = previous.then(task, task)
+  saveTails.set(code, next)
+  return next
+}
+
+export function saveClassOnline(cls, online) {
+  if (!supabase) return Promise.resolve({ ok: false, error: 'La liaison en ligne n’est pas prête.' })
+  if (!online?.code || !online?.teacherKey) return Promise.resolve({ ok: false, error: 'Code ou clé manquant.' })
   const payload = classForCloud({ ...cls, online })
-  const { error } = await supabase.rpc('save_class_register', {
-    p_code: online.code,
-    p_key: online.teacherKey,
-    p_payload: payload,
+  return enqueueSave(online.code, async () => {
+    const { error } = await supabase.rpc('save_class_register', {
+      p_code: online.code,
+      p_key: online.teacherKey,
+      p_payload: payload,
+    })
+    if (error) return { ok: false, error: 'La publication a été refusée. Vérifiez la clé professeur.' }
+    return { ok: true }
   })
-  if (error) return { ok: false, error: 'La publication a été refusée. Vérifiez la clé professeur.' }
-  return { ok: true }
 }
 
 export async function loadClassOnline(code, teacherKey) {
