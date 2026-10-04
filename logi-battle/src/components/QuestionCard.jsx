@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export const QuestionCard = ({ 
@@ -11,6 +11,11 @@ export const QuestionCard = ({
 }) => {
   const [userInput, setUserInput] = useState('')
   const [isWrong, setIsWrong] = useState(false)
+
+  useEffect(() => {
+    setUserInput('')
+    setIsWrong(false)
+  }, [question?.id])
 
   const isTeamA = team === 'A'
 
