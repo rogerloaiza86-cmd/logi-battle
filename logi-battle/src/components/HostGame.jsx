@@ -18,7 +18,7 @@ import { NIVEAU_LABEL, messageReport } from '../data/niveaux'
 import { parseCursusMode } from '../data/cursus'
 import { programmeDe } from '../data/programmes'
 
-export const HostGame = ({ onBack, gameMode }) => {
+export const HostGame = ({ onBack, gameMode, initialNiveau = 'seconde' }) => {
   const gameStore = useGameStore()
   const [code] = useState(createRoomCode)
   const [room, setRoom] = useState(null)
@@ -29,7 +29,7 @@ export const HostGame = ({ onBack, gameMode }) => {
   const [qrDataUrl, setQrDataUrl] = useState('')
   const [teamAName, setTeamAName] = useState(gameStore.teamA.name)
   const [teamBName, setTeamBName] = useState(gameStore.teamB.name)
-  const [niveau, setNiveau] = useState('seconde')
+  const [niveau, setNiveau] = useState(initialNiveau)
   const [classId, setClassId] = useState('')
   const [groupAId, setGroupAId] = useState('')
   const [groupBId, setGroupBId] = useState('')

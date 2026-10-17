@@ -10,7 +10,7 @@ import {
 import { gradePlayerAnswer, presentQuestion, questionUsesKeypad, resolveRoundWinner } from '../src/utils/roundRules.js'
 import { describeLocalMatch, evaluateAchievements, moduleProgress, readSettings, rememberMatch, HISTORY_KEY } from '../src/utils/progression.js'
 import { createRoomCode, normalizeRoomCode, ROOM_ALPHABET } from '../src/services/roomCode.js'
-import { questionRespecteNiveau } from '../src/data/niveaux.js'
+import { moduleOuvert, questionRespecteNiveau } from '../src/data/niveaux.js'
 import { decouverteQuestions } from '../src/utils/decouverteQuestions.js'
 import { applyArenaResult, rankGroups } from '../src/utils/classement.js'
 import { describeMatch, sortMatches } from '../src/utils/matchJournal.js'
@@ -222,5 +222,11 @@ const tight = readSettings({ getItem: () => JSON.stringify({ timerDuration: 5, s
 assert(tight.timerDuration === 15 && tight.soundEnabled === false && tight.musicEnabled === true, 'chrono borné')
 const loud = readSettings({ getItem: () => '{' })
 assert(loud.timerDuration === 30 && loud.soundEnabled === true, 'réglages illisibles')
+
+assert(!moduleOuvert('palettisation', 'seconde'), 'la palettisation attend la première')
+assert(moduleOuvert('safety', 'seconde'), 'la sécurité est ouverte en seconde')
+assert(!moduleOuvert('cout_transport', 'premiere'), 'le coût de transport attend la terminale')
+assert(moduleOuvert('palettisation', 'premiere'), 'la palettisation est ouverte en première')
+assert(moduleOuvert('jit', 'terminale'), 'la terminale ouvre tous les modules')
 
 console.log(`Référentiel OK — ${types.length} modules, ${cultureQuestions.length} questions de diplôme, ${questionsCursus.length} questions de cursus.`)

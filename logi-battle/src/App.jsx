@@ -86,7 +86,8 @@ function App() {
     return (
       <div className="dark">
         <HostGame 
-          gameMode={gameMode} 
+          gameMode={gameMode}
+          initialNiveau={niveau}
           onBack={() => {
             setIsHostMode(false)
             setGameMode(null)
@@ -164,7 +165,8 @@ function App() {
     )
   }
 
-  const handleGameSelect = (mode) => {
+  const handleGameSelect = (mode, nextNiveau) => {
+    if (nextNiveau) setNiveau(nextNiveau)
     setGameMode(mode)
     setShowTeamSetup(true)
   }
@@ -196,7 +198,8 @@ function App() {
     setShowTeamSetup(true)
   }
 
-  const handleHostMode = (mode) => {
+  const handleHostMode = (mode, nextNiveau) => {
+    if (nextNiveau) setNiveau(nextNiveau)
     setGameMode(mode)
     setIsHostMode(true)
     setShowTeamSetup(false)
@@ -295,6 +298,7 @@ function App() {
       <div className="dark">
         <TeamSetup 
           gameMode={gameMode}
+          initialNiveau={niveau}
           onStart={handleTeamSetupComplete} 
           onBack={() => {
             setGameMode(null)

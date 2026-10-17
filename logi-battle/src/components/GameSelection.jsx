@@ -5,6 +5,9 @@ import { useGameStore } from '../hooks/useGameStore'
 import BrandMark from './BrandMark'
 import { goToJoin } from '../services/roomCode'
 import CursusPicker from './CursusPicker'
+import PoleSwitch from './PoleSwitch'
+import NiveauPicker from './NiveauPicker'
+import { NIVEAU_LABEL, moduleOuvert } from '../data/niveaux'
 
 const modules = [
   {
@@ -166,13 +169,25 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
   const [activeModule, setActiveModule] = useState(null)
   const [activeNav, setActiveNav] = useState('arena')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [pole, setPole] = useState('matieres')
+  const [niveauLogistique, setNiveauLogistique] = useState('seconde')
+  const [cursusCode, setCursusCode] = useState(null)
   const gameStore = useGameStore()
   const history = readHistory()
+  const modulesVisibles = modules.filter((module) => moduleOuvert(module.id, niveauLogistique))
+
+  const ouvrirSelonPole = (launcher) => {
+    if (pole === 'matieres') {
+      if (cursusCode) launcher(cursusCode)
+      return
+    }
+    launcher('all', niveauLogistique)
+  }
 
   const handleSelectModule = (module) => {
     setActiveModule(module.id)
     setTimeout(() => {
-      onHostMode(module.id)
+      onHostMode(module.id, niveauLogistique)
     }, 300)
   }
 
@@ -257,7 +272,7 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
         {/* Start Battle Button */}
         <div className="p-4 border-t border-white/5">
           <button
-            onClick={() => onHostMode('all')}
+            onClick={() => ouvrirSelonPole(onHostMode)}
             className="w-full min-h-14 py-4 bg-gradient-to-r from-[#f4b942] to-[#d99926] rounded-xl text-[#17314a] font-bold text-sm tracking-wider shadow-lg shadow-orange-500/25 hover:scale-105 transition-transform"
           >
             OUVRIR LA SALLE
@@ -380,7 +395,7 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               className="relative overflow-hidden brand-card battle-trajectory p-6 group cursor-pointer"
-              onClick={() => onHostMode('all')}
+              onClick={() => ouvrirSelonPole(onHostMode)}
             >
               <div className="relative z-10">
                 <h3 className="text-2xl font-black text-white mb-2 italic">CODE DE SALLE</h3>
@@ -398,30 +413,38 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
           </div>
 
           {/* Section Title */}
-          <CursusPicker
-            onStart={onHostMode}
-            startLabel="Ouvrir la salle"
-            onSecondary={onGameSelect}
-            secondaryLabel="Deux équipes sur cet écran"
-          />
+          <PoleSwitch value={pole} onChange={setPole} />
 
+          {pole === 'matieres' ? (
+            <CursusPicker
+              onChange={(selection) => setCursusCode(selection.code)}
+              onStart={onHostMode}
+              startLabel="Ouvrir la salle"
+              onSecondary={onGameSelect}
+              secondaryLabel="Deux équipes sur cet écran"
+            />
+          ) : (
+            <>
           <div className="mb-6">
-            <p className="brand-kicker mb-1">Un module ouvre le code de la salle. Le niveau se choisit ensuite : Seconde, Première ou Terminale.</p>
+            <p className="brand-kicker mb-1">Logistique · {NIVEAU_LABEL[niveauLogistique]}. Les modules affichés sont ceux de cette année.</p>
             <div className="flex flex-wrap items-end justify-between gap-3">
               <h2 className="text-3xl font-black text-white italic font-display">Modules Geronimo Coop</h2>
               <button
                 type="button"
-                onClick={() => onGameSelect('all')}
+                onClick={() => onGameSelect('all', niveauLogistique)}
                 className="min-h-12 px-4 rounded-xl border border-white/15 text-gray-200 text-sm font-semibold"
               >
                 Deux équipes sur cet écran
               </button>
             </div>
+            <div className="mt-4 max-w-3xl">
+              <NiveauPicker value={niveauLogistique} onChange={setNiveauLogistique} />
+            </div>
           </div>
 
           {/* Modules Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {modules.map((entry, index) => {
+            {modulesVisibles.map((entry, index) => {
               const module = { ...entry, progress: moduleProgress(entry.id, history) }
               return (
               <motion.button
@@ -486,6 +509,8 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
               )
             })}
           </div>
+            </>
+          )}
         </div>
       </main>
     </div>

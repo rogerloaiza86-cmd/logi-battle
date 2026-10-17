@@ -7,12 +7,12 @@ import { NIVEAU_LABEL } from '../data/niveaux'
 import { parseCursusMode } from '../data/cursus'
 import { programmeDe } from '../data/programmes'
 
-export const TeamSetup = ({ onStart, onBack, gameMode }) => {
+export const TeamSetup = ({ onStart, onBack, gameMode, initialNiveau = 'seconde' }) => {
   const gameStore = useGameStore()
   const [teamAName, setTeamAName] = useState('')
   const [teamBName, setTeamBName] = useState('')
   const [errors, setErrors] = useState({})
-  const [niveau, setNiveau] = useState('seconde')
+  const [niveau, setNiveau] = useState(initialNiveau)
   const [classId, setClassId] = useState('')
   const [groupAId, setGroupAId] = useState('')
   const [groupBId, setGroupBId] = useState('')

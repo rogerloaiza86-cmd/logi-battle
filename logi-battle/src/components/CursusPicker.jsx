@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ANNEES, MATIERES, VOIES, codeCursus } from '../data/cursus'
 import { NIVEAU_LABEL } from '../data/niveaux'
 import { compterQuestions } from '../data/banques/index'
@@ -10,7 +10,7 @@ const ANNEE_LABEL = {
   terminale: 'Terminale',
 }
 
-export default function CursusPicker({ onStart, startLabel = 'Ouvrir la salle', onSecondary, secondaryLabel }) {
+export default function CursusPicker({ onStart, startLabel = 'Ouvrir la salle', onSecondary, secondaryLabel, onChange }) {
   const [voie, setVoie] = useState('generale')
   const [annee, setAnnee] = useState('seconde')
   const [matiere, setMatiere] = useState('francais')
@@ -19,9 +19,17 @@ export default function CursusPicker({ onStart, startLabel = 'Ouvrir la salle', 
   const nombre = programme ? compterQuestions(voie, annee, matiere) : 0
   const voieChoisie = VOIES.find((item) => item.id === voie)
 
+  const code = programme ? codeCursus(voie, annee, matiere) : null
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
+
+  useEffect(() => {
+    onChangeRef.current?.({ voie, annee, matiere, code })
+  }, [voie, annee, matiere, code])
+
   const lancer = (callback) => {
-    if (!programme || !callback) return
-    callback(codeCursus(voie, annee, matiere))
+    if (!code || !callback) return
+    callback(code)
   }
 
   return (
@@ -29,7 +37,7 @@ export default function CursusPicker({ onStart, startLabel = 'Ouvrir la salle', 
       <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#f4b942]">Matières du lycée</p>
       <h2 className="mt-1 text-2xl font-black text-white">Générale, technologique, professionnelle</h2>
       <p className="mt-2 max-w-3xl text-sm text-gray-300">
-        Chaque banque suit le programme officiel de la voie et de l’année. La logistique reste le pôle professionnel déjà en place.
+        Chaque banque suit le programme officiel de la voie et de l’année choisies.
       </p>
 
       <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-2">

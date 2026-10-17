@@ -6,6 +6,8 @@ import CursusPicker from './CursusPicker'
 import { generateNextQuestion } from '../utils/questionGenerator'
 import { parseCursusMode } from '../data/cursus'
 import { programmeDe } from '../data/programmes'
+import { NIVEAU_LABEL, moduleOuvert } from '../data/niveaux'
+import PoleSwitch from './PoleSwitch'
 import { readSettings, rememberMatch } from '../utils/progression'
 import { playCue, setMusic } from '../utils/feedback'
 
@@ -17,6 +19,7 @@ function titreEntrainement(moduleId) {
 
 export const TrainingMode = ({ onBack }) => {
   const [selectedModule, setSelectedModule] = useState(null)
+  const [pole, setPole] = useState('matieres')
   const [niveau, setNiveau] = useState('seconde')
   const niveauRef = useRef('seconde')
   niveauRef.current = niveau
@@ -422,21 +425,27 @@ export const TrainingMode = ({ onBack }) => {
         <div className="mb-8">
           <p className="text-[#f4b942] text-xs font-bold uppercase tracking-[0.2em] mb-2">Pratique Solo</p>
           <h2 className="text-3xl font-black text-white italic">CHOISISSEZ VOTRE MODULE</h2>
-          <p className="text-gray-400 mt-2">Le niveau filtre les questions : la Seconde reste sur la découverte.</p>
-          <div className="mt-6 max-w-3xl">
-            <NiveauPicker value={niveau} onChange={setNiveau} />
+          <div className="mt-6">
+            <PoleSwitch value={pole} onChange={setPole} />
           </div>
-          <div className="mt-8">
+          {pole === 'matieres' ? (
             <CursusPicker
               onStart={(code) => startTraining(code)}
               startLabel="S’entraîner sur cette matière"
             />
+          ) : (
+            <>
+          <p className="text-gray-400 mt-2">Logistique · {NIVEAU_LABEL[niveau]}. Les modules affichés sont ceux de cette année.</p>
+          <div className="mt-6 max-w-3xl">
+            <NiveauPicker value={niveau} onChange={setNiveau} />
           </div>
+            </>
+          )}
         </div>
 
-        {/* Modules Grid */}
+        {pole === 'logistique' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {modules.map((module, index) => (
+          {modules.filter((module) => moduleOuvert(module.id, niveau)).map((module, index) => (
             <motion.button
               key={module.id}
               initial={{ opacity: 0, y: 20 }}
@@ -464,6 +473,7 @@ export const TrainingMode = ({ onBack }) => {
             </motion.button>
           ))}
         </div>
+        )}
 
         {/* Quick Stats */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
