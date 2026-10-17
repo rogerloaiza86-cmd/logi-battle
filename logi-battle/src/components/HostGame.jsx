@@ -15,6 +15,8 @@ import {
 } from '../services/roomCode'
 import NiveauPicker from './NiveauPicker'
 import { NIVEAU_LABEL, messageReport } from '../data/niveaux'
+import { parseCursusMode } from '../data/cursus'
+import { programmeDe } from '../data/programmes'
 
 export const HostGame = ({ onBack, gameMode }) => {
   const gameStore = useGameStore()
@@ -36,6 +38,9 @@ export const HostGame = ({ onBack, gameMode }) => {
   const getRankings = useChampionshipStore((state) => state.getRankings)
   const selectedClass = classes.find((item) => item.id === classId) || null
   const rankings = classId ? getRankings(classId) : []
+  const cursus = parseCursusMode(gameMode)
+  const programme = cursus ? programmeDe(cursus.voie, cursus.annee, cursus.matiere) : null
+  const niveauEffectif = cursus?.annee || niveau
 
   useEffect(() => {
     gameStore.resetGame()
@@ -145,7 +150,7 @@ export const HostGame = ({ onBack, gameMode }) => {
         audience="class"
         room={room}
         roomCode={code}
-        niveau={niveau}
+        niveau={niveauEffectif}
         rankings={rankings}
         onMatchEnd={handleMatchEnd}
       />
@@ -257,14 +262,18 @@ export const HostGame = ({ onBack, gameMode }) => {
                   ))}
                 </select>
               </label>
-              {selectedClass ? (
+              {programme ? (
+                <p className="text-sm text-gray-300">
+                  {programme.intitule}. {programme.reference}.
+                </p>
+              ) : selectedClass ? (
                 <p className="text-sm text-gray-300">
                   Niveau imposé par la classe : {NIVEAU_LABEL[niveau]}. {selectedClass.groups.length} groupe{selectedClass.groups.length > 1 ? 's' : ''} inscrit{selectedClass.groups.length > 1 ? 's' : ''}.
                 </p>
               ) : (
                 <NiveauPicker value={niveau} onChange={setNiveau} />
               )}
-              {messageReport(gameMode, niveau) && (
+              {messageReport(gameMode, niveauEffectif) && (
                 <p className="text-sm text-amber-100">{messageReport(gameMode, niveau)}</p>
               )}
               {classes.length === 0 && (

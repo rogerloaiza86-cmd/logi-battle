@@ -4,6 +4,8 @@ import { useGameStore } from '../hooks/useGameStore'
 import { useChampionshipStore } from '../hooks/useChampionshipStore'
 import NiveauPicker from './NiveauPicker'
 import { NIVEAU_LABEL } from '../data/niveaux'
+import { parseCursusMode } from '../data/cursus'
+import { programmeDe } from '../data/programmes'
 
 export const TeamSetup = ({ onStart, onBack, gameMode }) => {
   const gameStore = useGameStore()
@@ -16,8 +18,11 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
   const [groupBId, setGroupBId] = useState('')
   const classes = useChampionshipStore((state) => state.classes)
   const selectedClass = classes.find((item) => item.id === classId) || null
+  const cursus = parseCursusMode(gameMode)
+  const programme = cursus ? programmeDe(cursus.voie, cursus.annee, cursus.matiere) : null
 
   const getGameModeLabel = () => {
+    if (programme) return programme.intitule
     const labels = {
       palettisation: '📦 Palettisation',
       cout_transport: '🚚 Coût de Transport',
@@ -60,7 +65,7 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
     gameStore.setTeamNames(nameA, nameB)
     gameStore.setGameStatus('active')
     onStart({
-      niveau: selectedClass?.niveau || niveau,
+      niveau: cursus?.annee || selectedClass?.niveau || niveau,
       classId: classId || null,
       groupAId: groupA?.id || null,
       groupBId: groupB?.id || null,
@@ -109,7 +114,9 @@ export const TeamSetup = ({ onStart, onBack, gameMode }) => {
         transition={{ delay: 0.2 }}
         className="w-full max-w-2xl space-y-6"
       >
-        {selectedClass ? (
+        {programme ? (
+          <p className="text-sm text-gray-300">{programme.intitule}. {programme.reference}.</p>
+        ) : selectedClass ? (
           <p className="text-sm text-gray-300">Niveau de la classe : {NIVEAU_LABEL[selectedClass.niveau] || 'Seconde'}</p>
         ) : (
           <NiveauPicker value={niveau} onChange={setNiveau} />

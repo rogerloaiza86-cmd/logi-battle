@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useGameStore } from '../hooks/useGameStore'
 import BrandMark from './BrandMark'
 import { goToJoin } from '../services/roomCode'
+import CursusPicker from './CursusPicker'
 
 const modules = [
   {
@@ -411,6 +412,13 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
           </div>
 
           {/* Section Title */}
+          <CursusPicker
+            onStart={onHostMode}
+            startLabel="Ouvrir la salle"
+            onSecondary={onGameSelect}
+            secondaryLabel="Deux équipes sur cet écran"
+          />
+
           <div className="mb-6">
             <p className="brand-kicker mb-1">Un module ouvre le code de la salle. Le niveau se choisit ensuite : Seconde, Première ou Terminale.</p>
             <div className="flex flex-wrap items-end justify-between gap-3">

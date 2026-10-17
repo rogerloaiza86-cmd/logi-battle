@@ -22,6 +22,8 @@ import { getMathQuestion } from './mathQuestions'
 import { referentielFor } from '../data/referentiel2025'
 import { themeEleveDe } from '../data/niveaux'
 import { generateQuestionPourNiveau } from './niveauQuestions'
+import { tirerQuestionCursus } from '../data/banques/index'
+import { parseCursusMode } from '../data/cursus'
 
 // ===== PALETTISATION =====
 /**
@@ -652,6 +654,9 @@ export const getRandomQuestionType = (includeCulture = true, includeVocabulary =
 }
 
 export const generateNextQuestion = (gameMode = 'all', niveau = 'terminale') => {
+  const cursus = parseCursusMode(gameMode)
+  if (cursus) return tirerQuestionCursus(cursus)
+
   if (niveau === 'seconde' || niveau === 'premiere') {
     const question = generateQuestionPourNiveau(gameMode, niveau, {
       palletCalc: () => generatePalletizationQuestion(1, true),

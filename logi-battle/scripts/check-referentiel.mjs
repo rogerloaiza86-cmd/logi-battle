@@ -14,6 +14,9 @@ import { decouverteQuestions } from '../src/utils/decouverteQuestions.js'
 import { applyArenaResult, rankGroups } from '../src/utils/classement.js'
 import { describeMatch, sortMatches } from '../src/utils/matchJournal.js'
 import { buildRegisterFile, parseRegisterFile } from '../src/utils/classRegisterFile.js'
+import { questionsCursus, questionsDe, tirerQuestionCursus } from '../src/data/banques/index.js'
+import { CELLULES, PROGRAMMES, programmeDe, raisonFermee } from '../src/data/programmes.js'
+import { parseCursusMode } from '../src/data/cursus.js'
 
 const types = [
   'palettisation', 'cout_transport', 'loading_plan', 'vocabulaire', 'supply_chain',
@@ -158,4 +161,33 @@ assert(restored.classes[0].groups[0].stats.points === 3, 'points repris')
 assert(restored.classes[0].online.teacherKey === 'CLEPROFESSEURTRESLONGUE123456', 'clé professeur reprise')
 assert(!parseRegisterFile('{}').ok, 'fichier étranger refusé')
 
-console.log(`Référentiel OK — ${types.length} modules, ${cultureQuestions.length} questions de diplôme.`)
+assert(!programmeDe('generale', 'terminale', 'francais'), 'le français s’arrête avant la terminale générale')
+assert(raisonFermee('technologique', 'terminale', 'francais').includes('philosophie'), 'la terminale GT passe à la philosophie')
+
+for (const [cle, programmeId] of Object.entries(CELLULES)) {
+  const [voie, annee, matiere] = cle.split('|')
+  const programme = PROGRAMMES[programmeId]
+  assert(programme?.intitule && programme.source, `programme incomplet ${programmeId}`)
+  const banque = questionsDe(voie, annee, matiere)
+  assert(banque.length >= 4, `${cle} : ${banque.length} questions`)
+  const indexes = new Set()
+  for (const question of banque) {
+    assert(question.programmeId === programmeId, `${question.id} hors programme ${programmeId}`)
+    assert(question.options.length === 4, `${question.id} doit avoir 4 choix`)
+    assert(question.correctOption >= 0 && question.correctOption < 4, `${question.id} index`)
+    assert(question.theme && question.explanation && question.question, `${question.id} incomplet`)
+    indexes.add(question.correctOption)
+  }
+  assert(indexes.size >= 2, `${cle} : bonnes réponses trop concentrées`)
+  const tiree = tirerQuestionCursus({ voie, annee, matiere })
+  assert(tiree.isMCQ && tiree.niveau === annee, `tirage ${cle}`)
+  assert(tiree.referentiel.savoir === programme.intitule, `rattachement ${cle}`)
+}
+
+const identifiants = questionsCursus.map((question) => question.id)
+assert(new Set(identifiants).size === identifiants.length, 'identifiants de cursus uniques')
+const mode = parseCursusMode('cursus:professionnelle:terminale:histoire')
+const questionCursus = generateNextQuestion(`cursus:${mode.voie}:${mode.annee}:${mode.matiere}`, 'seconde')
+assert(questionCursus.niveau === 'terminale' && questionCursus.type === 'histoire', 'le cursus prime sur le niveau logistique')
+
+console.log(`Référentiel OK — ${types.length} modules, ${cultureQuestions.length} questions de diplôme, ${questionsCursus.length} questions de cursus.`)

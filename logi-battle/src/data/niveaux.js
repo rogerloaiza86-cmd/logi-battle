@@ -90,6 +90,7 @@ export function moduleOuvert(moduleId, niveau) {
 }
 
 export function messageReport(moduleId, niveau) {
+  if (typeof moduleId === 'string' && moduleId.startsWith('cursus:')) return ''
   if (moduleOuvert(moduleId, niveau)) return ''
   return 'Ce sujet se traite plus tard dans le cursus. La salle joue d’abord les situations qui y préparent.'
 }

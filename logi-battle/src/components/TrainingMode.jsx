@@ -2,9 +2,18 @@ import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import QuestionView from './QuestionView'
 import NiveauPicker from './NiveauPicker'
+import CursusPicker from './CursusPicker'
 import { generateNextQuestion } from '../utils/questionGenerator'
+import { parseCursusMode } from '../data/cursus'
+import { programmeDe } from '../data/programmes'
 
 const ROUND_TIME = 45
+
+function titreEntrainement(moduleId) {
+  const cursus = parseCursusMode(moduleId)
+  if (cursus) return programmeDe(cursus.voie, cursus.annee, cursus.matiere)?.intitule || moduleId
+  return null
+}
 
 export const TrainingMode = ({ onBack }) => {
   const [selectedModule, setSelectedModule] = useState(null)
@@ -177,7 +186,7 @@ export const TrainingMode = ({ onBack }) => {
               <div>
                 <h1 className="text-xl font-bold text-white">Mode Entraînement</h1>
                 <p className="text-xs text-gray-500">
-                  {modules.find(m => m.id === selectedModule)?.title}
+                  {titreEntrainement(selectedModule) || modules.find(m => m.id === selectedModule)?.title}
                 </p>
               </div>
             </div>
@@ -270,7 +279,7 @@ export const TrainingMode = ({ onBack }) => {
               <div className="text-6xl mb-4">🎯</div>
               <h2 className="text-3xl font-black text-white mb-2">Entraînement Terminé!</h2>
               <p className="text-gray-400">
-                {modules.find(m => m.id === selectedModule)?.title}
+                {titreEntrainement(selectedModule) || modules.find(m => m.id === selectedModule)?.title}
               </p>
             </div>
 
@@ -388,6 +397,12 @@ export const TrainingMode = ({ onBack }) => {
           <p className="text-gray-400 mt-2">Le niveau filtre les questions : la Seconde reste sur la découverte.</p>
           <div className="mt-6 max-w-3xl">
             <NiveauPicker value={niveau} onChange={setNiveau} />
+          </div>
+          <div className="mt-8">
+            <CursusPicker
+              onStart={(code) => startTraining(code)}
+              startLabel="S’entraîner sur cette matière"
+            />
           </div>
         </div>
 
