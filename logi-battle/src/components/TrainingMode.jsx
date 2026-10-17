@@ -39,6 +39,9 @@ export const TrainingMode = ({ onBack }) => {
   const answeredRef = useRef(0)
   const lockedRef = useRef(false)
   const savedRef = useRef(false)
+  const nextRef = useRef(null)
+
+  useEffect(() => () => clearTimeout(nextRef.current), [])
 
   useEffect(() => {
     if (!isPlaying) return undefined
@@ -47,7 +50,7 @@ export const TrainingMode = ({ onBack }) => {
   }, [isPlaying])
 
   useEffect(() => {
-    if (!showResults || savedRef.current) return undefined
+    if (!showResults || savedRef.current || totalAnswered === 0) return undefined
     savedRef.current = true
     rememberMatch({
       kind: 'entrainement',
@@ -107,6 +110,14 @@ export const TrainingMode = ({ onBack }) => {
     startNewQuestion(moduleId)
   }
 
+  const scheduleNext = () => {
+    nextRef.current = setTimeout(() => {
+      nextRef.current = null
+      if (answeredRef.current < 10) startNewQuestion()
+      else setShowResults(true)
+    }, 2000)
+  }
+
   const startNewQuestion = (moduleId) => {
     const newQuestion = {
       ...generateNextQuestion(moduleId || selectedModule, niveauRef.current),
@@ -154,10 +165,7 @@ export const TrainingMode = ({ onBack }) => {
       }])
     }
 
-    setTimeout(() => {
-      if (answeredRef.current < 10) startNewQuestion()
-      else setShowResults(true)
-    }, 2000)
+    scheduleNext()
   }
 
   const handleTimeout = () => {
@@ -176,17 +184,20 @@ export const TrainingMode = ({ onBack }) => {
       timeout: true
     }])
 
-    setTimeout(() => {
-      if (answeredRef.current < 10) startNewQuestion()
-      else setShowResults(true)
-    }, 2000)
+    scheduleNext()
   }
 
   const handleStopTraining = () => {
+    clearTimeout(nextRef.current)
+    nextRef.current = null
+    lockedRef.current = true
+    setIsRoundActive(false)
     setShowResults(true)
   }
 
   const resetTraining = () => {
+    clearTimeout(nextRef.current)
+    nextRef.current = null
     setShowResults(false)
     setIsPlaying(false)
     setSelectedModule(null)

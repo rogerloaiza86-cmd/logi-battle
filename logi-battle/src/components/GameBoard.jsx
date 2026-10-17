@@ -13,7 +13,7 @@ import { NIVEAU_LABEL } from '../data/niveaux'
 import { readSettings, rememberMatch } from '../utils/progression'
 import { burstParticles, playCue, setMusic } from '../utils/feedback'
 
-export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room = null, roomCode = '', niveau = 'seconde', rankings = [], onMatchEnd }) => {
+export const GameBoard = ({ onBack, onMenu, gameMode, isHost, audience = 'local', room = null, roomCode = '', niveau = 'seconde', rankings = [], onMatchEnd }) => {
   const gameStore = useGameStore()
   const channelRef = useRef(null)
   const liveRef = useRef({ question: null, active: false, time: 30 })
@@ -231,6 +231,11 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
     onBack()
   }
 
+  const leaveToMenu = () => {
+    gameStore.resetGame()
+    ;(onMenu || onBack)()
+  }
+
   return (
     <div className="min-h-screen geronimo-screen flex flex-col">
       <ParticleEffect particles={particles} />
@@ -375,7 +380,7 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
             teamAName={gameStore.teamA.name}
             teamBName={gameStore.teamB.name}
             onRestart={leave}
-            onMenu={leave}
+            onMenu={leaveToMenu}
           />
         )}
       </AnimatePresence>

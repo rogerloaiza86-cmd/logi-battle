@@ -286,7 +286,8 @@ function App() {
             if (!arena?.classId) return
             recordArenaMatch(arena.classId, arena.groupAId, arena.groupBId, result.winner, result)
           }}
-          onBack={handleBackToTeamSetup} 
+          onBack={handleBackToTeamSetup}
+          onMenu={handleBackToMenu}
         />
       </div>
     )

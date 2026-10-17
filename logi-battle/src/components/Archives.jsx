@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { readChampionshipState } from '../utils/roundRules'
 import { describeMatch, sortMatches } from '../utils/matchJournal'
 import { rankGroups } from '../utils/classement'
-import { describeLocalMatch, evaluateAchievements, readHistory } from '../utils/progression'
+import { achievementDates, describeLocalMatch, evaluateAchievements, readHistory } from '../utils/progression'
 
 const STORAGE_KEYS = {
   championship: 'logi-battle-championship',
@@ -75,13 +75,15 @@ export const Archives = ({ onBack }) => {
       })
     })
     const owned = new Set(allAchievements.map((item) => item.id))
-    evaluateAchievements(readHistory()).forEach((badge) => {
+    const history = readHistory()
+    const dates = achievementDates(history)
+    evaluateAchievements(history).forEach((badge) => {
       if (owned.has(badge.id)) return
       allAchievements.push({
         ...badge,
         playerName: 'Arène',
         playerAvatar: 'military_tech',
-        unlockedAt: Date.now(),
+        unlockedAt: dates[badge.id] || Date.now(),
       })
     })
     allAchievements.sort((a, b) => b.unlockedAt - a.unlockedAt)
