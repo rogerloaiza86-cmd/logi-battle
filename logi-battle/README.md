@@ -21,11 +21,12 @@ L'application sera accessible sur `http://localhost:3000`
 
 ### Stack Technique
 - **Frontend**: React 18 + Vite
-- **Styling**: TailwindCSS + Custom CSS
+- **Styling**: TailwindCSS
 - **Animations**: Framer Motion
 - **State Management**: Zustand
-- **Backend**: Firebase (Firestore + Realtime DB)
-- **Font**: Lexend (Google Fonts)
+- **Salle en direct**: Supabase Realtime (broadcast). Le mode par défaut reste local.
+- **Firebase**: optionnel. L'application ne l'initialise que si `VITE_FIREBASE_API_KEY` est une vraie clé.
+- **Mémoire du navigateur**: historique des parties, succès et durée du chrono (`logi-battle-game-history`, `logi-battle-settings`).
 
 ### Structure du Projet
 ```
@@ -60,6 +61,12 @@ logi-battle/
 ├── .env                        # Configuration Firebase
 └── README.md
 ```
+
+## Avancement jouable
+
+Le menu, le duel, la salle, le championnat et l'entraînement lisent les mêmes réglages. Une partie terminée alimente la barre du module (+10 % par partie, plafond 100 %), les archives et les succès. Les cartes métier (sécurité, stock, accueil, flux, etc.) s'affichent quand le module le demande. Le chrono du QG (15 à 60 s) s'applique au duel, au championnat et à l'entraînement. Le son et la musique du QG pilotent des signaux générés dans le navigateur.
+
+Les matières du lycée (français, mathématiques, histoire-géographie, anglais, espagnol) passent par le sélecteur de cursus. Le détail des programmes est dans `docs/plan-cursus.md`.
 
 ## 🎮 Features
 

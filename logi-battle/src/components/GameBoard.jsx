@@ -2,11 +2,16 @@ import React, { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import BrandMark from './BrandMark'
 import QuestionView from './QuestionView'
+import GameOver from './GameOver'
+import ParticleEffect from './ParticleEffect'
+import ScreenVibration from './ScreenVibration'
 import { useGameStore } from '../hooks/useGameStore'
 import { useSplitRound } from '../hooks/useSplitRound'
 import { gamesService } from '../services/database'
 import { gradePlayerAnswer, questionUsesKeypad, toPublicQuestion } from '../utils/roundRules'
 import { NIVEAU_LABEL } from '../data/niveaux'
+import { readSettings, rememberMatch } from '../utils/progression'
+import { burstParticles, playCue, setMusic } from '../utils/feedback'
 
 export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room = null, roomCode = '', niveau = 'seconde', rankings = [], onMatchEnd }) => {
   const gameStore = useGameStore()
@@ -16,10 +21,13 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
   const reportedRef = useRef(false)
   const [logs, setLogs] = useState([])
   const [replies, setReplies] = useState([])
+  const [particles, setParticles] = useState([])
+  const [shake, setShake] = useState(false)
   const classMode = audience === 'class' && isHost
 
   const round = useSplitRound(gameMode, {
     niveau,
+    roundSeconds: readSettings().timerDuration,
     onRoundResolved: ({ winner }) => {
       if (winner === 'A') useGameStore.getState().incrementTeamAScore(1)
       else if (winner === 'B') useGameStore.getState().incrementTeamBScore(1)
@@ -30,6 +38,21 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
       return status === 'finished'
     },
   })
+
+  useEffect(() => {
+    setMusic(readSettings().musicEnabled)
+    return () => setMusic(false)
+  }, [])
+
+  const cueAnswer = (isCorrect) => {
+    playCue(isCorrect ? 'ok' : 'miss', readSettings().soundEnabled)
+    if (classMode) return
+    if (isCorrect) setParticles(burstParticles())
+    else {
+      setShake(true)
+      window.setTimeout(() => setShake(false), 420)
+    }
+  }
 
   const addLog = (user, action, team, points) => {
     const now = new Date()
@@ -79,6 +102,7 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
       if (seenRef.current.has(key)) return
       seenRef.current.add(key)
       const correct = gradePlayerAnswer(current, payload.answer)
+      cueAnswer(correct)
       round.handleAnswer(payload.team, correct)
       setReplies((prev) => [...prev, { team: payload.team, name, correct }])
       addLog(name, 'a envoyé sa réponse.', payload.team, '')
@@ -109,7 +133,9 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
     channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
       const current = round.questionRef.current
       if (!current || payload?.answer == null) return
-      round.handleAnswer(payload.team, gradePlayerAnswer(current, payload.answer))
+      const correct = gradePlayerAnswer(current, payload.answer)
+      cueAnswer(correct)
+      round.handleAnswer(payload.team, correct)
     })
     channel.subscribe()
     channelRef.current = channel
@@ -151,6 +177,17 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
   useEffect(() => {
     if (!showOver || reportedRef.current) return undefined
     reportedRef.current = true
+    rememberMatch({
+      kind: classMode ? 'classe' : 'duel',
+      moduleId: gameMode,
+      winner,
+      scoreA: gameStore.teamA.score,
+      scoreB: gameStore.teamB.score,
+      teamA: gameStore.teamA.name,
+      teamB: gameStore.teamB.name,
+      rounds: round.roundNumber,
+      label: classMode ? 'Salle de classe' : 'Duel',
+    })
     onMatchEnd?.({
       winner,
       score: { A: gameStore.teamA.score, B: gameStore.teamB.score },
@@ -176,7 +213,10 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
         <QuestionView
           question={round.question}
           team={team}
-          onAnswer={(isCorrect) => round.handleAnswer(team, isCorrect)}
+          onAnswer={(isCorrect) => {
+            cueAnswer(isCorrect)
+            round.handleAnswer(team, isCorrect)
+          }}
           disabled={!round.isRoundActive || status !== 'playing'}
           isAnswering={!round.isRoundActive || status !== 'playing'}
           responseTime={responseTime}
@@ -186,8 +226,15 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
     )
   }
 
+  const leave = () => {
+    gameStore.resetGame()
+    onBack()
+  }
+
   return (
     <div className="min-h-screen geronimo-screen flex flex-col">
+      <ParticleEffect particles={particles} />
+      <ScreenVibration active={shake} />
       <header className="bg-[#0f2539]/92 border-b border-white/5 px-4 md:px-8 py-4 relative z-10">
         <div className="flex items-center justify-between gap-4">
           <BrandMark nameClassName="text-[1.35rem]" />
@@ -288,7 +335,7 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
       </main>
 
       <AnimatePresence>
-        {showOver && (
+        {showOver && classMode && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -312,16 +359,24 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
                 </ol>
               )}
               <button
-                onClick={() => {
-                  gameStore.resetGame()
-                  onBack()
-                }}
+                onClick={leave}
                 className="w-full py-4 rounded-xl bg-[#f4b942] text-[#17314a] font-bold"
               >
-                {classMode ? 'Retour au menu' : 'Retour aux équipes'}
+                Retour au menu
               </button>
             </div>
           </motion.div>
+        )}
+        {showOver && !classMode && (
+          <GameOver
+            winner={winner}
+            teamAScore={gameStore.teamA.score}
+            teamBScore={gameStore.teamB.score}
+            teamAName={gameStore.teamA.name}
+            teamBName={gameStore.teamB.name}
+            onRestart={leave}
+            onMenu={leave}
+          />
         )}
       </AnimatePresence>
     </div>

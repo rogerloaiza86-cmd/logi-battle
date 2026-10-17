@@ -1,10 +1,36 @@
 import QuestionCard from './QuestionCard'
 import VocabularyCard from './VocabularyCard'
-import { questionUsesKeypad } from '../utils/roundRules'
+import SafetyCard from './SafetyCard'
+import StockCard from './StockCard'
+import GreenCard from './GreenCard'
+import JitCard from './JitCard'
+import LegalCard from './LegalCard'
+import MathCard from './MathCard'
+import RouteCard from './RouteCard'
+import ReceptionCard from './ReceptionCard'
+import SupplyChainCard from './SupplyChainCard'
+import TraceabilityCard from './TraceabilityCard'
+import TeamLeaderCard from './TeamLeaderCard'
+import { presentQuestion, questionUsesKeypad } from '../utils/roundRules'
+
+const SPECIALTY = {
+  safety: SafetyCard,
+  stock: StockCard,
+  green: GreenCard,
+  jit: JitCard,
+  legal: LegalCard,
+  math: MathCard,
+  route: RouteCard,
+  reception: ReceptionCard,
+  supply_chain: SupplyChainCard,
+  traceability: TraceabilityCard,
+  team_leader: TeamLeaderCard,
+}
 
 export default function QuestionView({ question, ...props }) {
   if (!question) return null
-  const Card = questionUsesKeypad(question) ? QuestionCard : VocabularyCard
+  const shown = presentQuestion(question)
+  const Card = questionUsesKeypad(question) ? QuestionCard : SPECIALTY[question.type] || VocabularyCard
   const badge = question.referentiel
 
   return (
@@ -19,7 +45,7 @@ export default function QuestionView({ question, ...props }) {
           {badge.unite} · {badge.competence}
         </p>
       )}
-      <Card question={question} {...props} />
+      <Card question={shown} {...props} />
     </div>
   )
 }

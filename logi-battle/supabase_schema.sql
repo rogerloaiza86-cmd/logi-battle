@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS public.questions (
 );
 
 -- Sécurité RLS
--- Les joueurs anonymes peuvent créer et mettre à jour une partie.
--- Ils ne peuvent pas supprimer une partie ni écrire les questions.
+-- Les joueurs anonymes peuvent lire et créer une partie.
+-- Ils ne peuvent pas la modifier : le score reste sur l'hôte (broadcast).
 ALTER TABLE public.games ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Activer l'accès anonyme général sur games" ON public.games;
 DROP POLICY IF EXISTS "games_select" ON public.games;
@@ -35,7 +35,6 @@ DROP POLICY IF EXISTS "games_insert" ON public.games;
 DROP POLICY IF EXISTS "games_update" ON public.games;
 CREATE POLICY "games_select" ON public.games FOR SELECT USING (true);
 CREATE POLICY "games_insert" ON public.games FOR INSERT WITH CHECK (true);
-CREATE POLICY "games_update" ON public.games FOR UPDATE USING (true) WITH CHECK (true);
 
 ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Activer l'accès anonyme général sur questions" ON public.questions;

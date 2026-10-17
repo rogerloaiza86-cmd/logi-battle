@@ -3,7 +3,7 @@
 ## Development Testing
 
 ### 1. Local Mode Testing
-For testing without Firebase:
+Le mode par défaut n'utilise pas Firebase. Une clé absente ou factice n'initialise pas le SDK.
 
 ```bash
 npm run dev

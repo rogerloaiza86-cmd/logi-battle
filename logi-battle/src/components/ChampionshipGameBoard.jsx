@@ -1,8 +1,10 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import RopeAnimation from './RopeAnimation'
 import QuestionView from './QuestionView'
 import { useSplitRound } from '../hooks/useSplitRound'
+import { readSettings, rememberMatch } from '../utils/progression'
+import { playCue, setMusic } from '../utils/feedback'
 
 export const ChampionshipGameBoard = ({ 
   gameMode, 
@@ -31,8 +33,14 @@ export const ChampionshipGameBoard = ({
   
   const [ropePosition, setRopePosition] = useState(0)
   const [matchStartTime] = useState(Date.now())
+  useEffect(() => {
+    setMusic(readSettings().musicEnabled)
+    return () => setMusic(false)
+  }, [])
+
   const round = useSplitRound(gameMode || 'all', {
     niveau,
+    roundSeconds: readSettings().timerDuration,
     onRoundResolved: ({ winner }) => {
       if (winner === 'A') {
         setTeamA((prev) => ({ ...prev, score: prev.score + 1 }))
@@ -63,6 +71,18 @@ export const ChampionshipGameBoard = ({
     const winner = getWinner()
     const duration = Math.floor((Date.now() - matchStartTime) / 1000)
     
+    rememberMatch({
+      kind: 'championnat',
+      moduleId: gameMode,
+      winner,
+      scoreA: teamA.score,
+      scoreB: teamB.score,
+      teamA: teamA.name,
+      teamB: teamB.name,
+      rounds: roundNumber,
+      duration,
+      label: 'Championnat',
+    })
     onMatchEnd({
       winner,
       score: { teamA: teamA.score, teamB: teamB.score },
@@ -176,7 +196,10 @@ export const ChampionshipGameBoard = ({
               <QuestionView
                 question={question}
                 team="A"
-                onAnswer={(isCorrect) => handleAnswer('A', isCorrect)}
+                onAnswer={(isCorrect) => {
+                  playCue(isCorrect ? 'ok' : 'miss', readSettings().soundEnabled)
+                  handleAnswer('A', isCorrect)
+                }}
                 isAnswering={!isRoundActive || teamAStatus !== 'playing'}
                 disabled={!isRoundActive || teamAStatus !== 'playing'}
                 responseTime={teamATime}
@@ -229,7 +252,10 @@ export const ChampionshipGameBoard = ({
               <QuestionView
                 question={question}
                 team="B"
-                onAnswer={(isCorrect) => handleAnswer('B', isCorrect)}
+                onAnswer={(isCorrect) => {
+                  playCue(isCorrect ? 'ok' : 'miss', readSettings().soundEnabled)
+                  handleAnswer('B', isCorrect)
+                }}
                 isAnswering={!isRoundActive || teamBStatus !== 'playing'}
                 disabled={!isRoundActive || teamBStatus !== 'playing'}
                 responseTime={teamBTime}

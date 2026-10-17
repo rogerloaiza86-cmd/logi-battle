@@ -10,13 +10,22 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
+function usableKey(value) {
+  if (typeof value !== 'string') return false
+  const trimmed = value.trim()
+  if (trimmed.length < 20) return false
+  return !/placeholder|your[_-]?api|xxx|changeme|todo/i.test(trimmed)
+}
+
 let db = null
 
-try {
-  const app = initializeApp(firebaseConfig)
-  db = getFirestore(app)
-} catch (error) {
-  console.warn('Firebase initialization skipped:', error.message)
+if (usableKey(firebaseConfig.apiKey) && firebaseConfig.projectId) {
+  try {
+    const app = initializeApp(firebaseConfig)
+    db = getFirestore(app)
+  } catch (error) {
+    console.warn('Firebase initialization skipped:', error.message)
+  }
 }
 
 export default db

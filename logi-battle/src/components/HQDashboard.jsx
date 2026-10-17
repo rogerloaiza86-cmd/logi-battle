@@ -3,6 +3,8 @@ import { motion } from 'framer-motion'
 import { readChampionshipState } from '../utils/roundRules'
 import { describeMatch, sortMatches } from '../utils/matchJournal'
 import { rankGroups } from '../utils/classement'
+import { describeLocalMatch, readHistory, readSettings } from '../utils/progression'
+import { setMusic } from '../utils/feedback'
 
 const STORAGE_KEYS = {
   players: 'logi-battle-players',
@@ -37,21 +39,18 @@ export const HQDashboard = ({ onBack }) => {
     // Load from all storage keys
     const players = JSON.parse(localStorage.getItem(STORAGE_KEYS.players) || '[]')
     const championship = readChampionshipState()
-    const history = JSON.parse(localStorage.getItem(STORAGE_KEYS.history) || '[]')
+    const history = readHistory()
 
     const classes = championship.classes || []
     const groupCount = classes.reduce((count, cls) => count + (cls.groups?.length || 0), 0)
     
-    let totalGames = 0
+    let totalGames = history.filter((item) => item.kind !== 'championnat').length
     let totalTime = 0
 
-    // Count games from players
     players.forEach(player => {
-      totalGames += player.stats?.totalGames || 0
       totalTime += player.stats?.timePlayed || 0
     })
 
-    // Count championship matches
     classes.forEach(cls => {
       totalGames += cls.matches?.length || 0
     })
@@ -77,6 +76,18 @@ export const HQDashboard = ({ onBack }) => {
         })
       })
     })
+    history
+      .filter((entry) => entry.kind !== 'championnat')
+      .forEach((entry) => {
+        const note = describeLocalMatch(entry)
+        activities.push({
+          type: entry.kind || 'duel',
+          date: note.date,
+          description: `${note.className} · ${note.left} vs ${note.right}`,
+          result: note.result,
+          draw: note.draw,
+        })
+      })
     setRecentActivity(sortMatches(activities).slice(0, 10))
     setClassBoards(classes.map((cls) => ({
       id: cls.id,
@@ -86,15 +97,13 @@ export const HQDashboard = ({ onBack }) => {
   }
 
   const loadSettings = () => {
-    const saved = localStorage.getItem(STORAGE_KEYS.settings)
-    if (saved) {
-      setSettings(JSON.parse(saved))
-    }
+    setSettings(readSettings())
   }
 
   const saveSettings = (newSettings) => {
     setSettings(newSettings)
     localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(newSettings))
+    setMusic(Boolean(newSettings.musicEnabled))
   }
 
   const handleClearData = () => {

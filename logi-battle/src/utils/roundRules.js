@@ -10,6 +10,26 @@ export function questionUsesKeypad(question) {
   return typeof question.correctAnswer === 'number'
 }
 
+/** Aligne les QCM métier (options dans `data`) avec les cartes qui lisent le premier niveau. */
+export function presentQuestion(question) {
+  if (!question) return null
+  const options = question.data?.options || question.options || null
+  const correctOption = question.data?.correctOption ?? question.correctOption ?? (options ? question.correctAnswer : undefined)
+  return {
+    ...question,
+    options,
+    correctOption,
+    question: question.question || question.description,
+    category: question.category || question.data?.category,
+    scenario: question.scenario || question.data?.scenario,
+    explanation: question.explanation || question.data?.explanation,
+    data: {
+      ...(question.data || {}),
+      ...(options ? { options, correctOption } : {}),
+    },
+  }
+}
+
 export function resolveRoundWinner(statusA, statusB, timeA, timeB) {
   const aCorrect = statusA === 'correct'
   const bCorrect = statusB === 'correct'

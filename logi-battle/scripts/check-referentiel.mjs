@@ -7,7 +7,8 @@ import {
   generatePalletizationQuestion,
   generateTransportCostQuestion,
 } from '../src/utils/questionGenerator.js'
-import { gradePlayerAnswer, questionUsesKeypad, resolveRoundWinner } from '../src/utils/roundRules.js'
+import { gradePlayerAnswer, presentQuestion, questionUsesKeypad, resolveRoundWinner } from '../src/utils/roundRules.js'
+import { describeLocalMatch, evaluateAchievements, moduleProgress, readSettings, rememberMatch, HISTORY_KEY } from '../src/utils/progression.js'
 import { createRoomCode, normalizeRoomCode, ROOM_ALPHABET } from '../src/services/roomCode.js'
 import { questionRespecteNiveau } from '../src/data/niveaux.js'
 import { decouverteQuestions } from '../src/utils/decouverteQuestions.js'
@@ -189,5 +190,37 @@ assert(new Set(identifiants).size === identifiants.length, 'identifiants de curs
 const mode = parseCursusMode('cursus:professionnelle:terminale:histoire')
 const questionCursus = generateNextQuestion(`cursus:${mode.voie}:${mode.annee}:${mode.matiere}`, 'seconde')
 assert(questionCursus.niveau === 'terminale' && questionCursus.type === 'histoire', 'le cursus prime sur le niveau logistique')
+
+const safety = presentQuestion(generateNextQuestion('safety'))
+assert(Array.isArray(safety.options) && safety.options.length >= 2, 'carte métier sans options')
+assert(safety.correctOption === safety.data.correctOption, 'index métier désaligné')
+assert(safety.question, 'énoncé métier absent')
+
+const memory = {
+  data: new Map(),
+  getItem(key) { return this.data.has(key) ? this.data.get(key) : null },
+  setItem(key, value) { this.data.set(key, String(value)) },
+}
+rememberMatch({ kind: 'duel', moduleId: 'safety', winner: 'A', scoreA: 3, scoreB: 1, teamA: 'Nord', teamB: 'Sud' }, memory)
+const history = JSON.parse(memory.getItem(HISTORY_KEY))
+const badges = evaluateAchievements(history)
+assert(badges.some((badge) => badge.id === 'premiere-manche'), 'succès première manche')
+assert(badges.some((badge) => badge.id === 'premiere-victoire'), 'succès victoire')
+assert(!badges.some((badge) => badge.id === 'match-nul'), 'un vainqueur ne débloque pas le nul')
+assert(moduleProgress('safety', history) === 10, 'progression de module')
+const card = describeLocalMatch(history[0])
+assert(card.left === 'Nord' && card.result.includes('Nord') && card.scoreLabel === '3 — 1', 'carte d’archive')
+const drawn = rememberMatch({ kind: 'duel', winner: null, scoreA: 2, scoreB: 2 }, memory)
+assert(evaluateAchievements(drawn.history).some((badge) => badge.id === 'match-nul'), 'succès match nul')
+for (let index = 0; index < 3; index += 1) rememberMatch({ kind: 'duel', winner: 'B' }, memory)
+assert(evaluateAchievements(JSON.parse(memory.getItem(HISTORY_KEY))).some((badge) => badge.id === 'cinq-manches'), 'succès cinq manches')
+const training = rememberMatch({ kind: 'entrainement', moduleId: 'math', winner: null, correct: 10, total: 10 }, memory)
+const trained = evaluateAchievements(training.history)
+assert(trained.some((badge) => badge.id === 'sans-faute'), 'succès sans faute')
+assert(trained.some((badge) => badge.id === 'entrainement'), 'succès entraînement')
+const tight = readSettings({ getItem: () => JSON.stringify({ timerDuration: 5, soundEnabled: false, musicEnabled: true }) })
+assert(tight.timerDuration === 15 && tight.soundEnabled === false && tight.musicEnabled === true, 'chrono borné')
+const loud = readSettings({ getItem: () => '{' })
+assert(loud.timerDuration === 30 && loud.soundEnabled === true, 'réglages illisibles')
 
 console.log(`Référentiel OK — ${types.length} modules, ${cultureQuestions.length} questions de diplôme, ${questionsCursus.length} questions de cursus.`)

@@ -1,8 +1,8 @@
 # 📋 Document Relais - Logi-Battle
 
-> **Date de dernière mise à jour** : 21 Mars 2026  
-> **Version** : 1.0.0  
-> **Statut** : Application fonctionnelle - Mode local actif
+> **Date de dernière mise à jour** : 17 octobre 2026  
+> **Version** : 1.1.0  
+> **Statut** : Duel, salle, championnat, entraînement et cursus jouables. Le temps réel de salle passe par Supabase broadcast. Firebase n'est plus le chemin par défaut.
 
 ---
 
@@ -151,7 +151,7 @@ Challenge Log/
 - [x] Page `/join` pour les joueurs mobiles
 - [x] Page `/host` pour l'enseignant
 - [x] Saisie de code manuel (format: GAME-XXXXXX)
-- [ ] **Synchronisation temps réel Firebase** (À implémenter)
+- [x] **Salle en direct** : broadcast Supabase (`roomChannel.js`), score porté par l'hôte
 
 ### State Management (Zustand)
 ```javascript
@@ -167,7 +167,7 @@ rounds, currentRound, totalRounds (10)
 
 ### Fichier `.env` (logi-battle/)
 ```env
-# Mode DB: 'local' ou 'firebase'
+# Mode DB: 'local' (défaut), 'supabase' ou 'firebase'
 VITE_DB_MODE=local
 
 # Firebase (optionnel si mode local)
@@ -229,7 +229,7 @@ npm run lint      # ESLint
 ## 🚧 Points d'Attention / TODOs
 
 ### Prioritaires
-1. **Firebase Realtime** : Le mode multijoueur est en mode démo (simulation). Implémenter la synchro temps réel pour usage en classe.
+1. **Salle** : le direct passe par le broadcast Supabase. La table `games` n'accepte plus la mise à jour anonyme (`supabase/games_lockdown.sql`, à appliquer sur le projet distant seulement après vérification).
 
 2. **Gestion des joueurs** :
    - Liste des joueurs connectés
@@ -331,8 +331,8 @@ npm run dev -- --port 3001
 Avant de reprendre le développement :
 
 - [ ] Vérifier que `npm run dev` fonctionne
-- [ ] Confirmer le mode DB souhaité (`local` vs `firebase`)
-- [ ] Si Firebase : vérifier les credentials dans `.env`
+- [x] Mode par défaut : local. Salle : `VITE_DB_MODE=supabase`
+- [ ] Firebase seulement si une vraie clé est fournie ; sinon l'init est ignorée
 - [ ] Consulter la section TODOs ci-dessus
 - [ ] Mettre à jour la date dans ce document après les modifications
 

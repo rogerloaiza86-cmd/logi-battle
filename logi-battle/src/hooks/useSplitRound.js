@@ -6,7 +6,7 @@ import { ROUND_TIME, TOTAL_ROUNDS, VOCABULARY_TIME, resolveRoundWinner } from '.
  * Manche en écran partagé. Les statuts sont lus dans une ref pour que
  * la dernière réponse compte dans le même tour que setState.
  */
-export function useSplitRound(gameMode, { onRoundResolved, totalRounds = TOTAL_ROUNDS, niveau = 'terminale' } = {}) {
+export function useSplitRound(gameMode, { onRoundResolved, totalRounds = TOTAL_ROUNDS, niveau = 'terminale', roundSeconds } = {}) {
   const [question, setQuestion] = useState(null)
   const [timeLeft, setTimeLeft] = useState(ROUND_TIME)
   const [roundTime, setRoundTime] = useState(ROUND_TIME)
@@ -30,8 +30,10 @@ export function useSplitRound(gameMode, { onRoundResolved, totalRounds = TOTAL_R
   const onRoundResolvedRef = useRef(onRoundResolved)
   const endRoundRef = useRef(() => {})
   const continueTimer = useRef(null)
+  const secondsRef = useRef(roundSeconds)
 
   onRoundResolvedRef.current = onRoundResolved
+  secondsRef.current = roundSeconds
 
   const startNewRound = useCallback(() => {
     if (finishedRef.current) return null
@@ -48,7 +50,9 @@ export function useSplitRound(gameMode, { onRoundResolved, totalRounds = TOTAL_R
     endingRef.current = false
     activeRef.current = true
     roundStartTime.current = Date.now()
-    const time = next.type === 'vocabulaire' ? VOCABULARY_TIME : ROUND_TIME
+    const configured = Number(secondsRef.current)
+    const fallback = next.type === 'vocabulaire' ? VOCABULARY_TIME : ROUND_TIME
+    const time = Number.isFinite(configured) ? Math.min(60, Math.max(15, configured)) : fallback
     setQuestion(next)
     setRoundTime(time)
     setTimeLeft(time)

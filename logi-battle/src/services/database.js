@@ -127,8 +127,7 @@ export const gamesService = {
     }
 
     if (USE_SUPABASE) {
-      const { error } = await supabase.from('games').update(updateData).eq('gameId', gameId)
-      if (error) throw error
+      // Le score de la salle est porté par l'hôte. La mise à jour anonyme de `games` est fermée.
       return true
     }
 
@@ -150,8 +149,6 @@ export const gamesService = {
 
   async updateGameStatus(gameId, status) {
     if (USE_SUPABASE) {
-      const { error } = await supabase.from('games').update({ status }).eq('gameId', gameId)
-      if (error) throw error
       return true
     }
 

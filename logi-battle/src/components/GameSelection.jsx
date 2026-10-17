@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { moduleProgress, readHistory } from '../utils/progression'
 import { motion } from 'framer-motion'
 import { useGameStore } from '../hooks/useGameStore'
 import BrandMark from './BrandMark'
@@ -13,7 +14,6 @@ const modules = [
     icon: 'inventory_2',
     description: 'Optimisez le positionnement des racks pour un débit inventaire à haute fréquence.',
     level: 'NIV 01',
-    progress: 75,
     color: 'orange',
   },
   {
@@ -23,7 +23,6 @@ const modules = [
     icon: 'local_shipping',
     description: 'Optimisation des routes sous contraintes de trafic et météo volatiles.',
     level: 'NIV 04',
-    progress: 25,
     color: 'blue',
   },
   {
@@ -33,7 +32,6 @@ const modules = [
     icon: 'conveyor_belt',
     description: 'Reconnaissance codes-barres haute vitesse et gestion de tapis roulants.',
     level: 'NIV 02',
-    progress: 100,
     color: 'orange',
   },
   {
@@ -43,7 +41,6 @@ const modules = [
     icon: 'menu_book',
     description: 'Gérez les pannes système et les protocoles de réacheminement d\'urgence.',
     level: 'NOUVEAU',
-    progress: 0,
     color: 'red',
     isNew: true,
   },
@@ -54,7 +51,6 @@ const modules = [
     icon: 'account_tree',
     description: 'Planification automatisée des quais et allocation des ressources.',
     level: 'NIV 03',
-    progress: 60,
     color: 'blue',
   },
   {
@@ -64,7 +60,6 @@ const modules = [
     icon: 'fact_check',
     description: 'Contrôle inventaire de précision et évaluation des dommages.',
     level: 'NIV 02',
-    progress: 45,
     color: 'orange',
   },
   {
@@ -74,7 +69,6 @@ const modules = [
     icon: 'warehouse',
     description: 'Opérations avancées de chariot élévateur et protocoles de sécurité.',
     level: 'NIV 05',
-    progress: 80,
     color: 'orange',
   },
   {
@@ -84,7 +78,6 @@ const modules = [
     icon: 'health_and_safety',
     description: 'Optimisation des nœuds supply chain et gestion des risques.',
     level: 'NIV 01',
-    progress: 30,
     color: 'red',
   },
   {
@@ -94,7 +87,6 @@ const modules = [
     icon: 'track_changes',
     description: 'Solutions d\'emballage durable et réduction des déchets.',
     level: 'NIV 02',
-    progress: 55,
     color: 'blue',
   },
   {
@@ -104,7 +96,6 @@ const modules = [
     icon: 'eco',
     description: 'Suivi empreinte carbone et mise en œuvre logistique verte.',
     level: 'NIV 03',
-    progress: 40,
     color: 'green',
   },
   {
@@ -114,7 +105,6 @@ const modules = [
     icon: 'groups',
     description: 'Prévision de la demande et optimisation des stocks.',
     level: 'NIV 04',
-    progress: 70,
     color: 'blue',
   },
   {
@@ -124,7 +114,6 @@ const modules = [
     icon: 'precision_manufacturing',
     description: 'Gestion de flotte électrique et optimisation de recharge.',
     level: 'NIV 03',
-    progress: 35,
     color: 'green',
   },
   {
@@ -134,7 +123,6 @@ const modules = [
     icon: 'map',
     description: 'Analyse des patterns de trafic et efficacité des routes.',
     level: 'NIV 02',
-    progress: 50,
     color: 'blue',
   },
   {
@@ -144,7 +132,6 @@ const modules = [
     icon: 'gavel',
     description: 'Conformité réglementaire et gestion documentaire.',
     level: 'NIV 01',
-    progress: 20,
     color: 'orange',
   },
   {
@@ -154,7 +141,6 @@ const modules = [
     icon: 'calculate',
     description: 'Synchronisation inventaire live entre plusieurs entrepôts.',
     level: 'NIV 03',
-    progress: 65,
     color: 'blue',
   },
   {
@@ -164,7 +150,6 @@ const modules = [
     icon: 'psychology',
     description: 'Compétences C1 à C4 du bac pro métiers de la logistique.',
     level: 'NIV 01',
-    progress: 10,
     color: 'orange',
   },
 ]
@@ -182,6 +167,7 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
   const [activeNav, setActiveNav] = useState('arena')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const gameStore = useGameStore()
+  const history = readHistory()
 
   const handleSelectModule = (module) => {
     setActiveModule(module.id)
@@ -435,7 +421,9 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
 
           {/* Modules Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {modules.map((module, index) => (
+            {modules.map((entry, index) => {
+              const module = { ...entry, progress: moduleProgress(entry.id, history) }
+              return (
               <motion.button
                 key={module.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -495,7 +483,8 @@ export const GameSelection = ({ userProfile, onGameSelect, onHostMode, onChampio
                 {/* Hover Effect */}
                 <div className="absolute inset-0 rounded-3xl bg-gradient-to-t from-[#f4b942]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
               </motion.button>
-            ))}
+              )
+            })}
           </div>
         </div>
       </main>

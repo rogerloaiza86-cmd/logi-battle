@@ -6,8 +6,8 @@ import CursusPicker from './CursusPicker'
 import { generateNextQuestion } from '../utils/questionGenerator'
 import { parseCursusMode } from '../data/cursus'
 import { programmeDe } from '../data/programmes'
-
-const ROUND_TIME = 45
+import { readSettings, rememberMatch } from '../utils/progression'
+import { playCue, setMusic } from '../utils/feedback'
 
 function titreEntrainement(moduleId) {
   const cursus = parseCursusMode(moduleId)
@@ -22,7 +22,8 @@ export const TrainingMode = ({ onBack }) => {
   niveauRef.current = niveau
   const [isPlaying, setIsPlaying] = useState(false)
   const [question, setQuestion] = useState(null)
-  const [timeLeft, setTimeLeft] = useState(ROUND_TIME)
+  const [roundTime] = useState(() => readSettings().timerDuration)
+  const [timeLeft, setTimeLeft] = useState(roundTime)
   const [isRoundActive, setIsRoundActive] = useState(false)
   const [score, setScore] = useState(0)
   const [streak, setStreak] = useState(0)
@@ -34,6 +35,29 @@ export const TrainingMode = ({ onBack }) => {
   const roundStartTime = useRef(null)
   const answeredRef = useRef(0)
   const lockedRef = useRef(false)
+  const savedRef = useRef(false)
+
+  useEffect(() => {
+    if (!isPlaying) return undefined
+    setMusic(readSettings().musicEnabled)
+    return () => setMusic(false)
+  }, [isPlaying])
+
+  useEffect(() => {
+    if (!showResults || savedRef.current) return undefined
+    savedRef.current = true
+    rememberMatch({
+      kind: 'entrainement',
+      moduleId: selectedModule,
+      winner: null,
+      correct: correctAnswers,
+      total: totalAnswered,
+      teamA: 'Entraînement',
+      teamB: `${correctAnswers}/${totalAnswered}`,
+      label: titreEntrainement(selectedModule) || selectedModule || 'Entraînement',
+    })
+    return undefined
+  }, [showResults, correctAnswers, totalAnswered, selectedModule])
 
   const modules = [
     { id: 'palettisation', title: 'Palettisation', icon: 'inventory_2', color: 'orange', description: 'Maîtrisez les calculs de palettisation' },
@@ -76,6 +100,7 @@ export const TrainingMode = ({ onBack }) => {
     setQuestionHistory([])
     answeredRef.current = 0
     lockedRef.current = false
+    savedRef.current = false
     startNewQuestion(moduleId)
   }
 
@@ -85,7 +110,7 @@ export const TrainingMode = ({ onBack }) => {
       id: `q_${Date.now()}`,
     }
     setQuestion(newQuestion)
-    setTimeLeft(ROUND_TIME)
+    setTimeLeft(roundTime)
     setIsRoundActive(true)
     lockedRef.current = false
     roundStartTime.current = Date.now()
@@ -94,6 +119,7 @@ export const TrainingMode = ({ onBack }) => {
   const handleAnswer = (isCorrect) => {
     if (lockedRef.current) return
     lockedRef.current = true
+    playCue(isCorrect ? 'ok' : 'miss', readSettings().soundEnabled)
     setIsRoundActive(false)
     answeredRef.current += 1
     setTotalAnswered(answeredRef.current)
@@ -134,6 +160,7 @@ export const TrainingMode = ({ onBack }) => {
   const handleTimeout = () => {
     if (lockedRef.current) return
     lockedRef.current = true
+    playCue('miss', readSettings().soundEnabled)
     setIsRoundActive(false)
     setStreak(0)
     answeredRef.current += 1
@@ -141,7 +168,7 @@ export const TrainingMode = ({ onBack }) => {
     setQuestionHistory(prev => [...prev, {
       question: question?.title || 'Question',
       isCorrect: false,
-      time: ROUND_TIME * 1000,
+      time: roundTime * 1000,
       points: 0,
       timeout: true
     }])
@@ -165,6 +192,7 @@ export const TrainingMode = ({ onBack }) => {
     setTotalAnswered(0)
     setCorrectAnswers(0)
     setQuestionHistory([])
+    savedRef.current = false
   }
 
   const accuracy = totalAnswered > 0 ? Math.round((correctAnswers / totalAnswered) * 100) : 0
@@ -220,7 +248,7 @@ export const TrainingMode = ({ onBack }) => {
               timeLeft <= 10 ? 'bg-red-500' : timeLeft <= 20 ? 'bg-yellow-500' : 'bg-[#f4b942]'
             }`}
             initial={{ width: '100%' }}
-            animate={{ width: `${(timeLeft / ROUND_TIME) * 100}%` }}
+            animate={{ width: `${(timeLeft / roundTime) * 100}%` }}
             transition={{ duration: 1, ease: 'linear' }}
           />
         </div>
