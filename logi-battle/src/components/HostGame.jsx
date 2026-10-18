@@ -274,7 +274,7 @@ export const HostGame = ({ onBack, gameMode, initialNiveau = 'seconde' }) => {
                 <NiveauPicker value={niveau} onChange={setNiveau} />
               )}
               {messageReport(gameMode, niveauEffectif) && (
-                <p className="text-sm text-amber-100">{messageReport(gameMode, niveau)}</p>
+                <p className="text-sm text-amber-100">{messageReport(gameMode, niveauEffectif)}</p>
               )}
               {classes.length === 0 && (
                 <p className="text-sm text-gray-400">Créez la classe et ses groupes dans le championnat, puis revenez ici pour les faire jouer.</p>

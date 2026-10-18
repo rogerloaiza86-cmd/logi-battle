@@ -30,7 +30,13 @@ const SPECIALTY = {
 export default function QuestionView({ question, ...props }) {
   if (!question) return null
   const shown = presentQuestion(question)
-  const Card = questionUsesKeypad(question) ? QuestionCard : SPECIALTY[question.type] || VocabularyCard
+  const Specialty = questionUsesKeypad(question) ? null : SPECIALTY[question.type]
+  const Card = questionUsesKeypad(question) ? QuestionCard : Specialty || VocabularyCard
+  // Les cartes métier colorent la bonne réponse avec `isAnswering` : sur écran partagé,
+  // elle ne doit apparaître qu'une fois la manche close pour les deux équipes.
+  const cardProps = Specialty
+    ? { ...props, isAnswering: Boolean(props.showCorrectAnswer), disabled: props.disabled || props.isAnswering }
+    : props
   const badge = question.referentiel
 
   return (
@@ -45,7 +51,7 @@ export default function QuestionView({ question, ...props }) {
           {badge.unite} · {badge.competence}
         </p>
       )}
-      <Card question={shown} {...props} />
+      <Card question={shown} {...cardProps} />
     </div>
   )
 }
