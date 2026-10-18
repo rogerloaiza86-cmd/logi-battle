@@ -8,7 +8,7 @@ import { parseCursusMode } from '../data/cursus'
 import { programmeDe } from '../data/programmes'
 import { NIVEAU_LABEL, moduleOuvert } from '../data/niveaux'
 import PoleSwitch from './PoleSwitch'
-import { readSettings, rememberMatch } from '../utils/progression'
+import { newTrainingCounters, readSettings, rememberMatch, TRAINING_QUESTIONS, trainingSessionOver } from '../utils/progression'
 import { playCue, setMusic } from '../utils/feedback'
 
 function titreEntrainement(moduleId) {
@@ -39,6 +39,21 @@ export const TrainingMode = ({ onBack }) => {
   const answeredRef = useRef(0)
   const lockedRef = useRef(false)
   const savedRef = useRef(false)
+  const nextRef = useRef(null)
+
+  const clearPendingQuestion = () => {
+    if (nextRef.current) {
+      clearTimeout(nextRef.current)
+      nextRef.current = null
+    }
+  }
+
+  const applyTrainingCounters = (counters) => {
+    answeredRef.current = counters.answered
+    savedRef.current = counters.saved
+  }
+
+  useEffect(() => () => clearPendingQuestion(), [])
 
   useEffect(() => {
     if (!isPlaying) return undefined
@@ -101,9 +116,9 @@ export const TrainingMode = ({ onBack }) => {
     setTotalAnswered(0)
     setCorrectAnswers(0)
     setQuestionHistory([])
-    answeredRef.current = 0
+    clearPendingQuestion()
+    applyTrainingCounters(newTrainingCounters())
     lockedRef.current = false
-    savedRef.current = false
     startNewQuestion(moduleId)
   }
 
@@ -154,9 +169,15 @@ export const TrainingMode = ({ onBack }) => {
       }])
     }
 
-    setTimeout(() => {
-      if (answeredRef.current < 10) startNewQuestion()
-      else setShowResults(true)
+    scheduleNext()
+  }
+
+  const scheduleNext = () => {
+    clearPendingQuestion()
+    nextRef.current = setTimeout(() => {
+      nextRef.current = null
+      if (trainingSessionOver(answeredRef.current)) setShowResults(true)
+      else startNewQuestion()
     }, 2000)
   }
 
@@ -176,17 +197,20 @@ export const TrainingMode = ({ onBack }) => {
       timeout: true
     }])
 
-    setTimeout(() => {
-      if (answeredRef.current < 10) startNewQuestion()
-      else setShowResults(true)
-    }, 2000)
+    scheduleNext()
   }
 
   const handleStopTraining = () => {
+    clearPendingQuestion()
+    lockedRef.current = true
+    setIsRoundActive(false)
     setShowResults(true)
   }
 
   const resetTraining = () => {
+    clearPendingQuestion()
+    applyTrainingCounters(newTrainingCounters())
+    lockedRef.current = false
     setShowResults(false)
     setIsPlaying(false)
     setSelectedModule(null)
@@ -195,7 +219,19 @@ export const TrainingMode = ({ onBack }) => {
     setTotalAnswered(0)
     setCorrectAnswers(0)
     setQuestionHistory([])
-    savedRef.current = false
+  }
+
+  const replayTraining = () => {
+    clearPendingQuestion()
+    applyTrainingCounters(newTrainingCounters())
+    lockedRef.current = false
+    setShowResults(false)
+    setScore(0)
+    setStreak(0)
+    setTotalAnswered(0)
+    setCorrectAnswers(0)
+    setQuestionHistory([])
+    startNewQuestion()
   }
 
   const accuracy = totalAnswered > 0 ? Math.round((correctAnswers / totalAnswered) * 100) : 0
@@ -209,7 +245,7 @@ export const TrainingMode = ({ onBack }) => {
           <div className="flex items-center justify-between max-w-6xl mx-auto">
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setShowResults(true)}
+                onClick={handleStopTraining}
                 className="w-10 h-10 rounded-xl bg-[#1d3d59] hover:bg-[#234a68] flex items-center justify-center transition-colors"
               >
                 <span className="material-icons text-gray-400">close</span>
@@ -238,7 +274,7 @@ export const TrainingMode = ({ onBack }) => {
               {/* Progress */}
               <div className="text-right">
                 <p className="text-xs text-gray-500 uppercase">Question</p>
-                <p className="text-xl font-bold text-white">{totalAnswered + 1}/10</p>
+                <p className="text-xl font-bold text-white">{totalAnswered + 1}/{TRAINING_QUESTIONS}</p>
               </div>
             </div>
           </div>
@@ -371,15 +407,7 @@ export const TrainingMode = ({ onBack }) => {
                 Changer de module
               </button>
               <button
-                onClick={() => {
-                  setShowResults(false)
-                  setScore(0)
-                  setStreak(0)
-                  setTotalAnswered(0)
-                  setCorrectAnswers(0)
-                  setQuestionHistory([])
-                  startNewQuestion()
-                }}
+                onClick={replayTraining}
                 className="flex-1 py-4 bg-[#f4b942] hover:bg-[#d99926] rounded-xl text-[#17314a] font-bold transition-colors"
               >
                 Rejouer
