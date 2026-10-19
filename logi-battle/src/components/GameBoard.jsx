@@ -8,7 +8,7 @@ import ScreenVibration from './ScreenVibration'
 import { useGameStore } from '../hooks/useGameStore'
 import { useSplitRound } from '../hooks/useSplitRound'
 import { gamesService } from '../services/database'
-import { gradePlayerAnswer, questionUsesKeypad, toPublicQuestion } from '../utils/roundRules'
+import { answerTargetsQuestion, gradePlayerAnswer, questionUsesKeypad, toPublicQuestion } from '../utils/roundRules'
 import { NIVEAU_LABEL } from '../data/niveaux'
 import { readSettings, rememberMatch } from '../utils/progression'
 import { burstParticles, playCue, setMusic } from '../utils/feedback'
@@ -74,7 +74,7 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
   liveRef.current = {
     question: round.question,
     active: round.isRoundActive,
-    time: round.roundTime,
+    time: round.timeLeft,
   }
 
   const questionId = round.question?.id
@@ -85,7 +85,7 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
 
   const publishQuestion = () => {
     const live = liveRef.current
-    if (!room || !live.question || !live.active) return
+    if (!room || !live.question || !live.active || !(live.time > 0)) return
     room.send('new_question', {
       questionData: toPublicQuestion(live.question),
       time: live.time,
@@ -97,6 +97,7 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
     const onAnswer = ({ payload }) => {
       const current = round.questionRef.current
       if (!current || payload?.answer == null || (payload.team !== 'A' && payload.team !== 'B')) return
+      if (!answerTargetsQuestion(current, payload.questionId)) return
       const name = String(payload.playerName || 'Élève').slice(0, 18)
       const key = `${payload.team}:${name}`
       if (seenRef.current.has(key)) return
@@ -133,6 +134,7 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
     channel.on('broadcast', { event: 'player_answer' }, ({ payload }) => {
       const current = round.questionRef.current
       if (!current || payload?.answer == null) return
+      if (!answerTargetsQuestion(current, payload.questionId)) return
       const correct = gradePlayerAnswer(current, payload.answer)
       cueAnswer(correct)
       round.handleAnswer(payload.team, correct)
@@ -147,12 +149,14 @@ export const GameBoard = ({ onBack, gameMode, isHost, audience = 'local', room =
   useEffect(() => {
     if (!isHost || room || !channelRef.current || !round.question || !round.isRoundActive) return undefined
     const send = () => {
+      const live = liveRef.current
+      if (!live.question || !live.active || !(live.time > 0)) return
       channelRef.current?.send({
         type: 'broadcast',
         event: 'new_question',
         payload: {
-          questionData: toPublicQuestion(round.question),
-          time: round.roundTime,
+          questionData: toPublicQuestion(live.question),
+          time: live.time,
         },
       })
     }
