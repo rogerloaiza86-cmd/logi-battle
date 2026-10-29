@@ -6,7 +6,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { normaliserNiveau } from '../data/niveaux'
-import { applyArenaResult, rankGroups } from '../utils/classement'
+import { applyArenaResult, championAfterRemoval, rankGroups } from '../utils/classement'
 import { saveClassOnline } from '../services/classCloud'
 import { sanitizeClass } from '../utils/classRegisterFile'
 
@@ -138,12 +138,7 @@ export const useChampionshipStore = create(
           classes: state.classes.map((c) => {
             if (c.id === classId) {
               const updatedGroups = c.groups.filter((g) => g.id !== groupId)
-              // Si on supprime le champion, le premier groupe devient champion
-              const wasChampion = c.currentChampion === groupId
-              const newChampion = wasChampion && updatedGroups.length > 0
-                ? updatedGroups[0].id
-                : c.currentChampion
-
+              const newChampion = championAfterRemoval(c.groups, c.currentChampion, groupId)
               const finalGroups = updatedGroups.map((g) => ({
                 ...g,
                 isChampion: g.id === newChampion,
