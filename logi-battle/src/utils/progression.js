@@ -48,6 +48,21 @@ export function evaluateAchievements(history) {
   return ACHIEVEMENTS.filter((item) => item.when(history || [])).map(({ when, ...badge }) => badge)
 }
 
+/** Date de la partie qui a débloqué chaque succès, historique stocké du plus récent au plus ancien. */
+export function achievementDates(history) {
+  const chronological = [...(history || [])].reverse()
+  const dates = {}
+  ACHIEVEMENTS.forEach((badge) => {
+    for (let index = 0; index < chronological.length; index += 1) {
+      if (badge.when(chronological.slice(0, index + 1))) {
+        dates[badge.id] = new Date(chronological[index].date || 0).getTime()
+        break
+      }
+    }
+  })
+  return dates
+}
+
 export function moduleProgress(moduleId, history) {
   const played = (history || []).filter((item) => item.moduleId === moduleId).length
   return Math.min(100, played * 10)

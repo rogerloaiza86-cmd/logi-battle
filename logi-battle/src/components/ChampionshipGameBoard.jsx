@@ -67,7 +67,11 @@ export const ChampionshipGameBoard = ({
     return null
   }
 
+  const endedRef = useRef(false)
+
   const handleEndMatch = () => {
+    if (endedRef.current) return
+    endedRef.current = true
     const winner = getWinner()
     const duration = Math.floor((Date.now() - matchStartTime) / 1000)
     
