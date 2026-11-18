@@ -24,6 +24,7 @@ import { themeEleveDe } from '../data/niveaux'
 import { generateQuestionPourNiveau } from './niveauQuestions'
 import { tirerQuestionCursus } from '../data/banques/index'
 import { parseCursusMode } from '../data/cursus'
+import { formatQuestionDescription } from './questionPrompt'
 
 // ===== PALETTISATION =====
 /**
@@ -361,9 +362,11 @@ export const generateReceptionQuestion = () => {
     type: 'reception',
     difficulty: receptionQ.difficulty,
     title: '🚛 Réception & Contrôle',
-    description: receptionQ.question,
+    question: receptionQ.question,
+    description: formatQuestionDescription(receptionQ.question, receptionQ.scenario),
     data: {
       category: receptionQ.category,
+      scenario: receptionQ.scenario,
       options: receptionQ.options,
       correctOption: receptionQ.correctOption,
       explanation: receptionQ.explanation,
@@ -383,9 +386,11 @@ export const generateStockQuestion = () => {
     type: 'stock',
     difficulty: stockQ.difficulty,
     title: '📦 Stock Master 3D',
-    description: stockQ.question,
+    question: stockQ.question,
+    description: formatQuestionDescription(stockQ.question, stockQ.scenario),
     data: {
       category: stockQ.category,
+      scenario: stockQ.scenario,
       options: stockQ.options,
       correctOption: stockQ.correctOption,
       explanation: stockQ.explanation,
@@ -405,9 +410,11 @@ export const generateSafetyQuestion = () => {
     type: 'safety',
     difficulty: safetyQ.difficulty,
     title: '🛡️ Safety First',
-    description: safetyQ.question,
+    question: safetyQ.question,
+    description: formatQuestionDescription(safetyQ.question, safetyQ.scenario),
     data: {
       category: safetyQ.category,
+      scenario: safetyQ.scenario,
       options: safetyQ.options,
       correctOption: safetyQ.correctOption,
       explanation: safetyQ.explanation,
@@ -427,9 +434,11 @@ export const generateTraceabilityQuestion = () => {
     type: 'traceability',
     difficulty: traceQ.difficulty,
     title: '📡 Traçabilité Track',
-    description: traceQ.question,
+    question: traceQ.question,
+    description: formatQuestionDescription(traceQ.question, traceQ.scenario),
     data: {
       category: traceQ.category,
+      scenario: traceQ.scenario,
       options: traceQ.options,
       correctOption: traceQ.correctOption,
       explanation: traceQ.explanation,
@@ -449,9 +458,11 @@ export const generateGreenLogisticsQuestion = () => {
     type: 'green',
     difficulty: greenQ.difficulty,
     title: '🌍 Green Logistique',
-    description: greenQ.question,
+    question: greenQ.question,
+    description: formatQuestionDescription(greenQ.question, greenQ.scenario),
     data: {
       category: greenQ.category,
+      scenario: greenQ.scenario,
       options: greenQ.options,
       correctOption: greenQ.correctOption,
       explanation: greenQ.explanation,
@@ -471,7 +482,8 @@ export const generateTeamLeaderQuestion = () => {
     type: 'team_leader',
     difficulty: leaderQ.difficulty,
     title: '👔 Team Leader',
-    description: leaderQ.question,
+    question: leaderQ.question,
+    description: formatQuestionDescription(leaderQ.question, leaderQ.scenario),
     data: {
       category: leaderQ.category,
       scenario: leaderQ.scenario,
