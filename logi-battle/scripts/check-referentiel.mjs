@@ -12,7 +12,7 @@ import { describeLocalMatch, evaluateAchievements, moduleProgress, readSettings,
 import { createRoomCode, normalizeRoomCode, ROOM_ALPHABET } from '../src/services/roomCode.js'
 import { moduleOuvert, questionRespecteNiveau } from '../src/data/niveaux.js'
 import { decouverteQuestions } from '../src/utils/decouverteQuestions.js'
-import { applyArenaResult, rankGroups } from '../src/utils/classement.js'
+import { applyArenaResult, championAfterRemoval, rankGroups } from '../src/utils/classement.js'
 import { describeMatch, sortMatches } from '../src/utils/matchJournal.js'
 import { buildRegisterFile, parseRegisterFile } from '../src/utils/classRegisterFile.js'
 import { questionsCursus, questionsDe, tirerQuestionCursus } from '../src/data/banques/index.js'
@@ -122,6 +122,15 @@ const afterDraw = applyArenaResult(groups, 'a', 'b', null)
 assert(afterDraw.every((group) => group.stats.points === 1), 'nul = 1 point chacun')
 const ranked = rankGroups(afterWin)
 assert(ranked[0].id === 'a' && ranked[0].rank === 1 && ranked[0].isChampion, 'le leader du classement est champion')
+
+const beltGroups = [
+  { id: 'alpha', stats: { points: 0, wins: 0, titleDefenses: 0 } },
+  { id: 'bravo', stats: { points: 3, wins: 1, titleDefenses: 0 } },
+  { id: 'charlie', stats: { points: 3, wins: 1, titleDefenses: 0 } },
+]
+assert(championAfterRemoval(beltGroups, 'bravo', 'bravo') === 'charlie', 'le champion retiré laisse la ceinture au leader restant')
+assert(championAfterRemoval(beltGroups, 'bravo', 'alpha') === 'bravo', 'retirer un autre groupe conserve le champion')
+assert(championAfterRemoval([{ id: 'bravo', stats: { points: 3, wins: 1, titleDefenses: 0 } }], 'bravo', 'bravo') === null, 'plus de groupe, plus de ceinture')
 
 const journalGroups = [{ id: 'a', name: 'Alpha' }, { id: 'b', name: 'Bravo' }]
 const arenaNote = describeMatch({

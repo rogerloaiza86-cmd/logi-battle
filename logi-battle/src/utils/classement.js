@@ -31,6 +31,16 @@ export function applyArenaResult(groups, groupAId, groupBId, winner) {
   })
 }
 
+/** Le champion retiré laisse la ceinture au leader des points, pas au plus ancien groupe. */
+export function championAfterRemoval(groups, currentChampionId, removedId) {
+  const remaining = (groups || []).filter((group) => group.id !== removedId)
+  const beltStillHeld = currentChampionId
+    && currentChampionId !== removedId
+    && remaining.some((group) => group.id === currentChampionId)
+  if (beltStillHeld) return currentChampionId
+  return rankGroups(remaining)[0]?.id || null
+}
+
 export function rankGroups(groups) {
   return [...groups]
     .sort((a, b) => {
