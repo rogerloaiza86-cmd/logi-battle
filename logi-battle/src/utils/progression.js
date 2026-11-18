@@ -48,6 +48,17 @@ export function evaluateAchievements(history) {
   return ACHIEVEMENTS.filter((item) => item.when(history || [])).map(({ when, ...badge }) => badge)
 }
 
+export const TRAINING_QUESTIONS = 10
+
+/** Nouvelle séance, y compris après « Rejouer ». Les compteurs ne se cumulent pas. */
+export function newTrainingCounters() {
+  return { answered: 0, saved: false }
+}
+
+export function trainingSessionOver(answered) {
+  return Number(answered) >= TRAINING_QUESTIONS
+}
+
 export function moduleProgress(moduleId, history) {
   const played = (history || []).filter((item) => item.moduleId === moduleId).length
   return Math.min(100, played * 10)

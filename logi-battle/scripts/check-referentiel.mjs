@@ -8,7 +8,7 @@ import {
   generateTransportCostQuestion,
 } from '../src/utils/questionGenerator.js'
 import { gradePlayerAnswer, presentQuestion, questionUsesKeypad, resolveRoundWinner } from '../src/utils/roundRules.js'
-import { describeLocalMatch, evaluateAchievements, moduleProgress, readSettings, rememberMatch, HISTORY_KEY } from '../src/utils/progression.js'
+import { describeLocalMatch, evaluateAchievements, moduleProgress, newTrainingCounters, readSettings, rememberMatch, TRAINING_QUESTIONS, trainingSessionOver, HISTORY_KEY } from '../src/utils/progression.js'
 import { createRoomCode, normalizeRoomCode, ROOM_ALPHABET } from '../src/services/roomCode.js'
 import { moduleOuvert, questionRespecteNiveau } from '../src/data/niveaux.js'
 import { decouverteQuestions } from '../src/utils/decouverteQuestions.js'
@@ -218,6 +218,10 @@ const training = rememberMatch({ kind: 'entrainement', moduleId: 'math', winner:
 const trained = evaluateAchievements(training.history)
 assert(trained.some((badge) => badge.id === 'sans-faute'), 'succès sans faute')
 assert(trained.some((badge) => badge.id === 'entrainement'), 'succès entraînement')
+const replay = newTrainingCounters()
+assert(replay.answered === 0 && replay.saved === false, 'rejouer remet la séance à zéro')
+assert(!trainingSessionOver(TRAINING_QUESTIONS - 1), 'la neuvième réponse continue')
+assert(trainingSessionOver(TRAINING_QUESTIONS), 'la dixième réponse termine la séance')
 const tight = readSettings({ getItem: () => JSON.stringify({ timerDuration: 5, soundEnabled: false, musicEnabled: true }) })
 assert(tight.timerDuration === 15 && tight.soundEnabled === false && tight.musicEnabled === true, 'chrono borné')
 const loud = readSettings({ getItem: () => '{' })
